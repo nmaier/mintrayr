@@ -1,0 +1,12 @@
+#filter substitution
+mintrayr.jar:
+#ifndef LOCALE_DISABLED
+% locale mintrayr @AB_CD@ %locale/@AB_CD@/
+#endif
+  locale/@AB_CD@/browser.dtd (@AB_CD@/browser.dtd)
+  locale/@AB_CD@/prefs.dtd (@AB_CD@/prefs.dtd)
+  locale/@AB_CD@/common.dtd (@AB_CD@/common.dtd)
+  locale/@AB_CD@/messenger.dtd (@AB_CD@/messenger.dtd)
+  locale/@AB_CD@/songbird.dtd (@AB_CD@/songbird.dtd)
+  locale/@AB_CD@/mozapps.dtd (@AB_CD@/mozapps.dtd)
+  locale/@AB_CD@/keys.dtd (@AB_CD@/keys.dtd)

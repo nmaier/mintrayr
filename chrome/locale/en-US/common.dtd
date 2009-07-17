@@ -1,0 +1,7 @@
+<!ENTITY mintrayr.minimize "Minimize to tray">
+<!ENTITY mintrayr.minimize.toolbar "To tray">
+<!ENTITY mintrayr.minimize.tip "Minimizes the current window to the system tray">
+<!ENTITY mintrayr.restore "Restore">
+<!ENTITY mintrayr.restoreall "Restore all">
+<!ENTITY mintrayr.close "Close">
+<!ENTITY mintrayr.closemenu "Close menu">

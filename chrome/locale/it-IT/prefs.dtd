@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "Opzioni di Minimize To Tray Revived">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Riduci a icona nell&apos;area di notifica">
+<!ENTITY mintrayr.prefs.minimizeon.never "Mai (solo tramite menu o pulsante)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Quando si riduce a icona">
+<!ENTITY mintrayr.prefs.minimizeon.close "Quando si chiude il programma">
+<!ENTITY mintrayr.prefs.minimizeon.both "Quando si chiude il programma e quando si riduce a icona">
+<!ENTITY mintrayr.prefs.main "Principale">
+<!ENTITY mintrayr.prefs.dblclickrestore "Doppio clic per ripristinare">
+<!ENTITY mintrayr.prefs.showcontext "Mostra il menu contestuale con il clic sul tasto destro">
+<!ENTITY mintrayr.prefs.watchwindows "Controlla finestre">
+<!ENTITY mintrayr.prefs.misc "Varie">
+<!ENTITY mintrayr.prefs.clickbehavior "Tasti del mouse">

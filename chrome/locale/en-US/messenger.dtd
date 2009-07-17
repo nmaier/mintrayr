@@ -1,0 +1,5 @@
+<!ENTITY mintrayr.newmessage "New Message">
+
+<!ENTITY mintrayr.prefs.messenger.watchmessenger "Use for Messenger windows">
+<!ENTITY mintrayr.prefs.messenger.watchreader    "Use for Message windows"> 
+<!ENTITY mintrayr.prefs.messenger.watchcomposer  "Use for Write windows">

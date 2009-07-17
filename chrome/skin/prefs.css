@@ -1,0 +1,19 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+prefwindow {
+	min-width: 30em;
+	min-height: 20em;
+}
+
+/* songbird hack */
+.paneButtonIcon {
+	width: 32px;
+	height: 32px;
+}
+
+radio[pane="paneMain"] {
+	list-style-image: url(chrome://mintrayr/skin/logo.png);
+}
+radio[pane="paneSpecific"] {
+	list-style-image: url(chrome://mintrayr/content/appicon64.png);
+}

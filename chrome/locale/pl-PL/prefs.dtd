@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR – ustawienia">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Minimalizuj do obszaru powiadamiania">
+<!ENTITY mintrayr.prefs.minimizeon.never "Nigdy (tylko za pomocą menu/przycisku)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Po kliknięciu ikony minimalizowania">
+<!ENTITY mintrayr.prefs.minimizeon.close "Po kliknięciu ikony zamykania">
+<!ENTITY mintrayr.prefs.minimizeon.both "Po kliknięciu ikony zamykania lub minimalizowania">
+<!ENTITY mintrayr.prefs.main "Ogólne">
+<!ENTITY mintrayr.prefs.dblclickrestore "Dwukrotne kliknięcie na ikonie przywraca okno">
+<!ENTITY mintrayr.prefs.showcontext "Kliknięcie ppm. wyświetla menu kontekstowe">
+<!ENTITY mintrayr.prefs.watchwindows "Działanie w oknach">
+<!ENTITY mintrayr.prefs.misc "Różne">
+<!ENTITY mintrayr.prefs.clickbehavior "Działanie kliknięć">

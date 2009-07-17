@@ -1,0 +1,69 @@
+#filter substitution
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+	<Description about="urn:mozilla:install-manifest">
+		<em:id>mintrayr@tn123.ath.cx</em:id>
+		<em:version>@MINTRAYR_VERSION@</em:version>
+
+		<em:targetPlatform>@TARGET_PLATFORM@</em:targetPlatform>
+
+		<em:name>MinimizeToTray revived (MinTrayR)</em:name>
+		<em:description>Minimizes windows into the system tray.</em:description>
+		<em:creator>Nils Maier</em:creator>
+		
+		<em:developer>Nils Maier</em:developer>
+		<em:contributor>Mook</em:contributor>
+		<em:contributor>helix400</em:contributor>
+		<em:contributor>Christoph Grimmer</em:contributor>
+		
+		
+		<em:iconURL>chrome://mintrayr/skin/logo.png</em:iconURL>
+		<em:homepageURL>http://tn123.ath.cx/mintrayr</em:homepageURL>
+		<em:optionsURL>chrome://mintrayr/content/prefs/prefs.xul</em:optionsURL>
+		
+		<!-- Firefox -->
+		<em:targetApplication>
+			<Description>
+				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+				<em:minVersion>3.0</em:minVersion>
+				<em:maxVersion>3.5.*</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+
+		<!-- Thunderbird -->
+		<em:targetApplication>
+			<Description>
+				<em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id>
+				<em:minVersion>3.0a1pre</em:minVersion>
+				<em:maxVersion>3.0b3pre</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+		
+		<!-- Sunbird -->
+		<!--<em:targetApplication>
+			<Description>
+				<em:id>{718e30fb-e89b-41dd-9da7-e25a45638b28}</em:id>
+				<em:minVersion>0.8</em:minVersion>
+				<em:maxVersion>0.9.*</em:maxVersion>
+			</Description>
+		</em:targetApplication>-->
+
+		<!-- Flock -->
+		<em:targetApplication>
+		  <Description>
+		    <em:id>{a463f10c-3994-11da-9945-000d60ca027b}</em:id>
+		    <em:minVersion>2.0b</em:minVersion>
+		    <em:maxVersion>2.0.*</em:maxVersion>
+		  </Description>
+		</em:targetApplication>
+		
+		<!-- Songbird -->
+		<em:targetApplication>
+			<Description>
+				<em:id>songbird@songbirdnest.com</em:id>
+				<em:minVersion>0.7</em:minVersion>
+				<em:maxVersion>1.2.*</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+	</Description>
+</RDF>

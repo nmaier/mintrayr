@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR instellingen">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Naar systeemvak minimaliseren">
+<!ENTITY mintrayr.prefs.minimizeon.never "Nooit (alleen met menu/knop)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Bij minimaliseren">
+<!ENTITY mintrayr.prefs.minimizeon.close "In plaats van sluiten">
+<!ENTITY mintrayr.prefs.minimizeon.both "In plaats van sluiten en bij minimaliseren">
+<!ENTITY mintrayr.prefs.main "Hoofdvenster">
+<!ENTITY mintrayr.prefs.dblclickrestore "Dubbelklikken om te herstellen">
+<!ENTITY mintrayr.prefs.showcontext "Contextmenu weergeven bij rechtermuisklik">
+<!ENTITY mintrayr.prefs.watchwindows "Vensters volgen">
+<!ENTITY mintrayr.prefs.misc "Diversen">
+<!ENTITY mintrayr.prefs.clickbehavior "Klikgedrag">

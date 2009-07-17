@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "Налаштування MinTrayR">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Згортати у трей">
+<!ENTITY mintrayr.prefs.minimizeon.never "Ніколи (Тільки через меню/кнопку)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "При згортанні вікна">
+<!ENTITY mintrayr.prefs.minimizeon.close "Замість закриття">
+<!ENTITY mintrayr.prefs.minimizeon.both "Замість закриття і при згортанні вікна">
+<!ENTITY mintrayr.prefs.main "Основні">
+<!ENTITY mintrayr.prefs.dblclickrestore "Розгортати по подвійному кліку">
+<!ENTITY mintrayr.prefs.showcontext "Відображати контекстне меню по правому кліку">
+<!ENTITY mintrayr.prefs.watchwindows "Слідкування за вікнами">
+<!ENTITY mintrayr.prefs.misc "Інші">
+<!ENTITY mintrayr.prefs.clickbehavior "Поведінка по натисненню кнопок миші">
