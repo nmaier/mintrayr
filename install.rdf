@@ -8,7 +8,7 @@
 		<em:targetPlatform>@TARGET_PLATFORM@</em:targetPlatform>
 
 		<em:name>MinimizeToTray revived (MinTrayR)</em:name>
-		<em:description>Minimizes windows into the system tray.</em:description>
+		<em:description>Minimizes windows into the system tray</em:description>
 		<em:creator>Nils Maier</em:creator>
 		
 		<em:developer>Nils Maier</em:developer>

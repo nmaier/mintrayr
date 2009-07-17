@@ -69,7 +69,9 @@ DIST_FILES = \
 
 DIRS = components_src chrome/locale
 
-PREF_JS_EXPORTS = $(srcdir)/defaults/preferences/mintrayr.js
+PREF_JS_EXPORTS = \
+		   $(srcdir)/defaults/preferences/mintrayr.js \
+		   $(srcdir)/defaults/preferences/localized.js
 
 EXTRA_JS_MODULES = \
 		   $(srcdir)/modules/preferences.jsm \

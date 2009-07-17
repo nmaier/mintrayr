@@ -10,3 +10,4 @@ mintrayr.jar:
   locale/@AB_CD@/songbird.dtd (@AB_CD@/songbird.dtd)
   locale/@AB_CD@/mozapps.dtd (@AB_CD@/mozapps.dtd)
   locale/@AB_CD@/keys.dtd (@AB_CD@/keys.dtd)
+  locale/@AB_CD@/localized.properties (@AB_CD@/localized.properties)
