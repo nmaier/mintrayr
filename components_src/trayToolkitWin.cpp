@@ -217,7 +217,7 @@ namespace {
 				menus due to bugzilla #435848,.
 				This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
 			*/
-			WINDOWPOS *wp = (LPWINDOWPOS)lParam;
+			WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(lParam);
 			if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
 				nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kWatcherDOMProp));
 				if (window) {			
@@ -237,7 +237,7 @@ namespace {
 		
 		case WM_NCLBUTTONDOWN:
 		case WM_NCLBUTTONUP:
-			if (wParam == HTCLOSE	&& DoMinimizeWindow(hwnd, kTrayOnClose)) {
+			if (wParam == HTCLOSE && DoMinimizeWindow(hwnd, kTrayOnClose)) {
 				return TRUE;
 			}
 			break;
@@ -246,7 +246,7 @@ namespace {
 		// Call the old WNDPROC or at lest DefWindowProc
 		WNDPROC oldProc = reinterpret_cast<WNDPROC>(::GetPropW(hwnd, kWatcherOldProp));
 		if (oldProc != NULL) {
-			return CallWindowProcW(oldProc, hwnd, uMsg, wParam, lParam);
+			return ::CallWindowProcW(oldProc, hwnd, uMsg, wParam, lParam);
 		}
 		return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
 	}
@@ -322,7 +322,7 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 
 	// Install the icon
 	if (::Shell_NotifyIconW(NIM_ADD, &mIconData)) {
-		::ShowWindow(mHwnd, SW_HIDE);
+		::ShowWindow(mHwnd, SW_MINIMIZE);
 	}
 	::Shell_NotifyIconW(NIM_SETVERSION, &mIconData);
 }
@@ -351,7 +351,7 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 {
 	TrayWindowWrapper *me = reinterpret_cast<TrayWindowWrapper*>(GetPropW(hwnd, kWrapperProp));
 
-	if (me == NULL) {
+	if (me == 0) {
 		// We should not process. Directly jump to default message passing
 		goto WrapperWindowProcEnd;
 	}
@@ -366,7 +366,7 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 	else if (uMsg == WM_WINDOWPOSCHANGED && me->mHwnd == hwnd) {
 		// Check if somebody else tries to show us again
 		WINDOWPOS *pos = reinterpret_cast<WINDOWPOS*>(lParam);
-		if (pos && pos->flags & SWP_SHOWWINDOW) {
+		if (pos && pos->flags & SWP_SHOWWINDOW && !::IsWindowVisible(hwnd)) {
 			// shown again, unexpectedly that is, so release
 			me->mWindow->mService->Restore(me->mWindow->mDOMWindow);
 		}
@@ -425,7 +425,7 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 				PRBool altKey = (::GetKeyState(VK_MENU) & 0x8000) != 0;
 				PRBool shiftKey = (::GetKeyState(VK_SHIFT) & 0x8000) != 0;
 				
-				::SetForegroundWindow(me->mHwnd);
+				::SetForegroundWindow(hwnd);
 
 				me->mWindow->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
 
