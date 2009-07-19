@@ -64,5 +64,9 @@ interface trayITrayService : nsISupports {
 	 * unwatch a window again
 	 */
 	void unwatchMinimize(in nsIDOMWindow window);
+	/**
+	 * is the window watched
+	 */
+	PRbool isWatchedWindow(in nsIDOMWindow window);
 
 };

@@ -192,19 +192,20 @@ namespace {
 	 */
 	LRESULT CALLBACK TrayServiceImpl_WatchWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
+		nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kWatcherDOMProp));
+		if (window == 0) {
+			goto WatcherWindowProcEnd;
+		}
+	
 		switch (uMsg) {
 		case WM_CLOSE:
 		case WM_DESTROY: {
 			// The window is (about to be) destroyed
 			// Let the service know and unwatch the window
-			nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kWatcherDOMProp));
-			if (window != NULL) {
-				nsresult rv;
-				nsCOMPtr<trayITrayService> traySvc(do_GetService(TRAYSERVICE_CONTRACTID, &rv));
-				if (NS_SUCCEEDED(rv)) {
-					traySvc->UnwatchMinimize(window);
-				}
-				::RemovePropW(hwnd, kWatcherDOMProp);
+			nsresult rv;
+			nsCOMPtr<trayITrayService> traySvc(do_GetService(TRAYSERVICE_CONTRACTID, &rv));
+			if (NS_SUCCEEDED(rv)) {
+				traySvc->UnwatchMinimize(window);
 			}
 			break;
 		} // case WM_DESTROY
@@ -219,16 +220,13 @@ namespace {
 			*/
 			WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(lParam);
 			if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
-				nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kWatcherDOMProp));
-				if (window) {			
-					WINDOWPLACEMENT pl;
-					pl.length = sizeof(WINDOWPLACEMENT);
-					::GetWindowPlacement(hwnd, &pl);
-					if (pl.showCmd == SW_SHOWMINIMIZED) {
-						if (DoMinimizeWindow(hwnd, kTrayOnMinimize)) {
-							pl.showCmd = SW_HIDE;
-							::SetWindowPlacement(hwnd, &pl);
-						}
+				WINDOWPLACEMENT pl;
+				pl.length = sizeof(WINDOWPLACEMENT);
+				::GetWindowPlacement(hwnd, &pl);
+				if (pl.showCmd == SW_SHOWMINIMIZED) {
+					if (DoMinimizeWindow(hwnd, kTrayOnMinimize)) {
+						pl.showCmd = SW_HIDE;
+						::SetWindowPlacement(hwnd, &pl);
 					}
 				}
 			}
@@ -243,6 +241,7 @@ namespace {
 			break;
 		}
 
+WatcherWindowProcEnd:
 		// Call the old WNDPROC or at lest DefWindowProc
 		WNDPROC oldProc = reinterpret_cast<WNDPROC>(::GetPropW(hwnd, kWatcherOldProp));
 		if (oldProc != NULL) {
@@ -267,9 +266,14 @@ public:
 private:
 	 // hold raw pointer. Class instances point to TrayWindow anyway and destructed with it.
 	TrayWindow* mWindow;
+	
+	// HWND this wrapper is associated with
 	HWND mHwnd;
-	HWND mHelper;
+	
+	// Previous window procedure
 	WNDPROC mOldWindowProc;
+	
+	// Win32 data structure containing the tray icon configuration
 	NOTIFYICONDATAW mIconData;
 };
 
@@ -277,6 +281,17 @@ private:
 TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wchar_t *aTitle)
 	: mHwnd(aHwnd), mWindow(aWindow)
 {
+	// We need to get a minimize through.
+	// Otherwise the SFW/PM hack won't work
+	// However we need to protect against the watcher watching this
+	// XXX: Do it properly
+	void *watcher = reinterpret_cast<void*>(::GetPropW(mHwnd, kWatcherDOMProp));
+	::RemovePropW(mHwnd, kWatcherDOMProp);
+	::ShowWindow(mHwnd, SW_MINIMIZE);
+	if (watcher != 0) {
+		::SetPropW(mHwnd, kWatcherDOMProp, watcher);
+	}
+
 	// Hook window
 	::SetPropW(mHwnd, kWrapperProp, this);
 	
@@ -322,7 +337,7 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 
 	// Install the icon
 	if (::Shell_NotifyIconW(NIM_ADD, &mIconData)) {
-		::ShowWindow(mHwnd, SW_MINIMIZE);
+		::ShowWindow(mHwnd, SW_HIDE);
 	}
 	::Shell_NotifyIconW(NIM_SETVERSION, &mIconData);
 }
@@ -344,7 +359,6 @@ TrayWindowWrapper::~TrayWindowWrapper()
 
 	// Try to grab focus
 	::SetForegroundWindow(mHwnd);
-
 }
 
 LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -361,20 +375,16 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 		// Got closed, no point in staying alive
 		me->mWindow->mService->Restore(me->mWindow->mDOMWindow);
 	}
-	
+
 	// The window might have been restored by someone else
 	else if (uMsg == WM_WINDOWPOSCHANGED && me->mHwnd == hwnd) {
 		// Check if somebody else tries to show us again
 		WINDOWPOS *pos = reinterpret_cast<WINDOWPOS*>(lParam);
-		if (pos && pos->flags & SWP_SHOWWINDOW && !::IsWindowVisible(hwnd)) {
+		if (pos && pos->flags & SWP_SHOWWINDOW) {
 			// shown again, unexpectedly that is, so release
 			me->mWindow->mService->Restore(me->mWindow->mDOMWindow);
 		}
 	}
-	/* XXX Leave this out for now. Seems it causes accidential restores when using context menu.
-	else if (uMsg == WM_ACTIVATE) {
-		me->mWindow->mService->Restore(me->mWindow->mDOMWindow);
-	}*/
 	
 	// This is a badly documented custom broadcast message by explorer
 	else if (uMsg == WM_TASKBARCREATED) {
@@ -424,13 +434,11 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 				PRBool ctrlKey = (::GetKeyState(VK_CONTROL) & 0x8000) != 0;
 				PRBool altKey = (::GetKeyState(VK_MENU) & 0x8000) != 0;
 				PRBool shiftKey = (::GetKeyState(VK_SHIFT) & 0x8000) != 0;
-				
+
+				// SFW/PM is a win32 hack, so that the context menu is hidden when loosing focus.
 				::SetForegroundWindow(hwnd);
-
 				me->mWindow->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
-
 				::PostMessage(me->mHwnd, WM_NULL, 0, 0L);
-
 			}
 		}
 		return 0;
@@ -738,6 +746,15 @@ NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
 	::RemovePropW(hwnd, kWatcherDOMProp);
 
 
+	return NS_OK;
+}
+
+NS_IMETHODIMP TrayServiceImpl::IsWatchedWindow(nsIDOMWindow *aWindow, PRBool *aResult)
+{
+	NS_ENSURE_ARG_POINTER(aWindow);
+	NS_ENSURE_ARG_POINTER(aResult);
+	
+	*aResult = mWatches.IndexOfObject(aWindow) != -1 ? PR_TRUE : PR_FALSE;
 	return NS_OK;
 }
 
