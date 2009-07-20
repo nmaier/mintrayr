@@ -175,10 +175,11 @@ namespace {
 		nsresult rv;
 		nsCOMPtr<trayITrayService> traySvc(do_GetService(TRAYSERVICE_CONTRACTID, &rv));
 		if (NS_SUCCEEDED(rv)) {
-			traySvc->Minimize(window);
+			rv = traySvc->Minimize(window);
 		}
 
 		::RemovePropW(hwnd, kWatcherLock);	
+		return NS_SUCCEEDED(rv);
 	}
 
 	/**
