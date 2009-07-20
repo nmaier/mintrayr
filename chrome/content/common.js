@@ -43,7 +43,7 @@ function MinTrayR(menu, pref) {
 	addEventListener(
 		'TrayDblClick',
 		function(event) {
-			if (event.button == 0 && !!tp.prefs.getExt('dblclickrestore')) {
+			if (event.button == 0 && !!tp.prefs.getExt('dblclickrestore', true)) {
 				tp.restore();
 			}
 		},
@@ -52,7 +52,7 @@ function MinTrayR(menu, pref) {
 	addEventListener(
 		'TrayClick',
 		function(event) {
-			if (event.button == 0 && !tp.prefs.getExt('dblclickrestore')) {
+			if (event.button == 0 && !tp.prefs.getExt('dblclickrestore', true)) {
 				tp.restore();
 			}
 		},
@@ -63,7 +63,7 @@ function MinTrayR(menu, pref) {
 		addEventListener(
 			'TrayClick',
 			function(event) {
-				if (event.button == 2) {
+				if (event.button == 2 && tp.prefs.getExt('showcontext', true)) {
 					tp.showMenu(event.screenX, event.screenY);
 				}
 			},
