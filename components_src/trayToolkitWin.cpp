@@ -282,17 +282,6 @@ private:
 TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wchar_t *aTitle)
 	: mHwnd(aHwnd), mWindow(aWindow)
 {
-	// We need to get a minimize through.
-	// Otherwise the SFW/PM hack won't work
-	// However we need to protect against the watcher watching this
-	// XXX: Do it properly
-	void *watcher = reinterpret_cast<void*>(::GetPropW(mHwnd, kWatcherDOMProp));
-	::RemovePropW(mHwnd, kWatcherDOMProp);
-	::ShowWindow(mHwnd, SW_MINIMIZE);
-	if (watcher != 0) {
-		::SetPropW(mHwnd, kWatcherDOMProp, watcher);
-	}
-
 	// Hook window
 	::SetPropW(mHwnd, kWrapperProp, this);
 	
@@ -305,6 +294,17 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 		));
 		::SetPropW(mHwnd, kWrapperOldProp, oldWindowProc);
 	}
+	
+	// We need to get a minimize through.
+	// Otherwise the SFW/PM hack won't work
+	// However we need to protect against the watcher watching this
+	// XXX: Do it properly
+	void *watcher = reinterpret_cast<void*>(::GetPropW(mHwnd, kWatcherDOMProp));
+	::RemovePropW(mHwnd, kWatcherDOMProp);
+	::ShowWindow(mHwnd, SW_MINIMIZE);
+	if (watcher != 0) {
+		::SetPropW(mHwnd, kWatcherDOMProp, watcher);
+	}	
 
 	// Init the icon data according to MSDN
 	ZeroMemory(&mIconData, sizeof(mIconData));
@@ -384,6 +384,22 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 		if (pos && pos->flags & SWP_SHOWWINDOW) {
 			// shown again, unexpectedly that is, so release
 			me->mWindow->mService->Restore(me->mWindow->mDOMWindow);
+		}
+		/* XXX Fix this bit to something more reasonable
+			The following code kinda replicates the way mozilla gets the window state.
+			We intensionally "hide" the SW_SHOWMINIMIZED here.
+			This indeed might cause some side effects, but if it didn't we couldn't open
+			menus due to bugzilla #435848,.
+			This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
+		*/
+		if (pos->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
+			WINDOWPLACEMENT pl;
+			pl.length = sizeof(WINDOWPLACEMENT);
+			::GetWindowPlacement(hwnd, &pl);
+			if (pl.showCmd == SW_SHOWMINIMIZED) {
+				pl.showCmd = SW_HIDE;
+				::SetWindowPlacement(hwnd, &pl);
+			}
 		}
 	}
 	
