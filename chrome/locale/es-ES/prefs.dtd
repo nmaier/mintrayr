@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR - Opciones">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Minimizar a la bandeja">
+<!ENTITY mintrayr.prefs.minimizeon.never "Nunca (sólo usando el menú/botón)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Al minimizar">
+<!ENTITY mintrayr.prefs.minimizeon.close "Al cerrar">
+<!ENTITY mintrayr.prefs.minimizeon.both "Al cerrar y al minimizar">
+<!ENTITY mintrayr.prefs.main "Principal">
+<!ENTITY mintrayr.prefs.dblclickrestore "Doble clic para restaurar">
+<!ENTITY mintrayr.prefs.showcontext "Mostrar menú contextual al pulsar con el botón derecho">
+<!ENTITY mintrayr.prefs.watchwindows "Ventanas">
+<!ENTITY mintrayr.prefs.misc "Varios">
+<!ENTITY mintrayr.prefs.clickbehavior "Comportamiento">

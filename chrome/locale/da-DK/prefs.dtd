@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR Indstillinger">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Minimer til statusfelt">
+<!ENTITY mintrayr.prefs.minimizeon.never "Aldrig (Kun med menu/knap)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Når der minimeres">
+<!ENTITY mintrayr.prefs.minimizeon.close "I stedet for lukning">
+<!ENTITY mintrayr.prefs.minimizeon.both "I stedet for lukning og når der minimeres">
+<!ENTITY mintrayr.prefs.main "Overordnet">
+<!ENTITY mintrayr.prefs.dblclickrestore "Dobbeltklik for at gendanne">
+<!ENTITY mintrayr.prefs.showcontext "Vis genvejsmenu ved højreklik">
+<!ENTITY mintrayr.prefs.watchwindows "Observer vinduer">
+<!ENTITY mintrayr.prefs.misc "Diverse">
+<!ENTITY mintrayr.prefs.clickbehavior "Handling ved klik">

@@ -1,0 +1,7 @@
+<!ENTITY mintrayr.minimize "Minimizar en la bandeja">
+<!ENTITY mintrayr.minimize.toolbar "A la bandeja">
+<!ENTITY mintrayr.minimize.tip "Minimizar la ventana actual a la bandeja del sistema">
+<!ENTITY mintrayr.restore "Restaurar">
+<!ENTITY mintrayr.restoreall "Restaurar todo">
+<!ENTITY mintrayr.close "Cerrar">
+<!ENTITY mintrayr.closemenu "Cerrar menú">
