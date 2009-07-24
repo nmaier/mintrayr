@@ -62,6 +62,10 @@ mintrayr.jar:
 % overlay chrome://songbird/content/xul/layoutWithBrowserOverlay.xul	chrome://mintrayr/content/songbird/player.xul
 % overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/songbird.xul application=songbird@songbirdnest.com
 % override chrome://mintrayr/content/appicon64.png chrome://branding/content/songbird-64.png application=songbird@songbirdnest.com appversion>=1.2
+%
+% # Instantbird
+% overlay chrome://instantbird/content/blist.xul	chrome://mintrayr/content/instantbird/blist.xul application={33cb9019-c295-46dd-be21-8c4936574bee}
+% overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/instantbird.xul application={33cb9019-c295-46dd-be21-8c4936574bee}
 % 
 % # Downloads
 % overlay chrome://mozapps/content/downloads/downloads.xul	chrome://mintrayr/content/mozapps/downloads.xul
@@ -72,8 +76,11 @@ mintrayr.jar:
    content/prefs/messenger.xul (chrome/content/prefs/messenger.xul)
    content/prefs/prefs.xul (chrome/content/prefs/prefs.xul)
    content/prefs/songbird.xul (chrome/content/prefs/songbird.xul)
+	 content/prefs/instantbird.xul (chrome/content/prefs/instantbird.xul)
    content/songbird/player.xul (chrome/content/songbird/player.xul)
    content/songbird/player.js (chrome/content/songbird/player.js)
+	 content/instantbird/blist.xul (chrome/content/instantbird/blist.xul)
+	 content/instantbird/blist.js (chrome/content/instantbird/blist.js)
    content/common.js (chrome/content/common.js)
    content/browser/browser.xul (chrome/content/browser/browser.xul)
    content/browser/places.js (chrome/content/browser/places.js)

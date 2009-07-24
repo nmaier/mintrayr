@@ -39,6 +39,10 @@
 <!DOCTYPE overlay [
 	<!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
 	%brandingDTD;	
+	<!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
+	%mozappsDTD;
+	<!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
+	%prefsDTD;
 	<!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
 	%messengerDTD;	
 ]>
@@ -50,9 +54,12 @@
 			<preference id="watchcomposer" name="extensions.mintrayr.messenger.watchcomposer" type="bool"/>
 		</preferences>
 		
-		<checkbox preference="watchmessenger" label="&mintrayr.prefs.messenger.watchmessenger;"/>
-		<checkbox preference="watchreader" label="&mintrayr.prefs.messenger.watchreader;"/>	
-		<checkbox preference="watchcomposer" label="&mintrayr.prefs.messenger.watchcomposer;"/>
+		<groupbox>
+			<caption label="&mintrayr.prefs.watchwindows;"/>
+			<checkbox preference="watchmessenger" label="&mintrayr.prefs.messenger.watchmessenger;"/>
+			<checkbox preference="watchreader" label="&mintrayr.prefs.messenger.watchreader;"/>	
+			<checkbox preference="watchcomposer" label="&mintrayr.prefs.messenger.watchcomposer;"/>
+		</groupbox>
 	</prefpane>
 </overlay>
 	

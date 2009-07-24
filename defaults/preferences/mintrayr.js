@@ -14,4 +14,6 @@ pref('extensions.mintrayr.songbird.titlestring', '%artistName% / %trackName%');
 pref('extensions.mintrayr.songbird.titlefloating', true);
 pref('extensions.mintrayr.songbird.middleclickplays', true);
 
+pref('extensions.mintrayr.instantbird.watchblist', true);
+
 pref('extensions.mintrayr.mozapps.watchdownloads', false);

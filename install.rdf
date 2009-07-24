@@ -65,5 +65,15 @@
 				<em:maxVersion>1.2.*</em:maxVersion>
 			</Description>
 		</em:targetApplication>
+		
+		<!-- Instantbird -->
+		<em:targetApplication>
+			<Description>
+				<em:id>{33cb9019-c295-46dd-be21-8c4936574bee}</em:id>
+				<em:minVersion>0.2a</em:minVersion>
+				<em:maxVersion>0.2.*</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+		
 	</Description>
 </RDF>
