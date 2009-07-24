@@ -67,6 +67,6 @@ interface trayITrayService : nsISupports {
 	/**
 	 * is the window watched
 	 */
-	PRbool isWatchedWindow(in nsIDOMWindow window);
+	PRBool isWatchedWindow(in nsIDOMWindow window);
 
 };
