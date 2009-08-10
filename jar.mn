@@ -41,32 +41,32 @@ mintrayr.jar:
 % content mintrayr %content/
 % skin mintrayr classic/1.0 %skin/
 % resource mintrayr modules/
-% 
+# 
 % style chrome://global/content/customizeToolbar.xul	chrome://mintrayr/skin/common.css
 % override chrome://mintrayr/content/appicon64.png chrome://branding/content/icon64.png
-%
+#
 % # Firefox/Flock
 % overlay	chrome://browser/content/browser.xul	chrome://mintrayr/content/browser/browser.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 % overlay	chrome://browser/content/browser.xul	chrome://mintrayr/content/browser/browser.xul application={a463f10c-3994-11da-9945-000d60ca027b}
 % overlay chrome://browser/content/places/places.xul	chrome://mintrayr/content/browser/places.xul
 % overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/browser.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 % overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/browser.xul application={a463f10c-3994-11da-9945-000d60ca027b}
-% 
+# 
 % # Thunderbird
 % overlay chrome://messenger/content/messenger.xul	chrome://mintrayr/content/messenger/messenger.xul
 % overlay chrome://messenger/content/messengercompose/messengercompose.xul	chrome://mintrayr/content/messenger/messagecompose.xul
 % overlay chrome://messenger/content/messageWindow.xul	chrome://mintrayr/content/messenger/messageWindow.xul
 % overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/messenger.xul application={3550f703-e582-4d05-9a08-453d09bdfdc6}
-%
+#
 % # Songbird
 % overlay chrome://songbird/content/xul/layoutWithBrowserOverlay.xul	chrome://mintrayr/content/songbird/player.xul
 % overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/songbird.xul application=songbird@songbirdnest.com
 % override chrome://mintrayr/content/appicon64.png chrome://branding/content/songbird-64.png application=songbird@songbirdnest.com appversion>=1.2
-%
+#
 % # Instantbird
 % overlay chrome://instantbird/content/blist.xul	chrome://mintrayr/content/instantbird/blist.xul application={33cb9019-c295-46dd-be21-8c4936574bee}
 % overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/instantbird.xul application={33cb9019-c295-46dd-be21-8c4936574bee}
-% 
+# 
 % # Downloads
 % overlay chrome://mozapps/content/downloads/downloads.xul	chrome://mintrayr/content/mozapps/downloads.xul
    content/common.xul (chrome/content/common.xul)

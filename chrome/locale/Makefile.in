@@ -43,7 +43,9 @@ VPATH		= @srcdir@
 relativesrcdir = extensions/mintrayr/chrome/locale
 
 include $(DEPTH)/config/autoconf.mk
-
+ifndef 
+L10NBASEDIR = @srcdir@
+endif
 MODULE = mintrayr
 MINTRAYR_VERSION=$(shell cat $(srcdir)/../../VERSION)
 TARGET_PLATFORM = $(OS_TARGET)_$(TARGET_XPCOM_ABI)
