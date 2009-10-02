@@ -1,6 +1,5 @@
 <!ENTITY mintrayr.prefs.title "MinTrayR Eintellungen">
 <!ENTITY mintrayr.prefs.winstyle "width: 25em; height: 20em;">
-
 <!ENTITY mintrayr.prefs.main "Hlavní">
 <!ENTITY mintrayr.prefs.dblclickrestore "Dvojklikem obnovit okno">
 <!ENTITY mintrayr.prefs.showcontext "Zobrazit kontextové menu pravým kliknutím myši">

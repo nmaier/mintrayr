@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "העדפות MinTrayR">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "מזער למגל">
+<!ENTITY mintrayr.prefs.minimizeon.never "לעולם לא (רק באמצעות תפריט או כפתור)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "כאשר ממזערים">
+<!ENTITY mintrayr.prefs.minimizeon.close "במקום סגירה">
+<!ENTITY mintrayr.prefs.minimizeon.both "במקום סגירה וכאשר ממזערים">
+<!ENTITY mintrayr.prefs.main "ראשי">
+<!ENTITY mintrayr.prefs.dblclickrestore "לחיצה כפולה לשחזור">
+<!ENTITY mintrayr.prefs.showcontext "הצג תפריט הקשר בלחיצה ימנית">
+<!ENTITY mintrayr.prefs.watchwindows "צפה בחלונות">
+<!ENTITY mintrayr.prefs.misc "שונות">
+<!ENTITY mintrayr.prefs.clickbehavior "התנהגות לחיצה">

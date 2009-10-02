@@ -1,0 +1,7 @@
+<!ENTITY mintrayr.minimize "最小化到托盘图标">
+<!ENTITY mintrayr.minimize.toolbar "最小化">
+<!ENTITY mintrayr.minimize.tip "最小化当前窗口到任务栏">
+<!ENTITY mintrayr.restore "恢复">
+<!ENTITY mintrayr.restoreall "恢复所有">
+<!ENTITY mintrayr.close "关闭">
+<!ENTITY mintrayr.closemenu "关闭菜单">

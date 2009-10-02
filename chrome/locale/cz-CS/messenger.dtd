@@ -1,5 +1,4 @@
 <!ENTITY mintrayr.newmessage "Nová zpráva">
-
 <!ENTITY mintrayr.prefs.messenger.watchmessenger "Použít pro okna poštovního klienta">
-<!ENTITY mintrayr.prefs.messenger.watchreader    "Použít pro okna zpráv">
-<!ENTITY mintrayr.prefs.messenger.watchcomposer  "Použít pro okna psaní zpráv">
+<!ENTITY mintrayr.prefs.messenger.watchreader "Použít pro okna zpráv">
+<!ENTITY mintrayr.prefs.messenger.watchcomposer "Použít pro okna psaní zpráv">

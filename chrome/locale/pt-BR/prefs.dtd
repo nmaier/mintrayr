@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "Preferências do MinTrayR">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Minimizar para a área de notificação">
+<!ENTITY mintrayr.prefs.minimizeon.never "Nunca (somente através de menu ou botão)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Ao minimizar">
+<!ENTITY mintrayr.prefs.minimizeon.close "Ao invés de fechar">
+<!ENTITY mintrayr.prefs.minimizeon.both "Ao invés de fechar quando minimizado">
+<!ENTITY mintrayr.prefs.main "Principal">
+<!ENTITY mintrayr.prefs.dblclickrestore "Duplo-click para restaurar">
+<!ENTITY mintrayr.prefs.showcontext "Exibir menu de contexto ao clicar com o botão direito">
+<!ENTITY mintrayr.prefs.watchwindows "Monitorar janelas">
+<!ENTITY mintrayr.prefs.misc "Outros">
+<!ENTITY mintrayr.prefs.clickbehavior "Comportamento do click">
