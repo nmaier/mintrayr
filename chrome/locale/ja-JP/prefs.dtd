@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayRの設定">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "トレイに最小化">
+<!ENTITY mintrayr.prefs.minimizeon.never "最小化しない（メニュー/ポタンで最小化）">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "最小化するとき">
+<!ENTITY mintrayr.prefs.minimizeon.close "閉じるとき">
+<!ENTITY mintrayr.prefs.minimizeon.both "最小化または閉じるとき">
+<!ENTITY mintrayr.prefs.main "メイン">
+<!ENTITY mintrayr.prefs.dblclickrestore "ダブルクリックで再表示">
+<!ENTITY mintrayr.prefs.showcontext "右クリックでコンテキストメニューを表示">
+<!ENTITY mintrayr.prefs.watchwindows "ウィンドウを監視">
+<!ENTITY mintrayr.prefs.misc "その他">
+<!ENTITY mintrayr.prefs.clickbehavior "クリック時の動作">

@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR - Beállítások">
+<!ENTITY mintrayr.prefs.winstyle "width: 20em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Ablak elrejtése a tálcára">
+<!ENTITY mintrayr.prefs.minimizeon.never "Soha (csak ezzel: menü/gyorsbillentyű)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Minimalizáláskor">
+<!ENTITY mintrayr.prefs.minimizeon.close "Bezárás helyett">
+<!ENTITY mintrayr.prefs.minimizeon.both "Bezárás helyett és minimalizáláskor">
+<!ENTITY mintrayr.prefs.main "Fő">
+<!ENTITY mintrayr.prefs.dblclickrestore "Ablak visszaállítása dupla kattintással">
+<!ENTITY mintrayr.prefs.showcontext "Jobb kattintás megjeleníti a helyi menüt">
+<!ENTITY mintrayr.prefs.watchwindows "Ablak elrejtése a tálcára">
+<!ENTITY mintrayr.prefs.misc "Vegyes">
+<!ENTITY mintrayr.prefs.clickbehavior "Kattintás műveletek">

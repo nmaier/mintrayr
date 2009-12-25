@@ -1,13 +1,10 @@
 <!ENTITY mintrayr.prefs.title "MinTrayR Einstellungen">
 <!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 25em;">
-
 <!ENTITY mintrayr.prefs.minimizeon "In den Infobereich minimieren">
 <!ENTITY mintrayr.prefs.minimizeon.never "Niemals (Nur durch Menü/Button)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "Beim Minimieren">
 <!ENTITY mintrayr.prefs.minimizeon.close "Anstatt zu Schließen">
 <!ENTITY mintrayr.prefs.minimizeon.both "Anstatt zu Schließen und beim Minimieren">
-
-
 <!ENTITY mintrayr.prefs.main "Allgemein">
 <!ENTITY mintrayr.prefs.dblclickrestore "Doppelklicken zum Wiederherstellen">
 <!ENTITY mintrayr.prefs.showcontext "Kontextmenu bei Rechtsklick zeigen">

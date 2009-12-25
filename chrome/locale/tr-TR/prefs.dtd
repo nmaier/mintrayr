@@ -3,7 +3,11 @@
 <!ENTITY mintrayr.prefs.minimizeon "Tepsiye Küçült">
 <!ENTITY mintrayr.prefs.minimizeon.never "Asla(Sadece menüve düğme ile Küçült)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "Küçüldüğünde">
+<!ENTITY mintrayr.prefs.minimizeon.close "Kapanma Yerine">
+<!ENTITY mintrayr.prefs.minimizeon.both "Kapanma veya küçültme yerine">
 <!ENTITY mintrayr.prefs.main "Ana">
+<!ENTITY mintrayr.prefs.dblclickrestore "Geri yükleme için iki kere tıkla.">
 <!ENTITY mintrayr.prefs.showcontext "Sağ tıklamada sağ tık menüsünü göster">
 <!ENTITY mintrayr.prefs.watchwindows "Pencereleri İzle">
 <!ENTITY mintrayr.prefs.misc "Çeşitli">
+<!ENTITY mintrayr.prefs.clickbehavior "Tıklama Davranışı">

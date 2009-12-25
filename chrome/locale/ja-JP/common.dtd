@@ -1,0 +1,7 @@
+<!ENTITY mintrayr.minimize "トレイに最小化">
+<!ENTITY mintrayr.minimize.toolbar "トレイへ">
+<!ENTITY mintrayr.minimize.tip "現在のウィンドウをシステムトレイに最小化">
+<!ENTITY mintrayr.restore "ウィンドウを表示">
+<!ENTITY mintrayr.restoreall "すべて表示">
+<!ENTITY mintrayr.close "閉じる">
+<!ENTITY mintrayr.closemenu "メニューを閉じる">

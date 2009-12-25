@@ -1,5 +1,4 @@
 <!ENTITY mintrayr.newmessage "Neue Nachricht">
-
 <!ENTITY mintrayr.prefs.messenger.watchmessenger "Für Hauptfenster benutzen">
-<!ENTITY mintrayr.prefs.messenger.watchreader    "Für Nachrichtenfenster benutzen"> 
-<!ENTITY mintrayr.prefs.messenger.watchcomposer  "Für Verfassen Fenster benutzen">
+<!ENTITY mintrayr.prefs.messenger.watchreader "Für Nachrichtenfenster benutzen">
+<!ENTITY mintrayr.prefs.messenger.watchcomposer "Für Verfassen Fenster benutzen">
