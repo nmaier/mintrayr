@@ -7,7 +7,7 @@ pref('extensions.mintrayr.browser.watchbookmarks', false);
 
 pref('extensions.mintrayr.messenger.watchmessenger', true);
 pref('extensions.mintrayr.messenger.watchreader', true);
-pref('extensions.mintrayr.messenger.watchcomposer', true);
+pref('extensions.mintrayr.messenger.watchcomposer', false);
 
 pref('extensions.mintrayr.songbird.watchplayer', true);
 pref('extensions.mintrayr.songbird.titlestring', '%artistName% / %trackName%');
