@@ -67,6 +67,14 @@ DIST_FILES = \
 	     install.rdf \
 	     $(NULL)
 
+EXTRA_DIST_FILES = \
+		 chrome/skin/icon.png \
+		 $(NULL)
+		 
+ICON_FILES = \
+		 chrome/icons/default/MinTrayR.ico \
+		 $(NULL)
+
 DIRS = components_src chrome/locale
 
 PREF_JS_EXPORTS = \
@@ -79,6 +87,16 @@ EXTRA_JS_MODULES = \
 		   $(NULL) 
 
 include $(topsrcdir)/config/rules.mk
+
+libs:: $(EXTRA_DIST_FILES)
+ifndef NO_DIST_INSTALL
+	$(INSTALL) $(IFLAGS1) $^ $(FINAL_TARGET)
+endif
+
+libs:: $(ICON_FILES)
+ifndef NO_DIST_INSTALL
+	$(INSTALL) $(IFLAGS1) $^ $(FINAL_TARGET)/chrome/icons/default
+endif
 
 libs::
 	@$(EXIT_ON_ERROR)                    \
