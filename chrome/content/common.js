@@ -41,13 +41,6 @@ function MinTrayR(menu, pref) {
 	}
 	let tp = this;
 	addEventListener(
-		'unload',
-		function() {
-			try { tp.restore(); } catch (ex) {/* no op */}
-		},
-		false
-	);
-	addEventListener(
 		'TrayDblClick',
 		function(event) {
 			if (event.button == 0 && !!tp.prefs.getExt('dblclickrestore', true)) {

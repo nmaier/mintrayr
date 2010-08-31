@@ -46,6 +46,8 @@
 #include "nsAutoPtr.h"
 #include "nsPoint.h"
 
+#include "nsIDOMEventListener.h"
+
 #include "trayIToolkit.h"
 #include "nsXPCOMStrings.h"
 #include "nsIObserver.h"
@@ -74,16 +76,17 @@ public:
 private:
 	// raw to resolve ambiguous conversation; doesn't hurt, all TrayWindow instanced should be down before TrayService goes away
 	TrayServiceImpl* mService;
-	nsCOMPtr<nsIDOMWindow> mDOMWindow;
 	nsAutoPtr<TrayWindowWrapper> mWrapper;
+	nsCOMPtr<nsIDOMWindow> mDOMWindow;
 };
 
-class TrayServiceImpl : public trayITrayService, nsIObserver {
+class TrayServiceImpl : public trayITrayService, nsIDOMEventListener, nsIObserver {
 
 	friend class TrayWindow;
 public:
 	NS_DECL_ISUPPORTS
 	NS_DECL_NSIOBSERVER
+	NS_DECL_NSIDOMEVENTLISTENER
 	NS_DECL_TRAYITRAYSERVICE
 
 	TrayServiceImpl();

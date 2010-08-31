@@ -39,7 +39,7 @@
  * This is just an include ;)
  */
 
-NS_IMPL_ISUPPORTS2(TrayServiceImpl, nsIObserver, trayITrayService)
+NS_IMPL_ISUPPORTS3(TrayServiceImpl, nsIObserver, nsIDOMEventListener, trayITrayService)
 
 void TrayServiceImpl::Init()
 {
@@ -75,6 +75,11 @@ NS_IMETHODIMP TrayServiceImpl::Minimize(nsIDOMWindow *aWindow)
 	if (NS_SUCCEEDED(rv)) {
 		return NS_ERROR_ALREADY_INITIALIZED;
 	}
+
+	nsCOMPtr<nsIDOMEventTarget> target = do_QueryInterface(aWindow, &rv);
+	NS_ENSURE_SUCCESS(rv, rv);
+	rv = target->AddEventListener(NS_LITERAL_STRING("unload"), this, PR_FALSE);
+	NS_ENSURE_SUCCESS(rv, rv);
 
 	trayWindow = new TrayWindow(this);
 	if (trayWindow == nsnull) {
@@ -123,6 +128,8 @@ NS_IMETHODIMP TrayServiceImpl::RestoreAll()
 		rv = mWindows[i]->GetWindow(getter_AddRefs(window));
 		NS_ENSURE_SUCCESS(rv, rv);
 
+		nsCOMPtr<nsIDOMEventTarget> target = do_QueryInterface(window, &rv);
+
 		rv = mWindows[i]->Destroy();
 		NS_ENSURE_SUCCESS(rv, rv);
 
@@ -132,6 +139,24 @@ NS_IMETHODIMP TrayServiceImpl::RestoreAll()
 		DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
 	}
     return NS_OK;
+}
+
+NS_IMETHODIMP TrayServiceImpl::HandleEvent(nsIDOMEvent *aEvent)
+{
+	nsresult rv;
+
+	NS_ENSURE_ARG_POINTER(aEvent);
+
+	nsCOMPtr<nsIDOMEventTarget> target;
+	rv = aEvent->GetCurrentTarget(getter_AddRefs(target));
+	NS_ENSURE_SUCCESS(rv, rv);
+
+	target->RemoveEventListener(NS_LITERAL_STRING("unload"), this, PR_FALSE);
+
+	nsCOMPtr<nsIDOMWindow> window = do_QueryInterface(target, &rv);
+	NS_ENSURE_SUCCESS(rv, rv);
+
+	Restore(window);
 }
 
 
