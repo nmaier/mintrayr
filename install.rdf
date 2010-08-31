@@ -10,23 +10,23 @@
 		<em:name>MinimizeToTray revived (MinTrayR)</em:name>
 		<em:description>Minimizes windows into the system tray</em:description>
 		<em:creator>Nils Maier</em:creator>
-		
+
 		<em:developer>Nils Maier</em:developer>
 		<em:contributor>Mook</em:contributor>
 		<em:contributor>helix400</em:contributor>
 		<em:contributor>Christoph Grimmer</em:contributor>
-		
-		
+
+
 		<em:iconURL>chrome://mintrayr/skin/icon.png</em:iconURL>
 		<em:homepageURL>http://tn123.ath.cx/mintrayr</em:homepageURL>
 		<em:optionsURL>chrome://mintrayr/content/prefs/prefs.xul</em:optionsURL>
-		
+
 		<!-- Firefox -->
 		<em:targetApplication>
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>3.6</em:minVersion>
-				<em:maxVersion>4.0b5pre</em:maxVersion>
+				<em:maxVersion>4.0b6pre</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 
@@ -38,7 +38,16 @@
 				<em:maxVersion>3.2a1pre</em:maxVersion>
 			</Description>
 		</em:targetApplication>
-		
+
+		<!-- Seamonkey -->
+		<em:targetApplication>
+			<Description>
+				<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+				<em:minVersion>2.0</em:minVersion>
+				<em:maxVersion>2.1b1</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+
 		<!-- Instantbird -->
 		<em:targetApplication>
 			<Description>
@@ -47,6 +56,6 @@
 				<em:maxVersion>0.2.*</em:maxVersion>
 			</Description>
 		</em:targetApplication>
-		
+
 	</Description>
 </RDF>

@@ -37,6 +37,16 @@
 
 function MinTrayRMessenger() {
 	MinTrayR.call(this, 'MinTrayR_context', 'messenger.watchreader');
+	try {
+		// Seamonkey hack
+		let n = document.querySelector('#menu_NewPopup menuitem');
+		if (n && !n.id)  {
+			n.id = 'newNewMsgCmd';
+		}
+	}
+	catch (ex) {
+		// no-op
+	}
 	this.cloneToMenu('MinTrayR_sep-top', ['newNewMsgCmd'], false);
 	this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
 	document
@@ -44,7 +54,7 @@ function MinTrayRMessenger() {
 		.setAttribute(
 			'label',
 			document.getElementById('MinTrayR_context').getAttribute('mintrayr_newmessage')
-		); 
+		);
 }
 
 var gMinTrayR;
