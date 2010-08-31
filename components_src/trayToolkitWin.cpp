@@ -69,12 +69,13 @@
 #include "nsIPrefBranch2.h"
 
 
+
+namespace {
+
 /*
  * include common code
  */
 #include "common.cpp"
-
-namespace {
 
 	static const wchar_t kTrayMessage[]    = L"_MINTRAYR_TrayMessageW";
 	static const wchar_t kWrapperProp[]    = L"_MINTRAYR_WRAPPER_PTR";
@@ -82,11 +83,6 @@ namespace {
 	static const wchar_t kWatcherDOMProp[] = L"_MINTRAYR_WATCHER_DOM_PTR";
 	static const wchar_t kWatcherOldProp[] = L"_MINTRAYR_WATCHER_OLD_PROC";
 	static const wchar_t kWatcherLock[]    = L"_MINTRAYR_WATCHER_LOCK";
-
-	typedef enum _eMinimizeActions {
-		kTrayOnMinimize = (1 << 0),
-		kTrayOnClose = (1 << 1)
-	} eMinimizeActions;
 
 	typedef BOOL (WINAPI *pChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
 #ifndef MGSFLT_ADD
@@ -134,20 +130,11 @@ namespace {
 		}
 	};
 
-	static bool DoMinimizeWindow(HWND hwnd, eMinimizeActions action)
+	static bool DoMinimizeWindowWin(HWND hwnd, eMinimizeActions action)
 	{
 		nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kWatcherDOMProp));
 		if (window == 0) {
 			return false;
-		}
-
-		nsCOMPtr<nsIPrefBranch2> prefs(do_GetService(NS_PREFSERVICE_CONTRACTID));
-		if (prefs) {
-			PRInt32 whenToMinimize = 0;
-			prefs->GetIntPref("extensions.mintrayr.minimizeon", &whenToMinimize);
-			if ((whenToMinimize & action) == 0) {
-				return false;
-			}
 		}
 
 		// We might receive the hide message, protect against it.
@@ -156,14 +143,10 @@ namespace {
 		}
 		::SetPropW(hwnd, kWatcherLock, reinterpret_cast<HANDLE>(0x1));
 
-		nsresult rv;
-		nsCOMPtr<trayITrayService> traySvc(do_GetService(TRAYSERVICE_CONTRACTID, &rv));
-		if (NS_SUCCEEDED(rv)) {
-			rv = traySvc->Minimize(window);
-		}
+		bool rv = DoMinimizeWindow(window, action);
 
 		::RemovePropW(hwnd, kWatcherLock);
-		return NS_SUCCEEDED(rv);
+    return rv;
 	}
 
 	/**
@@ -209,7 +192,7 @@ namespace {
 				pl.length = sizeof(WINDOWPLACEMENT);
 				::GetWindowPlacement(hwnd, &pl);
 				if (pl.showCmd == SW_SHOWMINIMIZED) {
-					if (DoMinimizeWindow(hwnd, kTrayOnMinimize)) {
+					if (DoMinimizeWindowWin(hwnd, kTrayOnMinimize)) {
 						pl.showCmd = SW_HIDE;
 						::SetWindowPlacement(hwnd, &pl);
 						return 0;
@@ -221,13 +204,13 @@ namespace {
 
 		case WM_NCLBUTTONDOWN:
 		case WM_NCLBUTTONUP:
-			if (wParam == HTCLOSE && DoMinimizeWindow(hwnd, kTrayOnClose)) {
+			if (wParam == HTCLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
 				return TRUE;
 			}
 			break;
 
 		case WM_SYSCOMMAND:
-			if (wParam == SC_CLOSE && DoMinimizeWindow(hwnd, kTrayOnClose)) {
+			if (wParam == SC_CLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
 				return 0;
 			}
 			break;
@@ -483,21 +466,6 @@ WrapperWindowProcEnd:
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-NS_IMPL_ISUPPORTS0(TrayWindow)
-
-TrayWindow::TrayWindow(TrayServiceImpl *aService)
-: mService(aService), mWrapper(nsnull), mDOMWindow(nsnull)
-{
-}
-
-NS_IMETHODIMP TrayWindow::Destroy()
-{
-	// Deleting the wrapper will make it destroy any icon as well
-	delete mWrapper.forget();
-
-	return NS_OK;
-}
-
 NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
@@ -526,23 +494,6 @@ NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
 	return NS_OK;
 }
 
-NS_IMETHODIMP TrayWindow::GetWindow(nsIDOMWindow **aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	*aWindow = mDOMWindow;
-	NS_IF_ADDREF(*aWindow);
-
-	return NS_OK;
-}
-
-inline
-NS_IMETHODIMP TrayWindow::DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey)
-{
-	return common::DispatchMouseEvent(mDOMWindow, aEventName, aButton, pt, aCtrlKey, aAltKey, aShiftKey);
-}
-
-NS_IMPL_ISUPPORTS2(TrayServiceImpl, nsIObserver, trayITrayService)
-
 TrayServiceImpl::TrayServiceImpl()
 {
 	// Register our hidden window
@@ -570,91 +521,11 @@ TrayServiceImpl::TrayServiceImpl()
 TrayServiceImpl::~TrayServiceImpl()
 {
 	Destroy();
-}
-void TrayServiceImpl::Destroy()
-{
-	// Destroy remaining icons
-	PRInt32 count = mWindows.Count();
-	for (PRInt32 i = count - 1; i > -1; --i) {
-		mWindows[i]->Destroy();
-		ReleaseTrayWindow(mWindows[i]);
-	}
-	mWindows.Clear();
-	mWatches.Clear();
 
-	// Vista (Administrator) needs some unlove, see c'tor
+  // Vista (Administrator) needs some unlove, see c'tor
 	if (OSVersionInfo().isVistaOrLater()) {
 		TrayServiceImpl_AdjustMessageFilters(MSGFLT_REMOVE);
 	}
-}
-
-NS_IMETHODIMP TrayServiceImpl::Minimize(nsIDOMWindow *aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-
-	nsresult rv;
-	nsCOMPtr<TrayWindow> trayWindow;
-	rv = FindTrayWindow(aWindow, getter_AddRefs(trayWindow));
-	if (NS_SUCCEEDED(rv)) {
-		return NS_ERROR_ALREADY_INITIALIZED;
-	}
-
-	trayWindow = new TrayWindow(this);
-	if (trayWindow == nsnull) {
-		return NS_ERROR_OUT_OF_MEMORY;
-	}
-	rv = trayWindow->Init(aWindow);
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	if (mWindows.AppendObject(trayWindow) == PR_FALSE) {
-		return NS_ERROR_FAILURE;
-	}
-	common::DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayMinimize"));
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayServiceImpl::Restore(nsIDOMWindow *aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-
-	nsresult rv;
-	nsCOMPtr<TrayWindow> trayWindow;
-	rv = FindTrayWindow(aWindow, getter_AddRefs(trayWindow));
-	if (NS_FAILED(rv)) {
-		return NS_OK;
-	}
-
-	rv = trayWindow->Destroy();
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	rv = ReleaseTrayWindow(trayWindow);
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	common::DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayRestore"));
-
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayServiceImpl::RestoreAll()
-{
-	nsresult rv;
-	PRInt32 count = mWindows.Count();
-
-	for (PRInt32 i = count - 1; i > -1; --i) {
-
-		nsCOMPtr<nsIDOMWindow> window;
-		rv = mWindows[i]->GetWindow(getter_AddRefs(window));
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		rv = mWindows[i]->Destroy();
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		rv = ReleaseTrayWindow(mWindows[i]);
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		common::DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
-	}
-    return NS_OK;
 }
 
 NS_IMETHODIMP TrayServiceImpl::WatchMinimize(nsIDOMWindow *aWindow)
@@ -715,56 +586,10 @@ NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
 	return NS_OK;
 }
 
-NS_IMETHODIMP TrayServiceImpl::IsWatchedWindow(nsIDOMWindow *aWindow, PRBool *aResult)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	NS_ENSURE_ARG_POINTER(aResult);
+// Need this
+#define strcasecmp lstrcmpA
 
-	*aResult = mWatches.IndexOfObject(aWindow) != -1 ? PR_TRUE : PR_FALSE;
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayServiceImpl::Observe(nsISupports *, const char *aTopic, const PRUnichar *)
-{
-	if (lstrcmpA(aTopic, "xpcom-shutdown") == 0) {
-		Destroy();
-
-		nsresult rv;
-		nsCOMPtr<nsIObserverService> obs(do_GetService("@mozilla.org/observer-service;1", &rv));
-		if (NS_SUCCEEDED(rv)) {
-			obs->RemoveObserver(static_cast<nsIObserver*>(this), "xpcom-shutdown");
-		}
-	}
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayServiceImpl::ReleaseTrayWindow(TrayWindow *aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	mWindows.RemoveObject(aWindow);
-	return NS_OK;
-}
-
-
-NS_IMETHODIMP TrayServiceImpl::FindTrayWindow(nsIDOMWindow *aWindow, TrayWindow **aTrayWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	NS_ENSURE_ARG_POINTER(aTrayWindow);
-
-	nsresult rv;
-	nsCOMPtr<nsIDOMWindow> domWindow;
-	PRInt32 count = mWindows.Count();
-
-	for (PRInt32 i = 0; i < count; ++i) {
-		rv = mWindows[i]->GetWindow(getter_AddRefs(domWindow));
-		if (NS_FAILED(rv)) {
-			continue;
-		}
-		if (domWindow == aWindow) {
-			*aTrayWindow = mWindows[i];
-			NS_IF_ADDREF(*aTrayWindow);
-			return NS_OK;
-		}
-	}
-	return NS_ERROR_FAILURE;
-}
+/**
+ * include the common component implementation
+ */
+#include "trayToolkitImpl.cpp"

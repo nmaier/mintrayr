@@ -39,6 +39,8 @@
  * This is just an include ;)
  */
 
+NS_IMPL_ISUPPORTS2(TrayServiceImpl, nsIObserver, trayITrayService)
+
 void TrayServiceImpl::Init()
 {
 	// Observe when the app is going down.
@@ -130,6 +132,22 @@ NS_IMETHODIMP TrayServiceImpl::RestoreAll()
 		DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
 	}
     return NS_OK;
+}
+
+
+NS_IMPL_ISUPPORTS0(TrayWindow)
+
+TrayWindow::TrayWindow(TrayServiceImpl *aService)
+: mService(aService), mWrapper(nsnull), mDOMWindow(nsnull)
+{
+}
+
+NS_IMETHODIMP TrayWindow::Destroy()
+{
+	// Deleting the wrapper will make it destroy any icon as well
+	delete mWrapper.forget();
+
+	return NS_OK;
 }
 
 NS_IMETHODIMP TrayWindow::GetWindow(nsIDOMWindow **aWindow)

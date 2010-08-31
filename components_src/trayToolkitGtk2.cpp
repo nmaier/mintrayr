@@ -262,21 +262,6 @@ GdkFilterReturn TrayWindowWrapper::filter(XEvent *xev, GdkEvent *event)
 
 }
 
-NS_IMPL_ISUPPORTS0(TrayWindow)
-
-TrayWindow::TrayWindow(TrayServiceImpl *aService)
-: mService(aService), mWrapper(nsnull), mDOMWindow(nsnull)
-{
-}
-
-NS_IMETHODIMP TrayWindow::Destroy()
-{
-	// Deleting the wrapper will make it destroy any icon as well
-	delete mWrapper.forget();
-
-	return NS_OK;
-}
-
 NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
@@ -304,8 +289,6 @@ NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
 
 	return NS_OK;
 }
-
-NS_IMPL_ISUPPORTS2(TrayServiceImpl, nsIObserver, trayITrayService)
 
 TrayServiceImpl::TrayServiceImpl()
 {
