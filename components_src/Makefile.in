@@ -83,9 +83,12 @@ RESFILE = resources.res
 else
 
 ifeq ($(MOZ_WIDGET_TOOLKIT),gtk2)
+
 CPPSRCS += trayToolkitGtk2.cpp
 LOCAL_INCLUDES += $(MOZ_GTK2_CFLAGS)
 OS_LIBS += $(TK_LIBS) $(XLIBS)
+EXTRA_DSO_LDOPTS += -g
+
 endif # gtk2
 endif # windows
 
@@ -104,6 +107,8 @@ EXTRA_SRC_COMPONENTS += \
 				trayToolkit.h \
 				trayToolkitWin.cpp \
 				trayToolkitGtk2.cpp \
+				trayToolkitImpl.cpp \
+				common.cpp \
 				$(NULL)
 				
 libs:: $(EXTRA_SRC_COMPONENTS)
