@@ -138,7 +138,7 @@ NS_IMETHODIMP TrayServiceImpl::RestoreAll()
 
 		DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
 	}
-    return NS_OK;
+	return NS_OK;
 }
 
 NS_IMETHODIMP TrayServiceImpl::HandleEvent(nsIDOMEvent *aEvent)
@@ -157,6 +157,8 @@ NS_IMETHODIMP TrayServiceImpl::HandleEvent(nsIDOMEvent *aEvent)
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	Restore(window);
+
+	return NS_OK;
 }
 
 
