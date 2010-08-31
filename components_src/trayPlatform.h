@@ -42,6 +42,7 @@
 #include "xpcom-config.h"
 
 #include "nsCOMPtr.h"
+#include "nsStringAPI.h"
 
 #include "nsIDOMWindow.h"
 
@@ -67,7 +68,7 @@ public:
 	virtual void Restore() = 0;
 };
 
-Icon* CreateIcon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const PRUnichar *aTitle);
+Icon* CreateIcon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
 
 } // namespace platform
 } // namespace mintrayr

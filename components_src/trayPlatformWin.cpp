@@ -234,7 +234,7 @@ void Destroy() {
 	}
 }
 
-Icon* CreateIcon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const PRUnichar *aTitle)
+Icon* CreateIcon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle)
 {
 	return new win::Icon(aOwner, aWindow, aTitle);
 }
@@ -277,12 +277,12 @@ NS_IMETHODIMP UnwatchWindow(nsIDOMWindow *aWindow)
 
 namespace win {
 
-Icon::Icon(TrayIconImpl *aIcon, nsIDOMWindow *aWindow, const wchar_t *aTitle)
+Icon::Icon(TrayIconImpl *aIcon, nsIDOMWindow *aWindow, const nsString& aTitle)
 	: mIcon(aIcon)
 {
 	Init(aWindow, aTitle);
 }
-NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const wchar_t *aTitle)
+NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
 {
 	nsresult rv;
 	nsCOMPtr<nsIBaseWindow> baseWindow;
@@ -304,7 +304,7 @@ NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const wchar_t *aTitle)
 	mIconData.cbSize = sizeof(mIconData);
 
 	// Copy the title
-	lstrcpynW(mIconData.szTip, aTitle, 127);
+	lstrcpynW(mIconData.szTip, aTitle.get(), 127);
 	mIconData.szTip[128] = '\0'; // Better be safe than sorry :p
 
 	// Get the window icon

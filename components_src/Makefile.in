@@ -109,6 +109,8 @@ EXTRA_SRC_COMPONENTS += \
 				trayPlatform.h \
 				trayPlatformWin.h \
 				trayPlatformWin.cpp \
+				trayPlatformGtk2.h \
+				trayPlatformGtk2.cpp \
 				$(NULL)
 				
 libs:: $(EXTRA_SRC_COMPONENTS)

@@ -264,12 +264,10 @@ NS_IMETHODIMP TrayIconImpl::Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore)
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
 
-	PRUnichar *title = nsnull;
-	baseWindow->GetTitle(&title);
+	nsString title;
+	baseWindow->GetTitle(getter_Copies(title));
 	mIcon = platform::CreateIcon(this, aWindow, title);
 	mWindow = aWindow;
-
-	NS_Free(title);
 
 	return NS_OK;
 }
