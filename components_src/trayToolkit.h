@@ -58,7 +58,7 @@ class TrayWindowWrapper;
 class TrayServiceImpl;
 
 class TrayWindow : public nsISupports {
-	
+
 	friend class TrayWindowWrapper;
 
 public:
@@ -93,9 +93,10 @@ private:
 
 private:
 	~TrayServiceImpl();
+
+	void Init();
 	void Destroy();
 	NS_IMETHOD FindTrayWindow(nsIDOMWindow *window, TrayWindow **trayWindow);
-	NS_IMETHOD DispatchTrustedEvent(nsIDOMWindow *window, const nsAString& eventName);
 	NS_IMETHOD ReleaseTrayWindow(TrayWindow *window);
 };
 

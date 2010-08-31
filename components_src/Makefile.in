@@ -84,7 +84,8 @@ else
 
 ifeq ($(MOZ_WIDGET_TOOLKIT),gtk2)
 CPPSRCS += trayToolkitGtk2.cpp
-
+LOCAL_INCLUDES += $(MOZ_GTK2_CFLAGS)
+OS_LIBS += $(TK_LIBS) $(XLIBS)
 endif # gtk2
 endif # windows
 

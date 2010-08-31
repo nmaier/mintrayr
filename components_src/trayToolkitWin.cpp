@@ -69,6 +69,11 @@
 #include "nsIPrefBranch2.h"
 
 
+/*
+ * include common code
+ */
+#include "common.cpp"
+
 namespace {
 
 	static const wchar_t kTrayMessage[]    = L"_MINTRAYR_TrayMessageW";
@@ -77,7 +82,7 @@ namespace {
 	static const wchar_t kWatcherDOMProp[] = L"_MINTRAYR_WATCHER_DOM_PTR";
 	static const wchar_t kWatcherOldProp[] = L"_MINTRAYR_WATCHER_OLD_PROC";
 	static const wchar_t kWatcherLock[]    = L"_MINTRAYR_WATCHER_LOCK";
-	
+
 	typedef enum _eMinimizeActions {
 		kTrayOnMinimize = (1 << 0),
 		kTrayOnClose = (1 << 1)
@@ -89,16 +94,16 @@ namespace {
 	#	define MSGFLT_ADD 1
 	#	define MSGFLT_REMOVE 2
 #endif
- 
+
 	static UINT WM_TASKBARCREATED = 0;
 	static UINT WM_TRAYMESSAGE = 0;
 
 	/**
-	 * Helper function that will allow us to receive some broadcast messages on Vista 
+	 * Helper function that will allow us to receive some broadcast messages on Vista
 	 * (We need to bypass that filter if we run as Administrator, but the orginating process
 	 * has less priviledges)
 	 */
-	static void TrayServiceImpl_AdjustMessageFilters(UINT filter) 
+	static void TrayServiceImpl_AdjustMessageFilters(UINT filter)
 	{
 		HMODULE user32 = LoadLibraryW(L"user32.dll");
 		if (user32 != NULL) {
@@ -115,27 +120,6 @@ namespace {
 	}
 
 	/**
-	 * Helper function that will try to get the nsIBaseWindow from an nsIDOMWindow
-	 */
-	static NS_IMETHODIMP TrayServiceImpl_GetBaseWindow(nsIDOMWindow *aWindow, nsIBaseWindow **aBaseWindow)
-	{
-		NS_ENSURE_ARG_POINTER(aWindow);
-		NS_ENSURE_ARG_POINTER(aBaseWindow);
-
-		nsresult rv;
-		
-		nsCOMPtr<nsIWebNavigation> webNav = do_GetInterface(aWindow, &rv);
-		NS_ENSURE_SUCCESS(rv, rv);
-		
-		nsCOMPtr<nsIBaseWindow> baseWindow = do_QueryInterface(webNav, &rv);
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		*aBaseWindow = baseWindow;
-		NS_IF_ADDREF(*aBaseWindow);
-		return NS_OK;
-	}
-
-	/**
 	 * Helper class to get Windows Version information
 	 */
 	class OSVersionInfo : public OSVERSIONINFOEXW
@@ -149,14 +133,14 @@ namespace {
 			return dwMajorVersion >= 6;
 		}
 	};
-	
+
 	static bool DoMinimizeWindow(HWND hwnd, eMinimizeActions action)
 	{
 		nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kWatcherDOMProp));
-		if (window == 0) {			
+		if (window == 0) {
 			return false;
 		}
-		
+
 		nsCOMPtr<nsIPrefBranch2> prefs(do_GetService(NS_PREFSERVICE_CONTRACTID));
 		if (prefs) {
 			PRInt32 whenToMinimize = 0;
@@ -178,13 +162,13 @@ namespace {
 			rv = traySvc->Minimize(window);
 		}
 
-		::RemovePropW(hwnd, kWatcherLock);	
+		::RemovePropW(hwnd, kWatcherLock);
 		return NS_SUCCEEDED(rv);
 	}
 
 	/**
 	 * Install this WindowProc in windows we watch
-	 * 
+	 *
 	 * Note: Once installed don't remove this again (by setting the old WNDPROC)
 	 * Or else we might break the chain if something else installed yet another WNDPROC
 	 * And chained us.
@@ -197,7 +181,7 @@ namespace {
 		if (window == 0) {
 			goto WatcherWindowProcEnd;
 		}
-	
+
 		switch (uMsg) {
 		case WM_CLOSE:
 		case WM_DESTROY: {
@@ -210,7 +194,7 @@ namespace {
 			}
 			break;
 		} // case WM_DESTROY
-		
+
 		case WM_WINDOWPOSCHANGED: {
 			/* XXX Fix this bit to something more reasonable
 				The following code kinda replicates the way mozilla gets the window state.
@@ -234,7 +218,7 @@ namespace {
 			}
 			break;
 		} // case WM_WINDOWPOSCHANGED
-		
+
 		case WM_NCLBUTTONDOWN:
 		case WM_NCLBUTTONUP:
 			if (wParam == HTCLOSE && DoMinimizeWindow(hwnd, kTrayOnClose)) {
@@ -274,13 +258,13 @@ public:
 private:
 	 // hold raw pointer. Class instances point to TrayWindow anyway and destructed with it.
 	TrayWindow* mWindow;
-	
+
 	// HWND this wrapper is associated with
 	HWND mHwnd;
-	
+
 	// Previous window procedure
 	WNDPROC mOldWindowProc;
-	
+
 	// Win32 data structure containing the tray icon configuration
 	NOTIFYICONDATAW mIconData;
 };
@@ -291,7 +275,7 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 {
 	// Hook window
 	::SetPropW(mHwnd, kWrapperProp, this);
-	
+
 	// Only subclass once and leave this intact
 	if (::GetPropW(mHwnd, kWrapperOldProp) == NULL) {
 		WNDPROC oldWindowProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(
@@ -301,7 +285,7 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 		));
 		::SetPropW(mHwnd, kWrapperOldProp, oldWindowProc);
 	}
-	
+
 	// We need to get a minimize through.
 	// Otherwise the SFW/PM hack won't work
 	// However we need to protect against the watcher watching this
@@ -311,7 +295,7 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 	::ShowWindow(mHwnd, SW_MINIMIZE);
 	if (watcher != 0) {
 		::SetPropW(mHwnd, kWatcherDOMProp, watcher);
-	}	
+	}
 
 	// Init the icon data according to MSDN
 	ZeroMemory(&mIconData, sizeof(mIconData));
@@ -336,7 +320,7 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow, HWND aHwnd, const wcha
 		icon = ::LoadIcon(NULL, IDI_APPLICATION);
 	}
 	mIconData.hIcon = icon;
-	
+
 	// Set the rest of the members
 	mIconData.hWnd = mHwnd;
 	mIconData.uCallbackMessage = WM_TRAYMESSAGE;
@@ -410,13 +394,13 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 			}
 		}
 	}
-	
+
 	// This is a badly documented custom broadcast message by explorer
 	else if (uMsg == WM_TASKBARCREATED) {
 		// The taskbar was (re)created. Add ourselves again.
 		Shell_NotifyIconW(NIM_ADD, &me->mIconData);
 	}
-	
+
 	// We got clicked. How exciting, isn't it.
 	else if (uMsg == WM_TRAYMESSAGE) {
 		nsString eventName;
@@ -468,7 +452,7 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 		}
 		return 0;
 	}
-	
+
 	// Window title changed
 	else if (uMsg == WM_SETTEXT) {
 		// First, let the original wndproc process this message,
@@ -521,13 +505,13 @@ NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
 	nsresult rv;
 
 	nsCOMPtr<nsIBaseWindow> baseWindow;
-	rv = TrayServiceImpl_GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	nativeWindow native = 0;
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
-	
+
 	HWND hwnd = reinterpret_cast<HWND>(native);
 
 	PRUnichar *title = nsnull;
@@ -551,53 +535,10 @@ NS_IMETHODIMP TrayWindow::GetWindow(nsIDOMWindow **aWindow)
 	return NS_OK;
 }
 
+inline
 NS_IMETHODIMP TrayWindow::DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey)
 {
-	nsresult rv;
-
-	nsCOMPtr<nsIDOMDocument> domDocument;
-	rv = mDOMWindow->GetDocument(getter_AddRefs(domDocument));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMDocumentEvent> docEvent(do_QueryInterface(domDocument));
-	nsCOMPtr<nsIDOMEventTarget> target(do_QueryInterface(domDocument));
-	NS_ENSURE_TRUE(docEvent && target, NS_ERROR_INVALID_ARG);
-
-	nsCOMPtr<nsIDOMDocumentView> docView(do_QueryInterface(domDocument, &rv));
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	nsCOMPtr<nsIDOMAbstractView> abstractView; 
-	rv = docView->GetDefaultView(getter_AddRefs(abstractView));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMEvent> event;
-	rv = docEvent->CreateEvent(NS_LITERAL_STRING("MouseEvents"), getter_AddRefs(event));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMMouseEvent> mouseEvent(do_QueryInterface(event, &rv));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	rv = mouseEvent->InitMouseEvent(
-		aEventName,
-		PR_FALSE,
-		PR_TRUE,
-		abstractView,
-		0,
-		pt.x,
-		pt.y,
-		0,
-		0,
-		aCtrlKey,
-		aAltKey,
-		aShiftKey,
-		PR_FALSE,
-		aButton,
-		target
-		);
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	PRBool dummy;
-	return target->DispatchEvent(mouseEvent, &dummy);
+	return common::DispatchMouseEvent(mDOMWindow, aEventName, aButton, pt, aCtrlKey, aAltKey, aShiftKey);
 }
 
 NS_IMPL_ISUPPORTS2(TrayServiceImpl, nsIObserver, trayITrayService)
@@ -610,7 +551,7 @@ TrayServiceImpl::TrayServiceImpl()
 	WM_TASKBARCREATED = RegisterWindowMessageW(L"TaskbarCreated");
 	// We register this as well, as we cannot know which WM_USER values are already taken
 	WM_TRAYMESSAGE = RegisterWindowMessageW(kTrayMessage);
-	
+
 	// Vista (Administrator) needs some love, or else we won't receive anything due to UIPI
 	if (OSVersionInfo().isVistaOrLater()) {
 		TrayServiceImpl_AdjustMessageFilters(MSGFLT_ADD);
@@ -624,7 +565,7 @@ TrayServiceImpl::TrayServiceImpl()
 	if (NS_SUCCEEDED(rv)) {
 		obs->AddObserver(static_cast<nsIObserver*>(this), "xpcom-shutdown", PR_FALSE);
 	}
-	
+
 }
 TrayServiceImpl::~TrayServiceImpl()
 {
@@ -650,7 +591,7 @@ void TrayServiceImpl::Destroy()
 NS_IMETHODIMP TrayServiceImpl::Minimize(nsIDOMWindow *aWindow)
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
-	
+
 	nsresult rv;
 	nsCOMPtr<TrayWindow> trayWindow;
 	rv = FindTrayWindow(aWindow, getter_AddRefs(trayWindow));
@@ -668,7 +609,7 @@ NS_IMETHODIMP TrayServiceImpl::Minimize(nsIDOMWindow *aWindow)
 	if (mWindows.AppendObject(trayWindow) == PR_FALSE) {
 		return NS_ERROR_FAILURE;
 	}
-	DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayMinimize"));
+	common::DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayMinimize"));
 	return NS_OK;
 }
 
@@ -689,7 +630,7 @@ NS_IMETHODIMP TrayServiceImpl::Restore(nsIDOMWindow *aWindow)
 	rv = ReleaseTrayWindow(trayWindow);
 	NS_ENSURE_SUCCESS(rv, rv);
 
-	DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayRestore"));
+	common::DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayRestore"));
 
 	return NS_OK;
 }
@@ -700,7 +641,7 @@ NS_IMETHODIMP TrayServiceImpl::RestoreAll()
 	PRInt32 count = mWindows.Count();
 
 	for (PRInt32 i = count - 1; i > -1; --i) {
-		
+
 		nsCOMPtr<nsIDOMWindow> window;
 		rv = mWindows[i]->GetWindow(getter_AddRefs(window));
 		NS_ENSURE_SUCCESS(rv, rv);
@@ -711,7 +652,7 @@ NS_IMETHODIMP TrayServiceImpl::RestoreAll()
 		rv = ReleaseTrayWindow(mWindows[i]);
 		NS_ENSURE_SUCCESS(rv, rv);
 
-		DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
+		common::DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
 	}
     return NS_OK;
 }
@@ -728,13 +669,13 @@ NS_IMETHODIMP TrayServiceImpl::WatchMinimize(nsIDOMWindow *aWindow)
 	nsresult rv;
 
 	nsCOMPtr<nsIBaseWindow> baseWindow;
-	rv = TrayServiceImpl_GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	nativeWindow native = 0;
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
-	
+
 	HWND hwnd = reinterpret_cast<HWND>(native);
 
 	// Storing this as raw pointer shouldn't be a problem, as the lifetime of the DOMWindow is at least as long as of the BaseWindow
@@ -757,13 +698,13 @@ NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
 	mWatches.RemoveObject(aWindow);
 
 	nsCOMPtr<nsIBaseWindow> baseWindow;
-	rv = TrayServiceImpl_GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	nativeWindow native = 0;
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
-	
+
 	HWND hwnd = reinterpret_cast<HWND>(native);
 
 	// This will effectively cause the WindowProc not to carry out anything itself.
@@ -778,7 +719,7 @@ NS_IMETHODIMP TrayServiceImpl::IsWatchedWindow(nsIDOMWindow *aWindow, PRBool *aR
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
 	NS_ENSURE_ARG_POINTER(aResult);
-	
+
 	*aResult = mWatches.IndexOfObject(aWindow) != -1 ? PR_TRUE : PR_FALSE;
 	return NS_OK;
 }
@@ -809,11 +750,11 @@ NS_IMETHODIMP TrayServiceImpl::FindTrayWindow(nsIDOMWindow *aWindow, TrayWindow 
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
 	NS_ENSURE_ARG_POINTER(aTrayWindow);
-	
+
 	nsresult rv;
 	nsCOMPtr<nsIDOMWindow> domWindow;
 	PRInt32 count = mWindows.Count();
-	
+
 	for (PRInt32 i = 0; i < count; ++i) {
 		rv = mWindows[i]->GetWindow(getter_AddRefs(domWindow));
 		if (NS_FAILED(rv)) {
@@ -826,35 +767,4 @@ NS_IMETHODIMP TrayServiceImpl::FindTrayWindow(nsIDOMWindow *aWindow, TrayWindow 
 		}
 	}
 	return NS_ERROR_FAILURE;
-}
-
-NS_IMETHODIMP TrayServiceImpl::DispatchTrustedEvent(nsIDOMWindow *aWindow, const nsAString& aEventName)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-
-	nsresult rv;
-
-	nsCOMPtr<nsIDOMDocument> domDocument;
-	rv = aWindow->GetDocument(getter_AddRefs(domDocument));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMDocumentEvent> docEvent(do_QueryInterface(domDocument));
-	nsCOMPtr<nsIDOMEventTarget> target(do_QueryInterface(domDocument));
-	NS_ENSURE_TRUE(docEvent && target, NS_ERROR_INVALID_ARG);
-
-	nsCOMPtr<nsIDOMEvent> event;
-	rv = docEvent->CreateEvent(NS_LITERAL_STRING("Events"), getter_AddRefs(event));
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	nsCOMPtr<nsIPrivateDOMEvent> privateEvent(do_QueryInterface(event, &rv));
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	rv = event->InitEvent(aEventName, PR_FALSE, PR_TRUE);
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	rv = privateEvent->SetTrusted(PR_TRUE);
-	NS_ENSURE_SUCCESS(rv, rv);
- 
-	PRBool dummy;
-	return target->DispatchEvent(event, &dummy);
 }

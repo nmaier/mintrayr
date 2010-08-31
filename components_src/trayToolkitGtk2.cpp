@@ -35,6 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
 #include "trayToolkit.h"
 
 #include "nsCOMPtr.h"
@@ -53,79 +60,206 @@
 #include "nsIDOMMouseEvent.h"
 
 #include "nsIWebNavigation.h"
-
-#include "nsIDocument.h"
-#include "nsIDocShell.h"
-#include "nsIDocShellTreeItem.h"
-#include "nsIDocShellTreeOwner.h"
-
-#include "nsIXULWindow.h"
 #include "nsIBaseWindow.h"
 
 #include "nsIInterfaceRequestorUtils.h"
 #include "nsIObserverService.h"
 
+#include "nsIPrefService.h"
+#include "nsIPrefBranch2.h"
 
+#define XATOM(atom) static const Atom atom = XInternAtom(xev->xany.display, #atom, false)
+
+/*
+ * include common code
+ */
 namespace {
 
+#include "common.cpp"
+
 	/**
-	 * Helper function that will try to get the nsIBaseWindow from an nsIDOMWindow
+	 * Helper: Gdk filter function to "watch" the window
 	 */
-	static NS_IMETHODIMP TrayServiceImpl_GetBaseWindow(nsIDOMWindow *aWindow, nsIBaseWindow **aBaseWindow)
+	static
+	GdkFilterReturn TrayServiceImpl_filter(XEvent *xev, GdkEvent* event, nsIDOMWindow* window)
 	{
-		NS_ENSURE_ARG_POINTER(aWindow);
-		NS_ENSURE_ARG_POINTER(aBaseWindow);
+		XATOM(WM_DELETE_WINDOW);
 
-		nsresult rv;
+		if (!xev) {
+			return GDK_FILTER_CONTINUE;
+		}
 
-		nsCOMPtr<nsIWebNavigation> webNav = do_GetInterface(aWindow, &rv);
-		NS_ENSURE_SUCCESS(rv, rv);
+		switch (xev->type) {
+			case UnmapNotify:
+				if (DoMinimizeWindow(window, kTrayOnMinimize)) {
+					return GDK_FILTER_REMOVE;
+				}
+				break;
 
-		nsCOMPtr<nsIDocShellTreeItem> dsti = do_QueryInterface(webNav, &rv);
-		NS_ENSURE_SUCCESS(rv, rv);
+			case ClientMessage:
+				if (xev->xclient.data.l
+						&& static_cast<Atom>(xev->xclient.data.l[0]) == WM_DELETE_WINDOW
+						&& DoMinimizeWindow(window, kTrayOnClose)
+				) {
+					return GDK_FILTER_REMOVE;
+				}
+				break;
 
-		nsCOMPtr<nsIDocShellTreeOwner> dsto;
-		rv = dsti->GetTreeOwner(getter_AddRefs(dsto));
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		nsCOMPtr<nsIXULWindow> xulWindow = do_GetInterface(dsto, &rv);
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		nsCOMPtr<nsIDocShell> docShell;
-		rv = xulWindow->GetDocShell(getter_AddRefs(docShell));
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		nsCOMPtr<nsIBaseWindow> baseWindow = do_QueryInterface(docShell, &rv);
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		*aBaseWindow = baseWindow;
-		NS_IF_ADDREF(*aBaseWindow);
-		return NS_OK;
+			default:
+				break;
+		}
+		return GDK_FILTER_CONTINUE;
 	}
-}
+} // namespace
 
-/**
- * Helper class
- * Encapsulates the Windows specific initialization code and message processing
- */
+
 class TrayWindowWrapper {
-public:
-	TrayWindowWrapper(TrayWindow *window);
-	~TrayWindowWrapper();
 
 private:
-	 // hold raw pointer. Class instances point to TrayWindow anyway and destructed with it.
-	TrayWindow* mWindow;
+	TrayWindow *mWindow;
+
+	GtkStatusIcon *mIcon;
+	GtkWindow *mGtkWindow;
+	GdkWindow *mGdkWindow;
+
+private:
+	void buttonEvent(GdkEventButton *event);
+	static void gtkButtonEvent(GtkStatusIcon*, GdkEventButton *event, TrayWindowWrapper *wrapper) {
+		wrapper->buttonEvent(event);
+	}
+
+	GdkFilterReturn filter(XEvent *xev, GdkEvent* event);
+	static GdkFilterReturn gdkFilter(XEvent *xev, GdkEvent *event, TrayWindowWrapper *wrapper) {
+		return wrapper->filter(xev, event);
+	}
+
+public:
+	TrayWindowWrapper(TrayWindow *window, GdkWindow* gdkWindow, const nsString& Title);
+	~TrayWindowWrapper();
 };
 
-
-TrayWindowWrapper::TrayWindowWrapper(TrayWindow *aWindow)
-	: mWindow(aWindow)
+TrayWindowWrapper::TrayWindowWrapper(TrayWindow *window, GdkWindow *gdkWindow, const nsString& aTitle)
+	: mWindow(window), mGdkWindow(gdkWindow)
 {
+	GtkWidget *widget;
+	gdk_window_get_user_data(mGdkWindow, reinterpret_cast<gpointer*>(&widget));
+	widget = gtk_widget_get_toplevel(widget);
+	mGtkWindow = reinterpret_cast<GtkWindow*>(widget);
+
+	// Set up tray icon
+	mIcon = gtk_status_icon_new();
+
+	// Get the window icon and set it
+	GdkPixbuf *buf = gtk_window_get_icon(mGtkWindow);
+	if (buf) {
+		gtk_status_icon_set_from_pixbuf(mIcon, buf);
+	}
+
+	// Get and set the title
+	if (aTitle.IsEmpty()) {
+		gtk_status_icon_set_tooltip_text(mIcon, gtk_window_get_title(mGtkWindow));
+	}
+	else {
+		NS_ConvertUTF16toUTF8 titleUTF8(aTitle);
+		gtk_status_icon_set_tooltip_text(mIcon, reinterpret_cast<const char*>(titleUTF8.get()));
+	}
+
+	// Add signals
+	g_signal_connect(G_OBJECT(mIcon), "button-press-event", G_CALLBACK(gtkButtonEvent), this);
+	g_signal_connect(G_OBJECT(mIcon), "button-release-event", G_CALLBACK(gtkButtonEvent), this);
+
+	// Add filter
+	gdk_window_add_filter(mGdkWindow, reinterpret_cast<GdkFilterFunc>(gdkFilter), this);
+
+	// Hide the window
+	gdk_window_hide(mGdkWindow);
+
+	// Make visible
+	gtk_status_icon_set_visible(mIcon, 1);
 }
 
-TrayWindowWrapper::~TrayWindowWrapper()
+TrayWindowWrapper::~TrayWindowWrapper() {
+	if (mIcon) {
+		gtk_status_icon_set_visible(mIcon, 0);
+		g_object_unref(mIcon);
+	}
+	gdk_window_remove_filter(mGdkWindow, reinterpret_cast<GdkFilterFunc>(gdkFilter), this);
+	gdk_window_show(mGdkWindow);
+}
+
+void TrayWindowWrapper::buttonEvent(GdkEventButton *event)
 {
+	nsString eventName;
+	switch (event->type) {
+		case GDK_BUTTON_RELEASE: // use release, so that we don't duplicate events
+			eventName = NS_LITERAL_STRING("TrayClick");
+			break;
+		case GDK_2BUTTON_PRESS:
+			eventName = NS_LITERAL_STRING("TrayDblClick");
+			break;
+		case GDK_3BUTTON_PRESS:
+			eventName = NS_LITERAL_STRING("TrayTriClick");
+			break;
+		default:
+			return;
+	}
+
+	nsPoint pt((nscoord)(event->x + event->x_root), (nscoord)(event->y + event->y_root));
+
+	// Dispatch the event
+#define HASSTATE(x) (event->state & x ? PR_TRUE : PR_FALSE)
+	mWindow->DispatchMouseEvent(
+			eventName,
+			event->button - 1,
+			pt,
+			HASSTATE(GDK_CONTROL_MASK),
+			HASSTATE(GDK_MOD1_MASK),
+			HASSTATE(GDK_SHIFT_MASK)
+			);
+#undef HASSTATE
+}
+
+GdkFilterReturn TrayWindowWrapper::filter(XEvent *xev, GdkEvent *event)
+{
+	XATOM(WM_DELETE_WINDOW);
+	XATOM(WM_NAME);
+
+	if (!xev) {
+		return GDK_FILTER_CONTINUE;
+	}
+
+	switch (xev->type) {
+	case VisibilityNotify:
+		if (xev->xvisibility.state == VisibilityFullyObscured) {
+			break;
+		}
+		mWindow->mService->Restore(mWindow->mDOMWindow);
+		break;
+	case MapNotify:
+		// Restore
+		mWindow->mService->Restore(mWindow->mDOMWindow);
+		break;
+
+	case ClientMessage:
+		if (xev->xclient.data.l
+				&& static_cast<Atom>(xev->xclient.data.l[0]) == WM_DELETE_WINDOW
+		) {
+			// Closed
+			mWindow->mService->Restore(mWindow->mDOMWindow);
+		}
+		break;
+
+	case PropertyNotify:
+		if (xev->xproperty.atom == WM_NAME) {
+			gtk_status_icon_set_tooltip_text(mIcon, gtk_window_get_title(mGtkWindow));
+		}
+		break;
+
+	default:
+		break;
+	}
+	return GDK_FILTER_CONTINUE;
+
 }
 
 NS_IMPL_ISUPPORTS0(TrayWindow)
@@ -150,173 +284,38 @@ NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
 	nsresult rv;
 
 	nsCOMPtr<nsIBaseWindow> baseWindow;
-	rv = TrayServiceImpl_GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	nativeWindow native = 0;
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
-	
-	// XXX implement
+
+	GdkWindow *window = gdk_window_get_toplevel(reinterpret_cast<GdkWindow*>(native));
+	if (!window) {
+		return NS_ERROR_UNEXPECTED;
+	}
+
+	nsString title;
+	baseWindow->GetTitle(getter_Copies(title));
+
+	mWrapper = new TrayWindowWrapper(this, window, title);
+	mDOMWindow = aWindow;
+
 	return NS_OK;
-}
-
-NS_IMETHODIMP TrayWindow::GetWindow(nsIDOMWindow **aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	*aWindow = mDOMWindow;
-	NS_IF_ADDREF(*aWindow);
-
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayWindow::DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey)
-{
-	nsresult rv;
-
-	nsCOMPtr<nsIDOMDocument> domDocument;
-	rv = mDOMWindow->GetDocument(getter_AddRefs(domDocument));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMDocumentEvent> docEvent(do_QueryInterface(domDocument));
-	nsCOMPtr<nsIDOMEventTarget> target(do_QueryInterface(domDocument));
-	NS_ENSURE_TRUE(docEvent && target, NS_ERROR_INVALID_ARG);
-
-	nsCOMPtr<nsIDOMDocumentView> docView(do_QueryInterface(domDocument, &rv));
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	nsCOMPtr<nsIDOMAbstractView> abstractView; 
-	rv = docView->GetDefaultView(getter_AddRefs(abstractView));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMEvent> event;
-	rv = docEvent->CreateEvent(NS_LITERAL_STRING("MouseEvents"), getter_AddRefs(event));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMMouseEvent> mouseEvent(do_QueryInterface(event, &rv));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	rv = mouseEvent->InitMouseEvent(
-		aEventName,
-		PR_FALSE,
-		PR_TRUE,
-		abstractView,
-		0,
-		pt.x,
-		pt.y,
-		0,
-		0,
-		aCtrlKey,
-		aAltKey,
-		aShiftKey,
-		PR_FALSE,
-		aButton,
-		target
-		);
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	PRBool dummy;
-	return target->DispatchEvent(mouseEvent, &dummy);
 }
 
 NS_IMPL_ISUPPORTS2(TrayServiceImpl, nsIObserver, trayITrayService)
 
 TrayServiceImpl::TrayServiceImpl()
 {
-	// Observe when the app is going down.
-	// Else we might not properly clean up
-	// And leave some tray icons behind
-	nsresult rv;
-	nsCOMPtr<nsIObserverService> obs(do_GetService("@mozilla.org/observer-service;1", &rv));
-	if (NS_SUCCEEDED(rv)) {
-		obs->AddObserver(static_cast<nsIObserver*>(this), "xpcom-shutdown", PR_FALSE);
-	}
-	
+	Init();
 }
+
 TrayServiceImpl::~TrayServiceImpl()
 {
 	Destroy();
 }
-void TrayServiceImpl::Destroy()
-{
-	// Destroy remaining icons
-	PRInt32 count = mWindows.Count();
-	for (PRInt32 i = count - 1; i > -1; --i) {
-		mWindows[i]->Destroy();
-		ReleaseTrayWindow(mWindows[i]);
-	}
-	mWindows.Clear();
-	mWatches.Clear();
-}
-
-NS_IMETHODIMP TrayServiceImpl::Minimize(nsIDOMWindow *aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	
-	nsresult rv;
-	nsCOMPtr<TrayWindow> trayWindow;
-	rv = FindTrayWindow(aWindow, getter_AddRefs(trayWindow));
-	if (NS_SUCCEEDED(rv)) {
-		return NS_ERROR_ALREADY_INITIALIZED;
-	}
-
-	trayWindow = new TrayWindow(this);
-	if (trayWindow == nsnull) {
-		return NS_ERROR_OUT_OF_MEMORY;
-	}
-	rv = trayWindow->Init(aWindow);
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	if (mWindows.AppendObject(trayWindow) == PR_FALSE) {
-		return NS_ERROR_FAILURE;
-	}
-	DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayMinimize"));
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayServiceImpl::Restore(nsIDOMWindow *aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-
-	nsresult rv;
-	nsCOMPtr<TrayWindow> trayWindow;
-	rv = FindTrayWindow(aWindow, getter_AddRefs(trayWindow));
-	if (NS_FAILED(rv)) {
-		return NS_OK;
-	}
-
-	rv = trayWindow->Destroy();
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	rv = ReleaseTrayWindow(trayWindow);
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	DispatchTrustedEvent(aWindow, NS_LITERAL_STRING("TrayRestore"));
-
-	return NS_OK;
-}
-
-NS_IMETHODIMP TrayServiceImpl::RestoreAll()
-{
-	nsresult rv;
-	PRInt32 count = mWindows.Count();
-
-	for (PRInt32 i = count - 1; i > -1; --i) {
-		nsCOMPtr<nsIDOMWindow> window;
-		rv = mWindows[i]->GetWindow(getter_AddRefs(window));
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		rv = mWindows[i]->Destroy();
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		rv = ReleaseTrayWindow(mWindows[i]);
-		NS_ENSURE_SUCCESS(rv, rv);
-
-		DispatchTrustedEvent(window, NS_LITERAL_STRING("TrayRestore"));
-	}
-    return NS_OK;
-}
-
 NS_IMETHODIMP TrayServiceImpl::WatchMinimize(nsIDOMWindow *aWindow)
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
@@ -329,14 +328,19 @@ NS_IMETHODIMP TrayServiceImpl::WatchMinimize(nsIDOMWindow *aWindow)
 	nsresult rv;
 
 	nsCOMPtr<nsIBaseWindow> baseWindow;
-	rv = TrayServiceImpl_GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	nativeWindow native = 0;
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
-	
-	// XXX Implement
+
+	GdkWindow *gdkWindow = gdk_window_get_toplevel(reinterpret_cast<GdkWindow*>(native));
+	if (!gdkWindow) {
+		return NS_ERROR_UNEXPECTED;
+	}
+	gdk_window_add_filter(gdkWindow, reinterpret_cast<GdkFilterFunc>(TrayServiceImpl_filter), aWindow);
+
 	return NS_OK;
 }
 NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
@@ -348,89 +352,23 @@ NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
 	mWatches.RemoveObject(aWindow);
 
 	nsCOMPtr<nsIBaseWindow> baseWindow;
-	rv = TrayServiceImpl_GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 	NS_ENSURE_SUCCESS(rv, rv);
 
 	nativeWindow native = 0;
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
-	
-	// XXX implement
-	return NS_OK;
-}
 
-NS_IMETHODIMP TrayServiceImpl::Observe(nsISupports *, const char *aTopic, const PRUnichar *)
-{
-	if (strcmp(aTopic, "xpcom-shutdown") == 0) {
-		Destroy();
-
-		nsresult rv;
-		nsCOMPtr<nsIObserverService> obs(do_GetService("@mozilla.org/observer-service;1", &rv));
-		if (NS_SUCCEEDED(rv)) {
-			obs->RemoveObserver(static_cast<nsIObserver*>(this), "xpcom-shutdown");
-		}
+	GdkWindow *gdkWindow = gdk_window_get_toplevel(reinterpret_cast<GdkWindow*>(native));
+	if (!gdkWindow) {
+		return NS_ERROR_UNEXPECTED;
 	}
+	gdk_window_remove_filter(gdkWindow, reinterpret_cast<GdkFilterFunc>(TrayServiceImpl_filter), aWindow);
+
 	return NS_OK;
 }
 
-NS_IMETHODIMP TrayServiceImpl::ReleaseTrayWindow(TrayWindow *aWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	mWindows.RemoveObject(aWindow);
-	return NS_OK;
-}
-
-
-NS_IMETHODIMP TrayServiceImpl::FindTrayWindow(nsIDOMWindow *aWindow, TrayWindow **aTrayWindow)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-	NS_ENSURE_ARG_POINTER(aTrayWindow);
-	
-	nsresult rv;
-	nsCOMPtr<nsIDOMWindow> domWindow;
-	PRInt32 count = mWindows.Count();
-	
-	for (PRInt32 i = 0; i < count; ++i) {
-		rv = mWindows[i]->GetWindow(getter_AddRefs(domWindow));
-		if (NS_FAILED(rv)) {
-			continue;
-		}
-		if (domWindow == aWindow) {
-			*aTrayWindow = mWindows[i];
-			NS_IF_ADDREF(*aTrayWindow);
-			return NS_OK;
-		}
-	}
-	return NS_ERROR_FAILURE;
-}
-
-NS_IMETHODIMP TrayServiceImpl::DispatchTrustedEvent(nsIDOMWindow *aWindow, const nsAString& aEventName)
-{
-	NS_ENSURE_ARG_POINTER(aWindow);
-
-	nsresult rv;
-
-	nsCOMPtr<nsIDOMDocument> domDocument;
-	rv = aWindow->GetDocument(getter_AddRefs(domDocument));
-	NS_ENSURE_SUCCESS(rv, rv);
-
-	nsCOMPtr<nsIDOMDocumentEvent> docEvent(do_QueryInterface(domDocument));
-	nsCOMPtr<nsIDOMEventTarget> target(do_QueryInterface(domDocument));
-	NS_ENSURE_TRUE(docEvent && target, NS_ERROR_INVALID_ARG);
-
-	nsCOMPtr<nsIDOMEvent> event;
-	rv = docEvent->CreateEvent(NS_LITERAL_STRING("Events"), getter_AddRefs(event));
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	nsCOMPtr<nsIPrivateDOMEvent> privateEvent(do_QueryInterface(event, &rv));
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	rv = event->InitEvent(aEventName, PR_FALSE, PR_TRUE);
-	NS_ENSURE_SUCCESS(rv, rv);
-	
-	rv = privateEvent->SetTrusted(PR_TRUE);
-	NS_ENSURE_SUCCESS(rv, rv);
- 
-	PRBool dummy;
-	return target->DispatchEvent(event, &dummy);
-}
+/*
+ * include common trayToolkitImpl
+ */
+#include "trayToolkitImpl.cpp"
