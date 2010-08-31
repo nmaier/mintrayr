@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "Nastavitve za MinTrayR">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Pomanjšaj v pladenj">
+<!ENTITY mintrayr.prefs.minimizeon.never "nikoli (le prek menija/gumba)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "ob pomanjšanju okna">
+<!ENTITY mintrayr.prefs.minimizeon.close "namesto zaprtja">
+<!ENTITY mintrayr.prefs.minimizeon.both "namesto zaprtja in ob pomanjšanju okna">
+<!ENTITY mintrayr.prefs.main "Glavno">
+<!ENTITY mintrayr.prefs.dblclickrestore "Dvoklik za obnovitev">
+<!ENTITY mintrayr.prefs.showcontext "Pokaži kontekstni meni z desnim klikom">
+<!ENTITY mintrayr.prefs.watchwindows "Opazuj okna">
+<!ENTITY mintrayr.prefs.misc "Razno">
+<!ENTITY mintrayr.prefs.clickbehavior "Vedenje klikov">

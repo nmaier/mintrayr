@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR Nastavení">
+<!ENTITY mintrayr.prefs.winstyle "šířka: 32em; výška: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Minimize to tray">
+<!ENTITY mintrayr.prefs.minimizeon.never "Nikdy (pouze menu / tlačítko)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Když minimalizováno">
+<!ENTITY mintrayr.prefs.minimizeon.close "Místo uzavření">
+<!ENTITY mintrayr.prefs.minimizeon.both "Místo uzavření a minimalozování">
+<!ENTITY mintrayr.prefs.main "Hlavní">
+<!ENTITY mintrayr.prefs.dblclickrestore "Dvojklikem obnovit okno">
+<!ENTITY mintrayr.prefs.showcontext "Zobrazit kontextové menu pravým kliknutím myši">
+<!ENTITY mintrayr.prefs.watchwindows "Sledovat okna">
+<!ENTITY mintrayr.prefs.misc "Různé">
+<!ENTITY mintrayr.prefs.clickbehavior "Chování kliknutí">
