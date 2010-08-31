@@ -35,7 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-#include "nsIGenericFactory.h"
+#include "mozilla/ModuleUtils.h"
+#include "nsIClassInfoImpl.h"
+
 #include "trayToolkit.h"
 
 // Need to import TrayServiceImpl from mintrayr so that the macro works
@@ -43,17 +45,25 @@ using mintrayr::TrayServiceImpl;
 
 // Generic factory
 NS_GENERIC_FACTORY_CONSTRUCTOR(TrayServiceImpl)
+NS_DEFINE_NAMED_CID(TRAYITRAYSERVICE_IID);
 
-// We just register the service component
-// trayIIcon must be constructed by the service
-static nsModuleComponentInfo components[] =
-{
-    {
-       TRAYSERVICE_CLASSNAME, 
-       TRAYITRAYSERVICE_IID,
-       TRAYSERVICE_CONTRACTID,
-       TrayServiceImplConstructor,
-    }
+static const mozilla::Module::CIDEntry kTrayIIDs[] = {
+    { &kTRAYITRAYSERVICE_IID, true, 0, TrayServiceImplConstructor },
+    { 0 }
 };
+static const mozilla::Module::ContractIDEntry kTrayContracts[] = {
+    { TRAYSERVICE_CONTRACTID, &kTRAYITRAYSERVICE_IID },
+    { 0 }
+};
+static const mozilla::Module::CategoryEntry kTrayCategories[] = {
+    { 0 }
+};
+static const mozilla::Module kTrayModule = {
+    mozilla::Module::kVersion,
+    kTrayIIDs,
+    kTrayContracts,
+    kTrayCategories
+};
+NSMODULE_DEFN(nsSampleModule) = &kTrayModule;
 
-NS_IMPL_NSGETMODULE("trayToolkitModule", components) 
+NS_IMPL_MOZILLA192_NSGETMODULE(&kTrayModule)

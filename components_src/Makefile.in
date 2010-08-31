@@ -47,7 +47,7 @@ IS_COMPONENT = 1
 MODULE = mintrayr
 LIBRARY_NAME = trayToolkit
 XPIDL_MODULE = trayToolkit
-	
+
 XPI_NAME = mintrayr
 	
 EXPORTS = \
@@ -93,8 +93,9 @@ endif # gtk2
 endif # windows
 
 USE_STATIC_LIBS = 1
+XPCOM_GLUE_NONMOZALLOC_LDOPTS = $(subst xpcomglue_s.,xpcomglue_s_nomozalloc.,$(XPCOM_GLUE_LDOPTS))
 EXTRA_DSO_LDOPTS += \
-					$(XPCOM_GLUE_LDOPTS) \
+					$(XPCOM_GLUE_NONMOZALLOC_LDOPTS) \
 					$(NSPR_LIBS) \
 				   	$(NULL)
 
@@ -112,7 +113,10 @@ EXTRA_SRC_COMPONENTS += \
 				trayPlatformGtk2.h \
 				trayPlatformGtk2.cpp \
 				$(NULL)
-				
+
+NO_INTERFACES_MANIFEST = 1
+NO_COMPONENTS_MANIFEST = 1
+
 libs:: $(EXTRA_SRC_COMPONENTS)
 ifndef NO_DIST_INSTALL
 	$(INSTALL) $(IFLAGS1) $^ $(FINAL_TARGET)/components_src
@@ -120,3 +124,12 @@ endif
 
 include $(topsrcdir)/config/rules.mk
 
+libs:: $(XPIDL_GEN_DIR)/$(XPIDL_MODULE).xpt
+ifndef NO_DIST_INSTALL
+	@$(PYTHON) $(MOZILLA_DIR)/config/buildlist.py $(FINAL_TARGET)/chrome.manifest "interfaces components/$(XPIDL_MODULE).xpt"
+endif
+
+libs:: $(SHARED_LIBRARY)
+ifndef NO_DIST_INSTALL
+	@$(PYTHON) $(MOZILLA_DIR)/config/buildlist.py $(FINAL_TARGET)/chrome.manifest "binary-component components/$(SHARED_LIBRARY)"
+endif
