@@ -147,6 +147,7 @@ NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
 
 	// Make visible
 	gtk_status_icon_set_visible(mStatusIcon, 1);
+	return NS_OK;
 }
 
 Icon::~Icon()

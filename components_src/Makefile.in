@@ -72,6 +72,8 @@ REQUIRES = \
 		  $(NULL)
 
 CPPSRCS = trayModule.cpp trayToolkit.cpp
+DEFINES += -DMOZ_NO_MOZALLOC
+STL_FLAGS = 
 
 # Platform specific stuff
 ifeq ($(MOZ_WIDGET_TOOLKIT),windows)
@@ -87,17 +89,16 @@ ifeq ($(MOZ_WIDGET_TOOLKIT),gtk2)
 CPPSRCS += trayPlatformGtk2.cpp
 LOCAL_INCLUDES += $(MOZ_GTK2_CFLAGS)
 OS_LIBS += $(TK_LIBS) $(XLIBS)
-EXTRA_DSO_LDOPTS += -g
 
 endif # gtk2
 endif # windows
 
 USE_STATIC_LIBS = 1
-XPCOM_GLUE_NONMOZALLOC_LDOPTS = $(subst xpcomglue_s.,xpcomglue_s_nomozalloc.,$(XPCOM_GLUE_LDOPTS))
+XPCOM_GLUE_NONMOZALLOC_LDOPTS = $(subst -lmozalloc,,$(subst xpcomglue_s.,xpcomglue_s_nomozalloc.,$(XPCOM_GLUE_LDOPTS)))
 EXTRA_DSO_LDOPTS += \
 					$(XPCOM_GLUE_NONMOZALLOC_LDOPTS) \
 					$(NSPR_LIBS) \
-				   	$(NULL)
+					$(NULL)
 
 EXTRA_SRC_COMPONENTS += \
 				BUILD \

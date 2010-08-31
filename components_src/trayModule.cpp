@@ -40,6 +40,7 @@
 
 #include "trayToolkit.h"
 
+
 // Need to import TrayServiceImpl from mintrayr so that the macro works
 using mintrayr::TrayServiceImpl;
 
@@ -64,6 +65,5 @@ static const mozilla::Module kTrayModule = {
     kTrayContracts,
     kTrayCategories
 };
-NSMODULE_DEFN(nsSampleModule) = &kTrayModule;
-
+NSMODULE_DEFN(trayModule) = &kTrayModule;
 NS_IMPL_MOZILLA192_NSGETMODULE(&kTrayModule)
