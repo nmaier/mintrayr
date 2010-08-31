@@ -78,7 +78,7 @@ class TrayIconImpl : public trayITrayIcon, nsIDOMEventListener {
 	friend class platform::Icon;
 
 private:
-    PRBool mIsMinimized;
+	PRBool mIsMinimized;
 	nsCOMPtr<nsIDOMWindow> mWindow;
 
 	PRBool mCloseOnRestore;
@@ -93,10 +93,10 @@ public:
 	NS_DECL_TRAYITRAYICON
 
 	TrayIconImpl(TrayServiceImpl *aService)
-		: mService(aService),
-		mIsMinimized(PR_FALSE),
+		: mIsMinimized(PR_FALSE),
 		mCloseOnRestore(PR_FALSE),
-		mClosed(false)
+		mClosed(false),
+		mService(aService)
 		{}
 
 	NS_IMETHOD Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore);
