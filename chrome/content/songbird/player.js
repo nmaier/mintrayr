@@ -115,6 +115,9 @@ MinTrayRSongbird.prototype = {
 		return true;
 	},
 	onMediacoreEvent: function(evt) {
+		if (!this.prefs.getExt('songbird.titlefloating', false)) {
+			return;
+		}
 		if (evt.type == this.evt.TRACK_CHANGE) {
 			let item = evt.data;
 			let sp = this._sp;
@@ -139,7 +142,6 @@ MinTrayRSongbird.prototype = {
 			document.title = this.windowTitle;
 		}
 	},
-	
 	notify: function(subject, topic, data) {
 		if (!this._title) {
 			return;
