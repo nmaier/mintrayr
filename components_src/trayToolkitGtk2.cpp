@@ -127,10 +127,10 @@ private:
 	static void gtkButtonEvent(GtkStatusIcon*, GdkEventButton *event, TrayWindowWrapper *wrapper) {
 		wrapper->buttonEvent(event);
 	}
-
-	GdkFilterReturn filter(XEvent *xev, GdkEvent* event);
-	static GdkFilterReturn gdkFilter(XEvent *xev, GdkEvent *event, TrayWindowWrapper *wrapper) {
-		return wrapper->filter(xev, event);
+	gboolean propertyEvent();
+	gulong propertyEventId;
+	static gboolean gtkPropertyEvent(GtkStatusIcon*, GdkEventProperty *event, TrayWindowWrapper *wrapper) {
+		return wrapper->propertyEvent();
 	}
 
 public:
@@ -158,18 +158,18 @@ TrayWindowWrapper::TrayWindowWrapper(TrayWindow *window, GdkWindow *gdkWindow, c
 	// Get and set the title
 	if (aTitle.IsEmpty()) {
 		gtk_status_icon_set_tooltip_text(mIcon, gtk_window_get_title(mGtkWindow));
+		gtk_widget_add_events(widget, GDK_PROPERTY_CHANGE_MASK);
+		propertyEventId = g_signal_connect(mGtkWindow, "property-notify-event", G_CALLBACK(gtkPropertyEvent), this);
 	}
 	else {
 		NS_ConvertUTF16toUTF8 titleUTF8(aTitle);
 		gtk_status_icon_set_tooltip_text(mIcon, reinterpret_cast<const char*>(titleUTF8.get()));
+		propertyEventId = 0;
 	}
 
 	// Add signals
 	g_signal_connect(G_OBJECT(mIcon), "button-press-event", G_CALLBACK(gtkButtonEvent), this);
 	g_signal_connect(G_OBJECT(mIcon), "button-release-event", G_CALLBACK(gtkButtonEvent), this);
-
-	// Add filter
-	gdk_window_add_filter(mGdkWindow, reinterpret_cast<GdkFilterFunc>(gdkFilter), this);
 
 	// Hide the window
 	gdk_window_hide(mGdkWindow);
@@ -183,7 +183,9 @@ TrayWindowWrapper::~TrayWindowWrapper() {
 		gtk_status_icon_set_visible(mIcon, 0);
 		g_object_unref(mIcon);
 	}
-	gdk_window_remove_filter(mGdkWindow, reinterpret_cast<GdkFilterFunc>(gdkFilter), this);
+	if (propertyEventId) {
+		g_signal_handler_disconnect(mGtkWindow, propertyEventId);
+	}
 	gdk_window_show(mGdkWindow);
 }
 
@@ -219,47 +221,10 @@ void TrayWindowWrapper::buttonEvent(GdkEventButton *event)
 #undef HASSTATE
 }
 
-GdkFilterReturn TrayWindowWrapper::filter(XEvent *xev, GdkEvent *event)
+gboolean TrayWindowWrapper::propertyEvent()
 {
-	XATOM(WM_DELETE_WINDOW);
-	XATOM(WM_NAME);
-
-	if (!xev) {
-		return GDK_FILTER_CONTINUE;
-	}
-
-	switch (xev->type) {
-	case VisibilityNotify:
-		if (xev->xvisibility.state == VisibilityFullyObscured) {
-			break;
-		}
-		mWindow->mService->Restore(mWindow->mDOMWindow);
-		break;
-	case MapNotify:
-		// Restore
-		mWindow->mService->Restore(mWindow->mDOMWindow);
-		break;
-
-	case ClientMessage:
-		if (xev->xclient.data.l
-				&& static_cast<Atom>(xev->xclient.data.l[0]) == WM_DELETE_WINDOW
-		) {
-			// Closed
-			mWindow->mService->Restore(mWindow->mDOMWindow);
-		}
-		break;
-
-	case PropertyNotify:
-		if (xev->xproperty.atom == WM_NAME) {
-			gtk_status_icon_set_tooltip_text(mIcon, gtk_window_get_title(mGtkWindow));
-		}
-		break;
-
-	default:
-		break;
-	}
-	return GDK_FILTER_CONTINUE;
-
+	gtk_status_icon_set_tooltip_text(mIcon, gtk_window_get_title(mGtkWindow));
+	return FALSE;
 }
 
 NS_IMETHODIMP TrayWindow::Init(nsIDOMWindow *aWindow)
