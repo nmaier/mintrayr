@@ -17,7 +17,7 @@
 		<em:contributor>Christoph Grimmer</em:contributor>
 		
 		
-		<em:iconURL>chrome://mintrayr/skin/logo.png</em:iconURL>
+		<em:iconURL>chrome://mintrayr/skin/icon.png</em:iconURL>
 		<em:homepageURL>http://tn123.ath.cx/mintrayr</em:homepageURL>
 		<em:optionsURL>chrome://mintrayr/content/prefs/prefs.xul</em:optionsURL>
 		
