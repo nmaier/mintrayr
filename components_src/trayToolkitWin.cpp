@@ -227,7 +227,9 @@ namespace {
 				if (pl.showCmd == SW_SHOWMINIMIZED) {
 					if (DoMinimizeWindow(hwnd, kTrayOnMinimize)) {
 						pl.showCmd = SW_HIDE;
+						pl.flags = 0;
 						::SetWindowPlacement(hwnd, &pl);
+						return 0;
 					}
 				}
 			}
