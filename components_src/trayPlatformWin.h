@@ -11,9 +11,10 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is MinimizeToTray Revived components.
+ * The Original Code is TrayToolkit
  *
- * The Initial Developer of the Original Code is Nils Maier
+ * The Initial Developer of the Original Code is
+ * Nils Maier
  * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
@@ -34,79 +35,46 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "nsISupports.idl"
+#ifndef __TRAYPLATFORMWIN_H
+#define __TRAYPLATFORMWIN_H
 
-interface nsIDOMWindow;
+#ifdef _WIN32_IE
+#	undef _WIN32_IE
+#endif
+#define _WIN32_IE 0x0600 // We want more features
+#include <windows.h>
+#include <shellapi.h>
 
-[scriptable, uuid(e17d921c-4b3a-47b2-8283-cab425cc1a0c)]
-interface trayITrayIcon : nsISupports {
+#include "trayPlatform.h"
 
-	/**
-	 * Associated DOM window
-	 */
-	[readonly] attribute nsIDOMWindow window;
+#include "nsCOMPtr.h"
 
-    /**
-     * Window is minimized to tray
-     */
-    [readonly] attribute boolean isMinimized;
+#include "nsIDOMWindow.h"
 
-	/**
-     * Indicates whether icon will be closed if window is restored
-	 */
-	attribute boolean closeOnRestore;
+namespace mintrayr {
+namespace platform {
+namespace win {
 
-	/**
-	 * Minimizes the window
-	 */
-	void minimize();
+/**
+ * Helper class
+ * Encapsulates the Windows specific initialization code and message processing
+ */
+class Icon : public platform::Icon {
+private:
+public:
+	HWND mWnd;
+	NOTIFYICONDATAW mIconData;
+	TrayIconImpl *mIcon;
 
-	/**
-	 * Restores the window
-	 */
-	void restore();
-
-	/**
-	 * Closes the tray icon, restoring the window in the process
-	 */
-	void close();
+	Icon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const wchar_t *aTitle);
+	virtual ~Icon();
+	
+	virtual void Minimize();
+	virtual void Restore();
+private:
+	NS_IMETHOD Init(nsIDOMWindow *aWindow, const wchar_t *aTitle);
 };
 
-[scriptable, uuid(8fbd1a20-7abf-11dd-ad8b-0800200c9a66)]
-interface trayITrayService : nsISupports {
+}}} // namespaces
 
-	/**
-	 * Creates a tray icon for window
-	 */
-	trayITrayIcon createIcon(in nsIDOMWindow window,  [optional] in boolean aCloseOnRestore);
-
-	/**
-	 * Restores all windows from the tray
-	 */
-	void restoreAll();
-
-	/**
-	 * Watch a window, and if minimized send to tray
-	 */
-	void watchMinimize(in nsIDOMWindow window);
-
-	/**
-	 * unwatch a window again
-	 */
-	void unwatchMinimize(in nsIDOMWindow window);
-
-	/**
-	 * is the window watched
-	 */
-	PRBool isWatchedWindow(in nsIDOMWindow window);
-
-	/**
-	 * minimizes a window to the tray
-	 */
-	void minimize(in nsIDOMWindow aWindow, [optional] in boolean aCloseOnRestore);
-
-	/**
-	 * Restores a window from the tray
-	 */
-	void restore(in nsIDOMWindow aWindow);
-};
+#endif

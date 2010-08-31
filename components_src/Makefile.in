@@ -71,11 +71,11 @@ REQUIRES = \
 		  layout \
 		  $(NULL)
 
-CPPSRCS = trayModule.cpp
+CPPSRCS = trayModule.cpp trayToolkit.cpp
 
 # Platform specific stuff
 ifeq ($(MOZ_WIDGET_TOOLKIT),windows)
-CPPSRCS += trayToolkitWin.cpp
+CPPSRCS += trayPlatformWin.cpp
 OS_LIBS += shell32.lib
 RCFILE = resources.rc
 RESFILE = resources.res
@@ -84,7 +84,7 @@ else
 
 ifeq ($(MOZ_WIDGET_TOOLKIT),gtk2)
 
-CPPSRCS += trayToolkitGtk2.cpp
+CPPSRCS += trayPlatformGtk2.cpp
 LOCAL_INCLUDES += $(MOZ_GTK2_CFLAGS)
 OS_LIBS += $(TK_LIBS) $(XLIBS)
 EXTRA_DSO_LDOPTS += -g
@@ -105,10 +105,10 @@ EXTRA_SRC_COMPONENTS += \
 				trayIToolkit.idl \
 				trayModule.cpp \
 				trayToolkit.h \
-				trayToolkitWin.cpp \
-				trayToolkitGtk2.cpp \
-				trayToolkitImpl.cpp \
-				common.cpp \
+				trayToolkit.cpp \
+				trayPlatform.h \
+				trayPlatformWin.h \
+				trayPlatformWin.cpp \
 				$(NULL)
 				
 libs:: $(EXTRA_SRC_COMPONENTS)

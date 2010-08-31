@@ -38,6 +38,7 @@
 #include "nsIGenericFactory.h"
 #include "trayToolkit.h"
 
+using mintrayr::TrayServiceImpl;
 NS_GENERIC_FACTORY_CONSTRUCTOR(TrayServiceImpl)
 
 static nsModuleComponentInfo components[] =

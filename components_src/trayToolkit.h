@@ -47,6 +47,7 @@
 #include "nsPoint.h"
 
 #include "nsIDOMEventListener.h"
+#include "nsIBaseWindow.h"
 
 #include "trayIToolkit.h"
 #include "nsXPCOMStrings.h"
@@ -56,51 +57,73 @@
 #define TRAYSERVICE_CONTRACTID "@tn123.ath.cx/trayservice;1"
 #define TRAYSERVICE_CLASSNAME  "TrayServiceImpl"
 
-class TrayWindowWrapper;
+namespace mintrayr {
+
+typedef enum _eMinimizeActions {
+	kTrayOnMinimize = (1 << 0),
+	kTrayOnClose = (1 << 1)
+} eMinimizeActions;
+
+namespace platform {
+	class Icon;
+}
+
+bool DoMinimizeWindow(nsIDOMWindow *window, eMinimizeActions action);
+NS_IMETHODIMP GetBaseWindow(nsIDOMWindow *aWindow, nsIBaseWindow **aBaseWindow);
+NS_IMETHODIMP DispatchTrustedEvent(nsIDOMWindow *aWindow, const nsAString& aEventName);
+
 class TrayServiceImpl;
 
-class TrayWindow : public nsISupports {
+class TrayIconImpl : public trayITrayIcon, nsIDOMEventListener {
+	friend class platform::Icon;
 
-	friend class TrayWindowWrapper;
+private:
+    PRBool mIsMinimized;
+	nsCOMPtr<nsIDOMWindow> mWindow;
+
+	PRBool mCloseOnRestore;
+
+	bool mClosed;
+	TrayServiceImpl *mService;
+	nsAutoPtr<platform::Icon> mIcon;
 
 public:
 	NS_DECL_ISUPPORTS
+	NS_DECL_NSIDOMEVENTLISTENER
+	NS_DECL_TRAYITRAYICON
 
-	TrayWindow(TrayServiceImpl *service);
+	TrayIconImpl(TrayServiceImpl *aService)
+		: mService(aService),
+		mIsMinimized(PR_FALSE),
+		mCloseOnRestore(PR_FALSE),
+		mClosed(false)
+		{}
 
-	NS_IMETHOD Init(nsIDOMWindow *Window);
-	NS_IMETHOD GetWindow(nsIDOMWindow **Window);
-	NS_IMETHOD Destroy();
-	NS_IMETHOD DispatchMouseEvent(const nsAString& eventName, PRUint16 button, nsPoint& pt, PRBool ctrlKey, PRBool altKey, PRBool shiftKey);
-
-private:
-	// raw to resolve ambiguous conversation; doesn't hurt, all TrayWindow instanced should be down before TrayService goes away
-	TrayServiceImpl* mService;
-	nsAutoPtr<TrayWindowWrapper> mWrapper;
-	nsCOMPtr<nsIDOMWindow> mDOMWindow;
+	NS_IMETHOD Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore);
+	NS_IMETHOD DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey);
 };
 
-class TrayServiceImpl : public trayITrayService, nsIDOMEventListener, nsIObserver {
-
-	friend class TrayWindow;
+class TrayServiceImpl : public trayITrayService, nsIObserver {
+	friend class TrayIconImpl;
 public:
 	NS_DECL_ISUPPORTS
 	NS_DECL_NSIOBSERVER
-	NS_DECL_NSIDOMEVENTLISTENER
 	NS_DECL_TRAYITRAYSERVICE
 
 	TrayServiceImpl();
 private:
-	nsCOMArray<TrayWindow> mWindows;
+	nsCOMArray<trayITrayIcon> mIcons;
 	nsCOMArray<nsIDOMWindow> mWatches;
 
 private:
 	~TrayServiceImpl();
-
-	void Init();
 	void Destroy();
-	NS_IMETHOD FindTrayWindow(nsIDOMWindow *window, TrayWindow **trayWindow);
-	NS_IMETHOD ReleaseTrayWindow(TrayWindow *window);
+
+	void UnwatchAll();
+	
+	void CloseIcon(trayITrayIcon *aIcon);
 };
+
+} // namespace
 
 #endif
