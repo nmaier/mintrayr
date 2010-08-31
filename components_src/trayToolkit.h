@@ -59,21 +59,42 @@
 
 namespace mintrayr {
 
+/**
+ * Minimize on what actions
+ */
 typedef enum _eMinimizeActions {
 	kTrayOnMinimize = (1 << 0),
 	kTrayOnClose = (1 << 1)
 } eMinimizeActions;
 
+/**
+ * Need this to hold a pointer to
+ * The implementation will be platform specific
+ */
 namespace platform {
 	class Icon;
 }
 
+/**
+ * Helper for watch: Minimize a window if a configured for the action
+ */
 bool DoMinimizeWindow(nsIDOMWindow *window, eMinimizeActions action);
+
+/**
+ * Helper: Gets the base window
+ */
 NS_IMETHODIMP GetBaseWindow(nsIDOMWindow *aWindow, nsIBaseWindow **aBaseWindow);
+
+/**
+ * Helper: Dispatches a trusted event (i.e. chrome only)
+ */
 NS_IMETHODIMP DispatchTrustedEvent(nsIDOMWindow *aWindow, const nsAString& aEventName);
 
 class TrayServiceImpl;
 
+/**
+ * The implementation for trayITrayIcon
+ */
 class TrayIconImpl : public trayITrayIcon, nsIDOMEventListener {
 	friend class platform::Icon;
 
@@ -103,6 +124,9 @@ public:
 	NS_IMETHOD DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey);
 };
 
+/**
+ * The implementation for trayITrayService
+ */
 class TrayServiceImpl : public trayITrayService, nsIObserver {
 	friend class TrayIconImpl;
 public:
@@ -111,6 +135,7 @@ public:
 	NS_DECL_TRAYITRAYSERVICE
 
 	TrayServiceImpl();
+
 private:
 	nsCOMArray<trayITrayIcon> mIcons;
 	nsCOMArray<nsIDOMWindow> mWatches;
@@ -120,7 +145,7 @@ private:
 	void Destroy();
 
 	void UnwatchAll();
-	
+
 	void CloseIcon(trayITrayIcon *aIcon);
 };
 

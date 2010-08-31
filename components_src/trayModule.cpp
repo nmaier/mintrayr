@@ -38,9 +38,14 @@
 #include "nsIGenericFactory.h"
 #include "trayToolkit.h"
 
+// Need to import TrayServiceImpl from mintrayr so that the macro works
 using mintrayr::TrayServiceImpl;
+
+// Generic factory
 NS_GENERIC_FACTORY_CONSTRUCTOR(TrayServiceImpl)
 
+// We just register the service component
+// trayIIcon must be constructed by the service
 static nsModuleComponentInfo components[] =
 {
     {

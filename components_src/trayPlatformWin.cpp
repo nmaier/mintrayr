@@ -57,7 +57,9 @@ public:
 	}
 };
 
-
+/**
+ * Helper: We need to get the DOMWindow from the hwnd
+ */
 static bool DoMinimizeWindowWin(HWND hwnd, eMinimizeActions action)
 {
 	nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kDOMWindow));
@@ -67,11 +69,15 @@ static bool DoMinimizeWindowWin(HWND hwnd, eMinimizeActions action)
 	return DoMinimizeWindow(window, action);
 }
 
+/**
+ * Helper: Subclassed Windows WNDPROC
+ */
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	using win::Icon;
-	
+
 	if (::GetPropW(hwnd, kWatch) == (HANDLE)0x1) {
+		// Watcher stuff
 
 		switch (uMsg) {
 		case WM_WINDOWPOSCHANGED: {
@@ -89,6 +95,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 				::GetWindowPlacement(hwnd, &pl);
 				if (pl.showCmd == SW_SHOWMINIMIZED) {
 					if (DoMinimizeWindowWin(hwnd, kTrayOnMinimize)) {
+						// We're active, ignore
 						return 0;
 					}
 				}
@@ -98,12 +105,14 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 		case WM_NCLBUTTONDOWN:
 		case WM_NCLBUTTONUP:
+			// Frame button clicked
 			if (wParam == HTCLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
 				return TRUE;
 			}
 			break;
 
 		case WM_SYSCOMMAND:
+			// Window menu
 			if (wParam == SC_CLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
 				return 0;
 			}
@@ -112,19 +121,27 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}
 
 	if (::GetPropW(hwnd, kIcon) == (HANDLE)0x1) {
-		Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-		if (!me) {
-			goto WndProcEnd;
-		}
+		// Icon stuff
 
 		// This is a badly documented custom broadcast message by explorer
 		if (uMsg == WM_TASKBARCREATED) {
+			// Try to get the platform icon
+			Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
+			if (!me) {
+				goto WndProcEnd;
+			}
 			// The taskbar was (re)created. Add ourselves again.
 			Shell_NotifyIconW(NIM_ADD, &me->mIconData);
 		}
 
 		// We got clicked. How exciting, isn't it.
 		else if (uMsg == WM_TRAYMESSAGE) {
+			// Try to get the platform icon
+			Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
+			if (!me) {
+				goto WndProcEnd;
+			}
+
 			nsString eventName;
 			PRUint16 button = 0;
 			switch (LOWORD(lParam)) {
@@ -177,6 +194,12 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 		// Window title changed
 		else if (uMsg == WM_SETTEXT) {
+			// Try to get the platform icon
+			Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
+			if (!me) {
+				goto WndProcEnd;
+			}
+
 			// First, let the original wndproc process this message,
 			// so that we may query the thing afterwards ;)
 			// this is required because we cannot know the encoding of this message for sure ;)

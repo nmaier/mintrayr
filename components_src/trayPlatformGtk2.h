@@ -57,7 +57,7 @@ namespace gtk2 {
 
 /**
  * Helper class
- * Encapsulates the Windows specific initialization code and message processing
+ * Encapsulates the Gtk2 specific initialization code and message processing
  */
 class Icon : public platform::Icon {
 private:

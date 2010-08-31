@@ -35,6 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/**
+ * Platform specific stuff
+ * Must be implemented for each platform
+ */
+
 #ifndef __TRAYPLATFORM_H
 #define __TRAYPLATFORM_H
 
@@ -47,18 +52,33 @@
 #include "nsIDOMWindow.h"
 
 namespace mintrayr {
-	class TrayIconImpl;
+
+class TrayIconImpl;
 
 namespace platform {
 
+/**
+ * Called when the service goes live
+ */
 void Init();
+
+/**
+ * Called when the service is destroyed
+ */
 void Destroy();
 
+/**
+ * Window should be watched
+ */
 NS_IMETHODIMP WatchWindow(nsIDOMWindow *aWindow);
+
+/**
+ * Window should be unwatched
+ */
 NS_IMETHODIMP UnwatchWindow(nsIDOMWindow *aWindow);
 
 /**
- * Helper class
+ * Abstract helper class
  * Encapsulates the platform specific initialization code and message processing
  */
 class Icon {
@@ -68,6 +88,9 @@ public:
 	virtual void Restore() = 0;
 };
 
+/**
+ * Factory
+ */
 Icon* CreateIcon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
 
 } // namespace platform

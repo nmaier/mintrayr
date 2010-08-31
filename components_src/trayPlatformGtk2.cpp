@@ -108,11 +108,13 @@ NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
 	rv = baseWindow->GetParentNativeWindow(&native);
 	NS_ENSURE_SUCCESS(rv, rv);
 
+	// Get the window
 	mGdkWindow = gdk_window_get_toplevel(reinterpret_cast<GdkWindow*>(native));
 	if (!mGdkWindow) {
 		return NS_ERROR_UNEXPECTED;
 	}
 
+	// Get the widget and gtk window
 	GtkWidget *widget;
 	gdk_window_get_user_data(mGdkWindow, reinterpret_cast<gpointer*>(&widget));
 	widget = gtk_widget_get_toplevel(widget);
@@ -150,7 +152,6 @@ NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
 Icon::~Icon()
 {
 	Restore();
-
 
 	if (mStatusIcon) {
 		gtk_status_icon_set_visible(mStatusIcon, 0);

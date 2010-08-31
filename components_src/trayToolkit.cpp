@@ -145,6 +145,8 @@ NS_IMETHODIMP DispatchTrustedEvent(nsIDOMWindow *aWindow, const nsAString& aEven
 	return target->DispatchEvent(event, &dummy);
 }
 
+/* TrayIconImpl */
+
 NS_IMPL_ISUPPORTS2(TrayIconImpl, trayITrayIcon, nsIDOMEventListener)
 
 NS_IMETHODIMP TrayIconImpl::GetWindow(nsIDOMWindow **aWindow)
@@ -248,7 +250,7 @@ NS_IMETHODIMP TrayIconImpl::Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore)
 	NS_ENSURE_ARG_POINTER(aWindow);
 
 	nsresult rv;
-	
+
 	mCloseOnRestore = aCloseOnRestore;
 
 	nsCOMPtr<nsIDOMEventTarget> target = do_QueryInterface(aWindow, &rv);
@@ -321,6 +323,7 @@ NS_IMETHODIMP TrayIconImpl::DispatchMouseEvent(const nsAString& aEventName, PRUi
 	return target->DispatchEvent(mouseEvent, &dummy);
 }
 
+/* TrayServiceImpl */
 
 NS_IMPL_ISUPPORTS2(TrayServiceImpl, trayITrayService, nsIObserver)
 
@@ -426,13 +429,13 @@ NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
 NS_IMETHODIMP TrayServiceImpl::Minimize(nsIDOMWindow *aWindow, PRBool aCloseOnRestore)
 {
 	NS_ENSURE_ARG_POINTER(aWindow);
-	
+
 	nsresult rv;
-	
+
 	nsCOMPtr<trayITrayIcon> icon;
 	rv = CreateIcon(aWindow, aCloseOnRestore, getter_AddRefs(icon));
 	NS_ENSURE_SUCCESS(rv, rv);
-	
+
 	rv = icon->Minimize();
 	return rv;
 }

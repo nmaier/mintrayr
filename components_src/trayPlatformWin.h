@@ -38,6 +38,10 @@
 #ifndef __TRAYPLATFORMWIN_H
 #define __TRAYPLATFORMWIN_H
 
+/**
+ * Windows specific implementation
+ */
+
 #ifdef _WIN32_IE
 #	undef _WIN32_IE
 #endif
