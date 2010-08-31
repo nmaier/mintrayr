@@ -241,6 +241,12 @@ namespace {
 				return TRUE;
 			}
 			break;
+
+		case WM_SYSCOMMAND:
+			if (wParam == SC_CLOSE && DoMinimizeWindow(hwnd, kTrayOnClose)) {
+				return 0;
+			}
+			break;
 		}
 
 WatcherWindowProcEnd:
@@ -400,6 +406,7 @@ LRESULT CALLBACK TrayWindowWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wPar
 			if (pl.showCmd == SW_SHOWMINIMIZED) {
 				pl.showCmd = SW_HIDE;
 				::SetWindowPlacement(hwnd, &pl);
+				return 0;
 			}
 		}
 	}
