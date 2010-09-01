@@ -369,6 +369,7 @@ NS_IMETHODIMP TrayServiceImpl::CreateIcon(nsIDOMWindow *aWindow, PRBool aCloseOn
 			continue;
 		}
 		*aResult = mIcons[i];
+		NS_ADDREF(*aResult);
 		return NS_OK;
 	}
 
