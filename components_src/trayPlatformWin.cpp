@@ -66,6 +66,9 @@ static bool DoMinimizeWindowWin(HWND hwnd, eMinimizeActions action)
 	if (window == 0) {
 		return false;
 	}
+	if (::GetPropW(hwnd, kWatch) == (HANDLE)0x2) {
+		return true;
+	}
 	return DoMinimizeWindow(window, action);
 }
 
@@ -76,7 +79,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 {
 	using win::Icon;
 
-	if (::GetPropW(hwnd, kWatch) == (HANDLE)0x1) {
+	if (::GetPropW(hwnd, kWatch) > (HANDLE)0x0) {
 		// Watcher stuff
 
 		switch (uMsg) {
@@ -130,20 +133,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			break;
 		} // case WM_WINDOWPOSCHANGED
 
-		case WM_NCLBUTTONDOWN:
-		case WM_NCLBUTTONUP:
-			// Frame button clicked
-			if (wParam == HTCLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
-				return TRUE;
-			}
-			break;
-
-		case WM_SYSCOMMAND:
-			// Window menu
-			if (wParam == SC_CLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
-				return 0;
-			}
-			break;
 		}
 	}
 
@@ -418,7 +407,7 @@ void Icon::Minimize() {
 	// Otherwise the SFW/PM hack won't work
 	// However we need to protect against the watcher watching this
 	HANDLE watch = ::GetPropW(mWnd, kWatch);
-	::RemovePropW(mWnd, kWatch);
+	::SetPropW(mWnd, kWatch, (HANDLE)(0x2));
 	::ShowWindow(mWnd, SW_MINIMIZE);
 	::SetPropW(mWnd, kWatch, watch);
 

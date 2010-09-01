@@ -225,22 +225,19 @@ NS_IMETHODIMP TrayIconImpl::Close()
 	delete mIcon.forget();
 	mService->CloseIcon(this);
 	mIsMinimized = PR_FALSE;
+
+	nsresult rv;
+	nsCOMPtr<nsIDOMEventTarget> target = do_QueryInterface(mWindow, &rv);
+	NS_ENSURE_SUCCESS(rv, rv);
+	target->RemoveEventListener(NS_LITERAL_STRING("unload"), this, PR_FALSE);
+
 	return NS_OK;
 }
 
 NS_IMETHODIMP TrayIconImpl::HandleEvent(nsIDOMEvent *aEvent)
 {
 	NS_ENSURE_ARG_POINTER(aEvent);
-
-	nsresult rv;
-
-	nsCOMPtr<nsIDOMEventTarget> target;
-	rv = aEvent->GetCurrentTarget(getter_AddRefs(target));
-	NS_ENSURE_SUCCESS(rv, rv);
-	target->RemoveEventListener(NS_LITERAL_STRING("unload"), this, PR_FALSE);
-
 	Close();
-
 	return NS_OK;
 }
 
@@ -325,7 +322,7 @@ NS_IMETHODIMP TrayIconImpl::DispatchMouseEvent(const nsAString& aEventName, PRUi
 
 /* TrayServiceImpl */
 
-NS_IMPL_ISUPPORTS2(TrayServiceImpl, trayITrayService, nsIObserver)
+NS_IMPL_ISUPPORTS3(TrayServiceImpl, trayITrayService, nsIObserver, nsIDOMEventListener)
 
 TrayServiceImpl::TrayServiceImpl()
 {
@@ -408,7 +405,7 @@ NS_IMETHODIMP TrayServiceImpl::WatchMinimize(nsIDOMWindow *aWindow)
 		return NS_OK;
 	}
 
-	if (!NS_SUCCEEDED(platform::WatchWindow(aWindow))) {
+	if (!NS_SUCCEEDED(platform::WatchWindow(aWindow)) || ! NS_SUCCEEDED(AddCloseListener(aWindow))) {
 		return NS_ERROR_INVALID_ARG;
 	}
 	mWatches.AppendObject(aWindow);
@@ -420,6 +417,7 @@ NS_IMETHODIMP TrayServiceImpl::UnwatchMinimize(nsIDOMWindow *aWindow)
 	NS_ENSURE_ARG_POINTER(aWindow);
 
 	if (NS_SUCCEEDED(platform::UnwatchWindow(aWindow))) {
+		RemoveCloseListener(aWindow);
 		return NS_ERROR_INVALID_ARG;
 	}
 	mWatches.RemoveObject(aWindow);
@@ -474,6 +472,7 @@ void TrayServiceImpl::UnwatchAll() {
 	const PRInt32 count = mWatches.Count();
 	for (PRInt32 i = 0; i < count; ++i) {
 		platform::UnwatchWindow(mWatches[i]);
+		RemoveCloseListener(mWatches[i]);
 	}
 	mWatches.Clear();
 }
@@ -481,6 +480,23 @@ void TrayServiceImpl::UnwatchAll() {
 void TrayServiceImpl::CloseIcon(trayITrayIcon *aIcon)
 {
 	mIcons.RemoveObject(aIcon);
+}
+
+NS_IMETHODIMP TrayServiceImpl::HandleEvent(nsIDOMEvent *aEvent)
+{
+	NS_ENSURE_ARG_POINTER(aEvent);
+
+	nsCOMPtr<nsIDOMEventTarget> target;
+	nsresult rv = aEvent->GetCurrentTarget(getter_AddRefs(target));
+	NS_ENSURE_SUCCESS(rv, rv);
+	nsCOMPtr<nsIDOMWindow> window = do_QueryInterface(target, &rv);
+	NS_ENSURE_SUCCESS(rv, rv);
+
+	if (DoMinimizeWindow(window, kTrayOnClose)) {
+		aEvent->PreventDefault();
+		aEvent->StopPropagation();
+	}
+	return NS_OK;
 }
 
 NS_IMETHODIMP TrayServiceImpl::Observe(nsISupports *, const char *aTopic, const PRUnichar *)
@@ -495,6 +511,30 @@ NS_IMETHODIMP TrayServiceImpl::Observe(nsISupports *, const char *aTopic, const 
 		}
 	}
 	return NS_OK;
+}
+
+NS_IMETHODIMP TrayServiceImpl::AddCloseListener(nsIDOMWindow *aWindow)
+{
+	NS_ENSURE_ARG_POINTER(aWindow);
+
+	nsresult rv;
+	nsCOMPtr<nsIDOMEventTarget> target = do_QueryInterface(aWindow, &rv);
+	NS_ENSURE_SUCCESS(rv, rv);
+	rv = target->AddEventListener(NS_LITERAL_STRING("close"), this, PR_TRUE);
+	return rv;
+}
+
+void TrayServiceImpl::RemoveCloseListener(nsIDOMWindow *aWindow)
+{
+	if (!aWindow) {
+		return;
+	}
+	nsresult rv;
+	nsCOMPtr<nsIDOMEventTarget> target = do_QueryInterface(aWindow, &rv);
+	if (!NS_SUCCEEDED(rv)) {
+		return;
+	}
+	target->RemoveEventListener(NS_LITERAL_STRING("close"), this, PR_TRUE);
 }
 
 } // namespace mintrayr
