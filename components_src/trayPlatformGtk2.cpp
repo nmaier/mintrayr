@@ -1,6 +1,9 @@
 #include "trayToolkit.h"
 #include "trayPlatformGtk2.h"
 
+#include "nsCOMPtr.h"
+#include "nsServiceManagerUtils.h"
+
 #define XATOM(atom) static const Atom atom = XInternAtom(xev->xany.display, #atom, false)
 
 namespace mintrayr {
@@ -19,6 +22,13 @@ GdkFilterReturn filterWindows(XEvent *xev, GdkEvent* event, nsIDOMWindow* window
 	}
 
 	switch (xev->type) {
+		case MapNotify:
+			{
+				nsCOMPtr<trayITrayService> traySvc(do_GetService(TRAYSERVICE_CONTRACTID));
+				traySvc->Restore(window);
+			}
+			break;
+
 		case UnmapNotify:
 			if (DoMinimizeWindow(window, kTrayOnMinimize)) {
 				return GDK_FILTER_REMOVE;
