@@ -7,7 +7,7 @@
 <!ENTITY mintrayr.prefs.minimizeon.both "Po kliknięciu ikony zamykania lub minimalizowania">
 <!ENTITY mintrayr.prefs.main "Ogólne">
 <!ENTITY mintrayr.prefs.dblclickrestore "Dwukrotne kliknięcie na ikonie przywraca okno">
-<!ENTITY mintrayr.prefs.showcontext "Kliknięcie ppm. wyświetla menu kontekstowe">
+<!ENTITY mintrayr.prefs.showcontext "Kliknięcie p.p.m. wyświetla menu kontekstowe">
 <!ENTITY mintrayr.prefs.watchwindows "Działanie w oknach">
 <!ENTITY mintrayr.prefs.misc "Różne">
 <!ENTITY mintrayr.prefs.clickbehavior "Działanie kliknięć">
