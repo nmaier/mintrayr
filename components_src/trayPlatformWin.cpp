@@ -101,11 +101,11 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         }
 		case WM_WINDOWPOSCHANGED: {
 			/* XXX Fix this bit to something more reasonable
-				The following code kinda replicates the way mozilla gets the window state.
-				We intensionally "hide" the SW_SHOWMINIMIZED here.
-				This indeed might cause some side effects, but if it didn't we couldn't open
-				menus due to bugzilla #435848,.
-				This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
+			  The following code kinda replicates the way mozilla gets the window state.
+			  We intensionally "hide" the SW_SHOWMINIMIZED here.
+			  This indeed might cause some side effects, but if it didn't we couldn't open
+			  menus due to bugzilla #435848,.
+			  This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
 			*/
 			WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(lParam);
 			if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
