@@ -6,6 +6,7 @@
 		<em:version>@MINTRAYR_VERSION@</em:version>
 
 		<em:targetPlatform>@TARGET_PLATFORM@</em:targetPlatform>
+		<em:unpack>true</em:unpack>
 
 		<em:name>MinimizeToTray revived (MinTrayR)</em:name>
 		<em:description>Minimizes windows into the system tray</em:description>
@@ -26,7 +27,7 @@
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>3.6</em:minVersion>
-				<em:maxVersion>4.0b6pre</em:maxVersion>
+				<em:maxVersion>4.0b8pre</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 
