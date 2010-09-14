@@ -1,4 +1,4 @@
 <!ENTITY mintrayr.newmessage "Yeni Mesaj">
-<!ENTITY mintrayr.prefs.messenger.watchmessenger "Windows Messenger için kullan">
-<!ENTITY mintrayr.prefs.messenger.watchreader "Windows Messenger için kullan">
-<!ENTITY mintrayr.prefs.messenger.watchcomposer "Windows Write İçin kullan">
+<!ENTITY mintrayr.prefs.messenger.watchmessenger "Messenger penceresi için kullan">
+<!ENTITY mintrayr.prefs.messenger.watchreader "Mesaj penceresi için kullan">
+<!ENTITY mintrayr.prefs.messenger.watchcomposer "Yazım penceresi İçin kullan">

@@ -1,7 +1,7 @@
 <!ENTITY mintrayr.prefs.title "MinTrayR Tercihleri">
 <!ENTITY mintrayr.prefs.winstyle "Genişlik:32em;Uzunluk:27em">
 <!ENTITY mintrayr.prefs.minimizeon "Tepsiye Küçült">
-<!ENTITY mintrayr.prefs.minimizeon.never "Asla(Sadece menüve düğme ile Küçült)">
+<!ENTITY mintrayr.prefs.minimizeon.never "Asla(Sadece menü ve düğme ile Küçült)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "Küçüldüğünde">
 <!ENTITY mintrayr.prefs.minimizeon.close "Kapanma Yerine">
 <!ENTITY mintrayr.prefs.minimizeon.both "Kapanma veya küçültme yerine">
