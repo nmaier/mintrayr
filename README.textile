@@ -24,3 +24,16 @@ Application integration:
 h2. License
 
 MPL 1.1/GPL 2.0/LGPL 2.1. See LICENSE file for specifics.
+
+h2. Building
+
+MinTrayR uses the mozilla-build-system and can currently build within mozilla-central.
+
+# Grab the mozilla source
+#* @$ hg clone https://hg.mozilla.org/mozilla-central@
+# Grab the mintryr source
+#* @$ cd mozilla-central/extensions && git clone git://github.com/nmaier/mintrayr.git@
+# "Configure your mozconfig":https://developer.mozilla.org/en/configuring_build_options . Make sure to include @ac_add_options --enable-extensions=default,mintrayr@
+# Build: @$ make -f client.mk@
+
+The output, an installable XPI, should be in @$objdir/dist/xpi-stage@.
