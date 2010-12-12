@@ -40,9 +40,10 @@
 mintrayr.jar:
 % content mintrayr %content/
 % skin mintrayr classic/1.0 %skin/
+% skin mintrayr-icon classic/1.9 ./
 % resource mintrayr modules/
 % style chrome://global/content/customizeToolbar.xul	chrome://mintrayr/skin/common.css
-% override chrome://mintrayr/skin/appicon64.png chrome://branding/content/icon64.png
+% override chrome://mintrayr-icon/skin/appicon64.png chrome://branding/content/icon64.png
 # Firefox
 % overlay	chrome://browser/content/browser.xul	chrome://mintrayr/content/browser/browser.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 % overlay	chrome://browser/content/browser.xul	chrome://mintrayr/content/browser/browser.xul application={a463f10c-3994-11da-9945-000d60ca027b}
@@ -88,6 +89,5 @@ mintrayr.jar:
    content/navigator/navigator.xul (chrome/content/navigator/navigator.xul)
    content/navigator/navigator.js (chrome/content/navigator/navigator.js)
    skin/prefs.css (chrome/skin/prefs.css)
-   skin/icon.png (chrome/skin/icon.png)
    skin/common.css (chrome/skin/common.css)
    skin/toolbuttons.png (chrome/skin/toolbuttons.png)

@@ -12,8 +12,8 @@ prefwindow {
 }
 
 radio[pane="paneMain"] {
-	list-style-image: url(icon.png);
+	list-style-image: url(chrome://mintrayr-icon/skin/icon.png);
 }
 radio[pane="paneSpecific"] {
-	list-style-image: url(appicon64.png);
+	list-style-image: url(chrome://mintrayr-icon/skin/appicon64.png);
 }

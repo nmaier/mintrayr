@@ -65,12 +65,12 @@ DEFINES = \
 	
 DIST_FILES = \
 	     install.rdf \
-	     chrome/skin/icon.png \
-	     LICENSE \
 	     $(NULL)
 
 EXTRA_DIST_FILES = \
+		 LICENSE \
 		 chrome/skin/icon.png \
+     chrome/skin/icon64.png \
 		 $(NULL)
 		 
 ICON_FILES = \
