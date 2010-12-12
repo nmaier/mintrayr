@@ -104,6 +104,8 @@ libs::
 	for locale in $(ADDITIONAL_LOCALES); do   \
 		$(MAKE) -C chrome/locale AB_CD=$$locale; \
 	done
+ifdef SHIP_ALL_LOCALES
 	for locale in $(DISABLED_LOCALES); do   \
 		$(MAKE) -C chrome/locale AB_CD=$$locale LOCALE_DISABLED=1; \
 	done	
+endif
