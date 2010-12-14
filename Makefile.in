@@ -87,8 +87,6 @@ EXTRA_JS_MODULES = \
 		   $(srcdir)/modules/services.jsm \
 		   $(NULL) 
 
-include $(topsrcdir)/config/rules.mk
-
 libs:: $(EXTRA_DIST_FILES)
 ifndef NO_DIST_INSTALL
 	$(INSTALL) $(IFLAGS1) $^ $(FINAL_TARGET)
@@ -99,13 +97,19 @@ ifndef NO_DIST_INSTALL
 	$(INSTALL) $(IFLAGS1) $^ $(FINAL_TARGET)/chrome/icons/default
 endif
 
+include $(topsrcdir)/config/rules.mk
+
 libs::
+ifndef NO_EXTRA_LOCALES
 	@$(EXIT_ON_ERROR)                    \
 	for locale in $(ADDITIONAL_LOCALES); do   \
 		$(MAKE) -C chrome/locale AB_CD=$$locale; \
 	done
 ifdef SHIP_ALL_LOCALES
+	@$(EXIT_ON_ERROR)                    \
 	for locale in $(DISABLED_LOCALES); do   \
 		$(MAKE) -C chrome/locale AB_CD=$$locale LOCALE_DISABLED=1; \
 	done	
 endif
+endif
+
