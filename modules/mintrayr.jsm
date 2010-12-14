@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Nils Maier.
- * Portions created by the Initial Developer are Copyright (C) 2008
+ * Portions created by the Initial Developer are Copyright (C) 2008,2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,13 +34,28 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+const EXPORTED_SYMBOLS = ['MinTrayR'];
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+const module = Cu.import;
 
 function MinTrayR(menu, pref) {
-	for (let p in MinTrayR.prototype) {
-		this[p] = MinTrayR.prototype[p];
-	}
-	let tp = this;
-	addEventListener(
+  if (!menu) {
+    throw Error("no menu");
+  }
+  this.menu = menu;
+  
+  // Add our prototype
+  this.__proto__ = MinTrayR.prototype;
+	
+  this.document = menu.ownerDocument;
+  this.window = this.document.defaultView;
+
+  let tp = this;
+	this.window.addEventListener(
 		'TrayDblClick',
 		function(event) {
 			if (event.button == 0 && !!tp.prefs.getExt('dblclickrestore', true)) {
@@ -49,7 +64,7 @@ function MinTrayR(menu, pref) {
 		},
 		true
 	);
-	addEventListener(
+	this.window.addEventListener(
 		'TrayClick',
 		function(event) {
 			if (event.button == 0 && !tp.prefs.getExt('dblclickrestore', true)) {
@@ -58,18 +73,15 @@ function MinTrayR(menu, pref) {
 		},
 		true
 	);
-	if (menu) {
-		this.menu = document.getElementById(menu);
-		addEventListener(
-			'TrayClick',
-			function(event) {
-				if (event.button == 2 && tp.prefs.getExt('showcontext', true)) {
-					tp.showMenu(event.screenX, event.screenY);
-				}
-			},
-			true
-		);		
-	}
+  this.window.addEventListener(
+    'TrayClick',
+    function(event) {
+      if (event.button == 2 && tp.prefs.getExt('showcontext', true)) {
+        tp.showMenu(event.screenX, event.screenY);
+      }
+    },
+    true
+  );		
 	if (typeof pref == 'boolean' && pref) {
 		this.watch();
 	}
@@ -87,7 +99,7 @@ MinTrayR.prototype = {
 	
 	showMenu: function MinTrayR_showMenu(x, y) {
 		this.menu.showPopup(
-			document.documentElement,
+			this.document.documentElement,
 			x,
 			y,
 			"context",
@@ -96,26 +108,26 @@ MinTrayR.prototype = {
 		);
 	},
 	minimize: function MinTrayR_minimize() {
-		this.minimizeWindow(window);
+		this.minimizeWindow(this.window);
 	},
 	restore: function MinTrayR_restore() {
-		this.restoreWindow(window);
+		this.restoreWindow(this.window);
 	},
 	get isWatched() this._watched,
 	watch: function MinTrayR_watch() {
 		if (!this._watched) {
-			this.watchWindow(window);
+			this.watchWindow(this.window);
 			this._watched = true;
 		}
 	},
 	unwatch: function MinTrayR_watch() {
 		if (this._watched) {
-			this.unwatchWindow(window);
+			this.unwatchWindow(this.window);
 			this._watched = false;
 		}
 	},	
 	cloneToMenu: function MinTrayR_cloneToMenu(ref, items, bottom) {
-		ref = document.getElementById(ref);
+		ref = this.document.getElementById(ref);
 		if (bottom) {
 			ref = ref.nextSibling;
 		}
@@ -124,7 +136,7 @@ MinTrayR.prototype = {
 			try {
 				let node;
 				if (typeof id == 'string') {
-					node = document.getElementById(id).cloneNode(true);
+					node = this.document.getElementById(id).cloneNode(true);
 				}
 				else {
 					node = id;
@@ -145,12 +157,12 @@ MinTrayR.prototype = {
 		return rv;
 	},
 	addToMenu: function(ref, attrs) {
-		ref = document.getElementById(ref);
+		ref = this.document.getElementById(ref);
 		if (bottom) {
 			ref = ref.nextSibling;
 		}
 		try {
-			let node = document.createElement('menuitem');
+			let node = this.document.createElement('menuitem');
 			for (let attr in attrs) {
 				node.setAttribute(attr, attrs[attr]);
 			}
@@ -164,7 +176,7 @@ MinTrayR.prototype = {
 	},
 	show: function(){
 		for (let i = 0; i < arguments.length; ++i) {
-			let n = document.getElementById(arguments[i]);
+			let n = this.document.getElementById(arguments[i]);
 			if (n && n.hasAttribute('hidden')) {
 				n.removeAttribute('hidden');
 			}
@@ -172,7 +184,7 @@ MinTrayR.prototype = {
 	},
 	hide: function(){
 		for (let i = 0; i < arguments.length; ++i) {
-			let n = document.getElementById(arguments[i]);
+			let n = this.document.getElementById(arguments[i]);
 			if (n) {
 				n.setAttribute('hidden', true);
 			}
@@ -194,6 +206,5 @@ MinTrayR.prototype = {
 		}
 	}
 };
-
-Components.utils.import('resource://mintrayr/services.jsm', MinTrayR.prototype);
-Components.utils.import('resource://mintrayr/preferences.jsm', MinTrayR.prototype.prefs);
+module('resource://mintrayr/services.jsm', MinTrayR.prototype);
+module('resource://mintrayr/preferences.jsm', MinTrayR.prototype.prefs);

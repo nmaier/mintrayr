@@ -44,7 +44,6 @@
 	%keysDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="text/javascript" src="chrome://mintrayr/content/common.js"/>
 
 	<keyset id="MinTrayR_keyset">
 		<key id="MinTrayR_minimize_key" modifiers="&mintrayr.keys.minimize.modifiers;" keycode="&mintrayr.keys.minimize.keycode;" oncommand="gMinTrayR.minimize();"/>

@@ -35,31 +35,39 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function MinTrayRMessenger() {
-	MinTrayR.call(this, 'MinTrayR_context', 'messenger.watchmessenger');
-	try {
-		// Seamonkey hack
-		let n = document.querySelector('#menu_NewPopup menuitem');
-		if (n && !n.id)  {
-			n.id = 'newNewMsgCmd';
-		}
-	}
-	catch (ex) {
-		// no-op
-	}
-	this.cloneToMenu('MinTrayR_sep-top', ['newNewMsgCmd'], false);
-	this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
-	document
-		.getElementById('MinTrayR_newNewMsgCmd')
-		.setAttribute(
-			'label',
-			document.getElementById('MinTrayR_context').getAttribute('mintrayr_newmessage')
-		);
-}
-
-var gMinTrayR;
+var gMinTrayR = {};
 addEventListener(
 	'load',
-	function() gMinTrayR = new MinTrayRMessenger(),
+	function() {
+    removeEventListener("load", arguments.callee, true);
+
+    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+    gMinTrayR = new (function() {
+      let menu = document.getElementById('MinTrayR_context');
+      gMinTrayR.MinTrayR.call(
+        this,
+        menu,
+        'messenger.watchmessenger'
+        );
+      try {
+        // Seamonkey hack
+        let n = document.querySelector('#menu_NewPopup menuitem');
+        if (n && !n.id)  {
+          n.id = 'newNewMsgCmd';
+        }
+      }
+      catch (ex) {
+        // no-op
+      }
+      this.cloneToMenu('MinTrayR_sep-top', ['newNewMsgCmd'], false);
+      this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
+      document
+        .getElementById('MinTrayR_newNewMsgCmd')
+        .setAttribute(
+          'label',
+          menu.getAttribute('mintrayr_newmessage')
+        );
+    });
+  },
 	true
 );

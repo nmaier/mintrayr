@@ -75,7 +75,6 @@ mintrayr.jar:
    content/prefs/seamonkey.xul (chrome/content/prefs/seamonkey.xul)
    content/instantbird/blist.xul (chrome/content/instantbird/blist.xul)
    content/instantbird/blist.js (chrome/content/instantbird/blist.js)
-   content/common.js (chrome/content/common.js)
    content/browser/browser.xul (chrome/content/browser/browser.xul)
    content/browser/places.js (chrome/content/browser/places.js)
    content/browser/places.xul (chrome/content/browser/places.xul)

@@ -35,22 +35,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function MinTrayRMessenger() {
-	MinTrayR.call(this, 'MinTrayR_context', 'messenger.watchcomposer');
-	this.cloneToMenu(
-		'MinTrayR_sep-top',
-		[document.getElementById('menu_New').getElementsByTagName('menuitem')[0]],
-		false
-	)[0].setAttribute(
-		'label',
-		document.getElementById('MinTrayR_context').getAttribute('mintrayr_newmessage')
-	);
-	this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
-}
-
-var gMinTrayR;
+var gMinTrayR = {};
 addEventListener(
 	'load',
-	function() gMinTrayR = new MinTrayRMessenger(),
+	function() {
+    removeEventListener("load", arguments.callee, true);
+
+    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+    gMinTrayR = new (function() {
+      let menu = document.getElementById('MinTrayR_context');
+      gMinTrayR.MinTrayR.call(this, menu, 'messenger.watchcomposer');
+      this.cloneToMenu(
+        'MinTrayR_sep-top',
+        [document.getElementById('menu_New').getElementsByTagName('menuitem')[0]],
+        false
+      )[0].setAttribute(
+        'label',
+        menu.getAttribute('mintrayr_newmessage')
+      );
+      this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
+  },
 	true
 );

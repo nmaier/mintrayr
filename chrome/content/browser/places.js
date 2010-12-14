@@ -35,13 +35,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function MinTrayRPlaces() {
-	MinTrayR.call(this, 'MinTrayR_context', 'browser.watchbookmarks');
-}
-
-var gMinTrayR;
+var gMinTrayR = {};
 addEventListener(
 	'load',
-	function() gMinTrayR = new MinTrayRPlaces(),
+	function() {
+    removeEventListener("load", arguments.callee, true);
+
+    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+    gMinTrayR = new (function() {
+      gMinTrayR.MinTrayR.call(
+        this,
+        document.getElementById('MinTrayR_context'),
+        'browser.watchbookmarks'
+        );
+    });
+  },
 	true
 );

@@ -35,15 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function MinTrayRBList() {
-	MinTrayR.call(this, 'MinTrayR_context', 'instantbird.watchblist');
-	this.cloneToMenu('MinTrayR_sep-top', ['addBuddyMenuItem', 'getAwayMenuItem'], false);
-	this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
-}
-
-var gMinTrayR;
+var gMinTrayR = {};
 addEventListener(
 	'load',
-	function() gMinTrayR = new MinTrayRBList(),
+	function() {
+    removeEventListener("load", arguments.callee, true);
+
+    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+    gMinTrayR = new (function() {
+      gMinTrayR.MinTrayR.call(
+        this,
+        document.getElementById('MinTrayR_context'),
+        'instantbird.watchblist'
+        );
+      this.cloneToMenu('MinTrayR_sep-top', ['addBuddyMenuItem', 'getAwayMenuItem'], false);
+      this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
+    });
+  },
 	true
 );
