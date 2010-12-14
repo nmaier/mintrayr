@@ -82,6 +82,7 @@ function MinTrayR(menu, pref) {
 
 MinTrayR.prototype = {
 	_watchPref: null,
+	_watched: false,
 	prefs: {},
 	
 	showMenu: function MinTrayR_showMenu(x, y) {
@@ -100,11 +101,18 @@ MinTrayR.prototype = {
 	restore: function MinTrayR_restore() {
 		this.restoreWindow(window);
 	},
+	get isWatched() this._watched,
 	watch: function MinTrayR_watch() {
-		this.watchWindow(window);
+		if (!this._watched) {
+			this.watchWindow(window);
+			this._watched = true;
+		}
 	},
 	unwatch: function MinTrayR_watch() {
-		this.unwatchWindow(window);
+		if (this._watched) {
+			this.unwatchWindow(window);
+			this._watched = false;
+		}
 	},	
 	cloneToMenu: function MinTrayR_cloneToMenu(ref, items, bottom) {
 		ref = document.getElementById(ref);
