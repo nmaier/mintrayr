@@ -358,6 +358,8 @@ NS_IMETHODIMP TrayServiceImpl::CreateIcon(nsIDOMWindow *aWindow, PRBool aCloseOn
 
 	nsresult rv;
 	const PRInt32 count = mIcons.Count();
+	nsCOMPtr<nsIBaseWindow> baseWindow;
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 
 	for (PRInt32 i = 0; i < count; ++i) {
 		nsCOMPtr<nsIDOMWindow> domWindow;
@@ -365,7 +367,9 @@ NS_IMETHODIMP TrayServiceImpl::CreateIcon(nsIDOMWindow *aWindow, PRBool aCloseOn
 		if (NS_FAILED(rv)) {
 			continue;
 		}
-		if (domWindow != aWindow) {
+		nsCOMPtr<nsIBaseWindow> iconWindow;
+		rv = GetBaseWindow(domWindow, getter_AddRefs(iconWindow));
+		if (baseWindow != iconWindow) {
 			continue;
 		}
 		*aResult = mIcons[i];
@@ -445,6 +449,8 @@ NS_IMETHODIMP TrayServiceImpl::Restore(nsIDOMWindow *aWindow)
 
 	nsresult rv;
 	const PRInt32 count = mIcons.Count();
+	nsCOMPtr<nsIBaseWindow> baseWindow;
+	rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
 
 	for (PRInt32 i = 0; i < count; ++i) {
 		nsCOMPtr<nsIDOMWindow> domWindow;
@@ -452,7 +458,9 @@ NS_IMETHODIMP TrayServiceImpl::Restore(nsIDOMWindow *aWindow)
 		if (NS_FAILED(rv)) {
 			continue;
 		}
-		if (domWindow != aWindow) {
+		nsCOMPtr<nsIBaseWindow> iconWindow;
+		rv = GetBaseWindow(domWindow, getter_AddRefs(iconWindow));
+		if (baseWindow != iconWindow) {
 			continue;
 		}
 		return mIcons[i]->Restore();
@@ -488,7 +496,7 @@ NS_IMETHODIMP TrayServiceImpl::HandleEvent(nsIDOMEvent *aEvent)
 	NS_ENSURE_ARG_POINTER(aEvent);
 
 	nsCOMPtr<nsIDOMEventTarget> target;
-	nsresult rv = aEvent->GetCurrentTarget(getter_AddRefs(target));
+	nsresult rv = aEvent->GetTarget(getter_AddRefs(target));
 	NS_ENSURE_SUCCESS(rv, rv);
 	nsCOMPtr<nsIDOMWindow> window = do_QueryInterface(target, &rv);
 	NS_ENSURE_SUCCESS(rv, rv);
