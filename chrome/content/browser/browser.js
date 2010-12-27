@@ -49,7 +49,8 @@ function MinTrayRBrowser() {
 		}
 		let _old = WindowIsClosing;
 		WindowIsClosing = function() {
-			if (self.prefs.getExt('minimizeon', 1) & (1<<1)) {
+			if (self.prefs.getExt('browser.watchbrowser', true)
+        && (self.prefs.getExt('minimizeon', 1) & (1<<1))) {
 				return false;
 			}
 			return _old.apply(window, arguments);
