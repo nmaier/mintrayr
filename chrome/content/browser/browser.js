@@ -39,18 +39,34 @@ var gMinTrayR = {};
 addEventListener(
 	'load',
 	function() {
-    removeEventListener("load", arguments.callee, true);
+		removeEventListener("load", arguments.callee, true);
 
-    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
-    gMinTrayR = new (function() {
-      gMinTrayR.MinTrayR.call(
-        this,
-        document.getElementById('MinTrayR_context'),
-        'browser.watchbrowser'
-        );
-      this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
-      this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
-    });
-  },
+		Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+		gMinTrayR = new (function() {
+			gMinTrayR.MinTrayR.call(
+				this,
+				document.getElementById('MinTrayR_context'),
+				'browser.watchbrowser'
+				);
+			this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
+			this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
+			let self = this;
+
+			// Override WindowIsClosing to correctly tray-on-close
+			// See GH-2
+			(function() {
+				if (!WindowIsClosing) {
+					return;
+				}
+				let _old = WindowIsClosing;
+				WindowIsClosing = function() {
+					if (self.prefs.getExt('minimizeon', 1) & (1<<1)) {
+						return false;
+					}
+					return _old.apply(window, arguments);
+				}
+			})();
+		});
+	},
 	true
 );
