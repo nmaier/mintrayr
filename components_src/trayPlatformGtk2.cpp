@@ -7,12 +7,16 @@
 namespace mintrayr {
 namespace platform {
 
+#define XATOM(atom) static const Atom atom = XInternAtom(xev->xany.display, #atom, false)
+
 /**
  * Helper: Gdk filter function to "watch" the window
  */
 static
 GdkFilterReturn filterWindows(XEvent *xev, GdkEvent* event, nsIDOMWindow* window)
 {
+	XATOM(WM_DELETE_WINDOW);
+
 	if (!xev) {
 		return GDK_FILTER_CONTINUE;
 	}
@@ -27,6 +31,15 @@ GdkFilterReturn filterWindows(XEvent *xev, GdkEvent* event, nsIDOMWindow* window
 
 		case UnmapNotify:
 			if (DoMinimizeWindow(window, kTrayOnMinimize)) {
+				return GDK_FILTER_REMOVE;
+			}
+			break;
+
+		case ClientMessage:
+			if (xev->xclient.data.l
+					&& static_cast<Atom>(xev->xclient.data.l[0]) == WM_DELETE_WINDOW
+					&& DoMinimizeWindow(window, kTrayOnClose)
+			) {
 				return GDK_FILTER_REMOVE;
 			}
 			break;

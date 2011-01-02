@@ -132,7 +132,20 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			}
 			break;
 		} // case WM_WINDOWPOSCHANGED
+		case WM_NCLBUTTONDOWN:
+		case WM_NCLBUTTONUP:
+			// Frame button clicked
+			if (wParam == HTCLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
+				return TRUE;
+			}
+			break;
 
+		case WM_SYSCOMMAND:
+			// Window menu
+			if (wParam == SC_CLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
+				return 0;
+			}
+			break;
 		}
 	}
 

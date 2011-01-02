@@ -39,23 +39,6 @@ function MinTrayRBrowser() {
 	MinTrayR.call(this, 'MinTrayR_context', 'browser.watchbrowser');
 	this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
 	this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
-	let self = this;
-
-	// Override WindowIsClosing to correctly tray-on-close
-	// See GH-2
-	(function() {
-		if (!WindowIsClosing) {
-			return;
-		}
-		let _old = WindowIsClosing;
-		WindowIsClosing = function() {
-			if (self.prefs.getExt('browser.watchbrowser', true)
-        && (self.prefs.getExt('minimizeon', 1) & (1<<1))) {
-				return false;
-			}
-			return _old.apply(window, arguments);
-		}
-	})();
 }
 
 var gMinTrayR;
