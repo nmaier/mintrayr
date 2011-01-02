@@ -127,12 +127,11 @@ public:
 /**
  * The implementation for trayITrayService
  */
-class TrayServiceImpl : public trayITrayService, nsIObserver, nsIDOMEventListener {
+class TrayServiceImpl : public trayITrayService, nsIObserver {
 	friend class TrayIconImpl;
 public:
 	NS_DECL_ISUPPORTS
 	NS_DECL_NSIOBSERVER
-	NS_DECL_NSIDOMEVENTLISTENER
 	NS_DECL_TRAYITRAYSERVICE
 
 	TrayServiceImpl();
@@ -148,10 +147,6 @@ private:
 	void UnwatchAll();
 
 	void CloseIcon(trayITrayIcon *aIcon);
-
-	NS_IMETHOD AddCloseListener(nsIDOMWindow *aWindow);
-	void RemoveCloseListener(nsIDOMWindow *aWindow);
-
 };
 
 } // namespace
