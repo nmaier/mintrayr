@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR-ի կարգավորումները">
+<!ENTITY mintrayr.prefs.winstyle "լայն-ը. 32em; բարձր. 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Թաքցնել ներքևում">
+<!ENTITY mintrayr.prefs.minimizeon.never "Երբեք (միայն ընտրացանկից/կոճակով)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "Իջեցնելիս">
+<!ENTITY mintrayr.prefs.minimizeon.close "Փակելու փոխարեն">
+<!ENTITY mintrayr.prefs.minimizeon.both "Փակելու և իջեցնելու փոխարեն">
+<!ENTITY mintrayr.prefs.main "Հիմնականը">
+<!ENTITY mintrayr.prefs.dblclickrestore "Վերականգնելու համար կր. սեղմել">
+<!ENTITY mintrayr.prefs.showcontext "Աջ սեղմամբ ցուցադրել ընտրությունը">
+<!ENTITY mintrayr.prefs.watchwindows "Պատուհանները">
+<!ENTITY mintrayr.prefs.misc "Տարբեր">
+<!ENTITY mintrayr.prefs.clickbehavior "Սեղման գործողությունը">
