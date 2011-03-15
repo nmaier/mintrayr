@@ -1,0 +1,24 @@
+# Set up environment specific cruft
+mintrayr_objdir=@TOPSRCDIR@/../mintrayr-2.0-@CONFIG_GUESS@
+if uname | grep -qi mingw; then
+	if cl 2>&1 | grep -qi x64; then
+		ac_add_options --target=x86_64-pc-mingw32
+		ac_add_options --host=x86_64-pc-mingw32
+		mintrayr_objdir=@TOPSRCDIR@/../mintrayr-2.0-x86_64-pc-mingw32
+	fi
+	mk_add_options MOZ_MAKE_FLAGS=-j8
+else
+	mk_add_options MOZ_MAKE_FLAGS=-j4
+fi
+mk_add_options MOZ_OBJDIR=${mintrayr_objdir}
+
+ac_add_options --enable-application=browser
+ac_add_options --enable-optimize
+ac_add_options --enable-jemalloc
+ac_add_options --enable-extensions=default,mintrayr
+ac_add_options --enable-strip
+
+# Might want to enable during "debug" builds
+#ac_add_options --enable-tests
+#ac_add_options --enable-debug-symbols
+#ac_add_options --enable-xpctools
