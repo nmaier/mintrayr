@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "Opțiuni MinTrayR">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "Minimizare în zona de notificare">
+<!ENTITY mintrayr.prefs.minimizeon.never "Niciodată (doar prin meniu/buton)">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "La minimizarea ferestrei">
+<!ENTITY mintrayr.prefs.minimizeon.close "La închiderea ferestrei">
+<!ENTITY mintrayr.prefs.minimizeon.both "La minimizarea sau închiderea ferestrei">
+<!ENTITY mintrayr.prefs.main "General">
+<!ENTITY mintrayr.prefs.dblclickrestore "Restabilește fereastra cu dublu-clic">
+<!ENTITY mintrayr.prefs.showcontext "Afișează meniul contextual cu clic-dreapta">
+<!ENTITY mintrayr.prefs.watchwindows "Ferestre controlate">
+<!ENTITY mintrayr.prefs.misc "Diverse">
+<!ENTITY mintrayr.prefs.clickbehavior "Acțiuni pentru clic pe pictogramă">
