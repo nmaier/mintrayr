@@ -50,6 +50,24 @@ addEventListener(
         );
       this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
       this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
+
+      // Override WindowIsClosing to correctly tray-on-close
+      // See GH-6
+      (function(self) {
+        if (!WindowIsClosing) {
+          return;
+        }
+        let _old = WindowIsClosing;
+        WindowIsClosing = function() {
+          if (self.prefs.getExt('browser.watchbrowser', true)
+            && (self.prefs.getExt('minimizeon', 1) & (1<<1))) {
+            self.minimize();
+            return false;
+          }
+          return _old.apply(window, arguments);
+        }
+      })(this);
+
     });
   },
   true
