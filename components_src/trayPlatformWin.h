@@ -66,17 +66,17 @@ namespace win {
 class Icon : public platform::Icon {
 private:
 public:
-	HWND mWnd;
-	NOTIFYICONDATAW mIconData;
-	TrayIconImpl *mIcon;
+  HWND mWnd;
+  NOTIFYICONDATAW mIconData;
+  TrayIconImpl *mIcon;
 
-	Icon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
-	virtual ~Icon();
-	
-	virtual void Minimize();
-	virtual void Restore();
+  Icon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
+  virtual ~Icon();
+
+  virtual void Minimize();
+  virtual void Restore();
 private:
-	NS_IMETHOD Init(nsIDOMWindow *aWindow, const nsString& aTitle);
+  NS_IMETHOD Init(nsIDOMWindow *aWindow, const nsString& aTitle);
 };
 
 }}} // namespaces

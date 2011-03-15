@@ -44,14 +44,14 @@
   <keyset id="mainKeyset">
     <keyset id="MinTrayR_keyset"/>
   </keyset>
-	<script type="text/javascript" src="chrome://mintrayr/content/instantbird/blist.js"/>
-	<menupopup id="fileMenuPopup">
-		<menuitem id="MinTrayR_minimize" insertbefore="menu_FileQuitItem"/>
-	</menupopup>
-	<popupset>
-		<menupopup id="MinTrayR_context">
-			<menuseparator id="MinTrayR_sep-top"/>	
-			<menuseparator id="MinTrayR_sep-bottom"/>
-		</menupopup> 
-	</popupset>
+  <script type="text/javascript" src="chrome://mintrayr/content/instantbird/blist.js"/>
+  <menupopup id="fileMenuPopup">
+    <menuitem id="MinTrayR_minimize" insertbefore="menu_FileQuitItem"/>
+  </menupopup>
+  <popupset>
+    <menupopup id="MinTrayR_context">
+      <menuseparator id="MinTrayR_sep-top"/>
+      <menuseparator id="MinTrayR_sep-bottom"/>
+    </menupopup>
+  </popupset>
 </overlay>

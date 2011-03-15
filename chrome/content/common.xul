@@ -38,52 +38,52 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 <!DOCTYPE overlay [
-	<!ENTITY % commonDTD SYSTEM "chrome://mintrayr/locale/common.dtd">
-	%commonDTD;
-	<!ENTITY % keysDTD SYSTEM "chrome://mintrayr/locale/keys.dtd">
-	%keysDTD;
+  <!ENTITY % commonDTD SYSTEM "chrome://mintrayr/locale/common.dtd">
+  %commonDTD;
+  <!ENTITY % keysDTD SYSTEM "chrome://mintrayr/locale/keys.dtd">
+  %keysDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<keyset id="MinTrayR_keyset">
-		<key id="MinTrayR_minimize_key" modifiers="&mintrayr.keys.minimize.modifiers;" keycode="&mintrayr.keys.minimize.keycode;" oncommand="gMinTrayR.minimize();"/>
-	</keyset>
+  <keyset id="MinTrayR_keyset">
+    <key id="MinTrayR_minimize_key" modifiers="&mintrayr.keys.minimize.modifiers;" keycode="&mintrayr.keys.minimize.keycode;" oncommand="gMinTrayR.minimize();"/>
+  </keyset>
 
-	<menupopup id="MinTrayR_context">	
-		<menuitem
-			id="MinTrayR_restore"
-			label="&mintrayr.restore;"
-			oncommand="gMinTrayR.restore();"
-			insertbefore="MinTrayR_sep-bottom"
-	    />
-	  <menuitem
-			id="MinTrayR_restore-all"
-			label="&mintrayr.restoreall;"
-			oncommand="gMinTrayR.restoreAll();"
-			insertbefore="MinTrayR_sep-bottom"
-			/>
-		<menuseparator insertbefore="MinTrayR_sep-bottom"/>
-		<menuitem
-			id="MinTrayR_close-menu"
-			label="&mintrayr.closemenu;"
-			insertbefore="MinTrayR_sep-bottom"
-			/>
-	</menupopup>
-	
-	
-	<menuitem
-		id="MinTrayR_minimize"
-		label="&mintrayr.minimize;"
-		tooltiptext="&mintrayr.minimize.tip;"
-		oncommand="gMinTrayR.minimize();"
-		key="MinTrayR_minimize_key"
+  <menupopup id="MinTrayR_context">
+    <menuitem
+      id="MinTrayR_restore"
+      label="&mintrayr.restore;"
+      oncommand="gMinTrayR.restore();"
+      insertbefore="MinTrayR_sep-bottom"
+      />
+    <menuitem
+      id="MinTrayR_restore-all"
+      label="&mintrayr.restoreall;"
+      oncommand="gMinTrayR.restoreAll();"
+      insertbefore="MinTrayR_sep-bottom"
+      />
+    <menuseparator insertbefore="MinTrayR_sep-bottom"/>
+    <menuitem
+      id="MinTrayR_close-menu"
+      label="&mintrayr.closemenu;"
+      insertbefore="MinTrayR_sep-bottom"
+      />
+  </menupopup>
+
+
+  <menuitem
+    id="MinTrayR_minimize"
+    label="&mintrayr.minimize;"
+    tooltiptext="&mintrayr.minimize.tip;"
+    oncommand="gMinTrayR.minimize();"
+    key="MinTrayR_minimize_key"
     />
-	
-	<toolbarbutton
-		id="MinTrayR_toolbaritem"
-		oncommand="if (event.target == this) gMinTrayR.minimize();"
-		label="&mintrayr.minimize.toolbar;"
-		tooltiptext="&mintrayr.minimize.tip;"
-		class="toolbarbutton-1 chromeclass-toolbar-additional"
-	/>	
+
+  <toolbarbutton
+    id="MinTrayR_toolbaritem"
+    oncommand="if (event.target == this) gMinTrayR.minimize();"
+    label="&mintrayr.minimize.toolbar;"
+    tooltiptext="&mintrayr.minimize.tip;"
+    class="toolbarbutton-1 chromeclass-toolbar-additional"
+  />
 </overlay>

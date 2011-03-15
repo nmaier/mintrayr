@@ -38,28 +38,27 @@
    - ***** END LICENSE BLOCK ***** -->
 
 <!DOCTYPE overlay [
-	<!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
-	%brandingDTD;	
-	<!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
-	%mozappsDTD;
-	<!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
-	%prefsDTD;	
-	<!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
-	%browserDTD;	
+  <!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
+  %brandingDTD;
+  <!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
+  %mozappsDTD;
+  <!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
+  %prefsDTD;
+  <!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
+  %browserDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<prefpane id="paneSpecific" label="&brandShortName;">
-		<preferences>
-			<preference id="watchbrowser" name="extensions.mintrayr.browser.watchbrowser" type="bool"/>
-			<preference id="watchbookmarks" name="extensions.mintrayr.browser.watchbookmarks" type="bool"/>
-			<preference id="watchdownloads" name="extensions.mintrayr.mozapps.watchdownloads" type="bool"/>
-		</preferences>
-		<groupbox>
-			<caption label="&mintrayr.prefs.watchwindows;"/>
-			<checkbox preference="watchbrowser" label="&mintrayr.prefs.browser.watchbrowser;"/>
-			<checkbox preference="watchbookmarks" label="&mintrayr.prefs.browser.watchbookmarks;"/>	
-			<checkbox preference="watchdownloads" label="&mintrayr.prefs.mozapps.watchdownloads;"/>
-		</groupbox>
-	</prefpane>
+  <prefpane id="paneSpecific" label="&brandShortName;">
+    <preferences>
+      <preference id="watchbrowser" name="extensions.mintrayr.browser.watchbrowser" type="bool"/>
+      <preference id="watchbookmarks" name="extensions.mintrayr.browser.watchbookmarks" type="bool"/>
+      <preference id="watchdownloads" name="extensions.mintrayr.mozapps.watchdownloads" type="bool"/>
+    </preferences>
+    <groupbox>
+      <caption label="&mintrayr.prefs.watchwindows;"/>
+      <checkbox preference="watchbrowser" label="&mintrayr.prefs.browser.watchbrowser;"/>
+      <checkbox preference="watchbookmarks" label="&mintrayr.prefs.browser.watchbookmarks;"/>
+      <checkbox preference="watchdownloads" label="&mintrayr.prefs.mozapps.watchdownloads;"/>
+    </groupbox>
+  </prefpane>
 </overlay>
-	

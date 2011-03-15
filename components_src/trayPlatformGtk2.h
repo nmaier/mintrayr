@@ -62,29 +62,29 @@ namespace gtk2 {
 class Icon : public platform::Icon {
 private:
 public:
-	GtkStatusIcon *mStatusIcon;
-	GtkWindow *mGtkWindow;
-	GdkWindow *mGdkWindow;
-	TrayIconImpl *mIcon;
+  GtkStatusIcon *mStatusIcon;
+  GtkWindow *mGtkWindow;
+  GdkWindow *mGdkWindow;
+  TrayIconImpl *mIcon;
 
-	Icon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
-	virtual ~Icon();
-	
-	virtual void Minimize();
-	virtual void Restore();
+  Icon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
+  virtual ~Icon();
+
+  virtual void Minimize();
+  virtual void Restore();
 
 private:
-	NS_IMETHOD Init(nsIDOMWindow *aWindow, const nsString& aTitle);
+  NS_IMETHOD Init(nsIDOMWindow *aWindow, const nsString& aTitle);
 
-	void buttonEvent(GdkEventButton *event);
-	static void gtkButtonEvent(GtkStatusIcon*, GdkEventButton *event, Icon *icon) {
-		icon->buttonEvent(event);
-	}
-	gboolean propertyEvent();
-	gulong propertyEventId;
-	static gboolean gtkPropertyEvent(GtkStatusIcon*, GdkEventProperty *event, Icon *icon) {
-		return icon->propertyEvent();
-	}
+  void buttonEvent(GdkEventButton *event);
+  static void gtkButtonEvent(GtkStatusIcon*, GdkEventButton *event, Icon *icon) {
+    icon->buttonEvent(event);
+  }
+  gboolean propertyEvent();
+  gulong propertyEventId;
+  static gboolean gtkPropertyEvent(GtkStatusIcon*, GdkEventProperty *event, Icon *icon) {
+    return icon->propertyEvent();
+  }
 
 };
 

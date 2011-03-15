@@ -37,8 +37,8 @@
 
 var gMinTrayR = {};
 addEventListener(
-	'load',
-	function() {
+  'load',
+  function() {
     removeEventListener("load", arguments.callee, true);
 
     Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
@@ -52,5 +52,5 @@ addEventListener(
       this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
     });
   },
-	true
+  true
 );

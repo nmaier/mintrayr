@@ -37,20 +37,20 @@
 
 var gMinTrayR = {};
 addEventListener(
-	'load',
-	function() {
-		removeEventListener("load", arguments.callee, true);
+  'load',
+  function() {
+    removeEventListener("load", arguments.callee, true);
 
-		Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
-		gMinTrayR = new (function() {
-			gMinTrayR.MinTrayR.call(
-				this,
-				document.getElementById('MinTrayR_context'),
-				'browser.watchbrowser'
-				);
-			this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
-			this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
-		});
-	},
-	true
+    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+    gMinTrayR = new (function() {
+      gMinTrayR.MinTrayR.call(
+        this,
+        document.getElementById('MinTrayR_context'),
+        'browser.watchbrowser'
+        );
+      this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
+      this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
+    });
+  },
+  true
 );

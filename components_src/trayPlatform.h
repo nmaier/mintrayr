@@ -83,9 +83,9 @@ NS_IMETHODIMP UnwatchWindow(nsIDOMWindow *aWindow);
  */
 class Icon {
 public:
-	virtual ~Icon() {}
-	virtual void Minimize() = 0;
-	virtual void Restore() = 0;
+  virtual ~Icon() {}
+  virtual void Minimize() = 0;
+  virtual void Restore() = 0;
 };
 
 /**

@@ -37,43 +37,43 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 <!DOCTYPE overlay [
-	<!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
-	%brandingDTD;
-	<!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
-	%mozappsDTD;
-	<!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
-	%prefsDTD;
+  <!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
+  %brandingDTD;
+  <!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
+  %mozappsDTD;
+  <!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
+  %prefsDTD;
     <!ENTITY % tasksDTD SYSTEM "chrome://communicator/locale/tasksOverlay.dtd">
     %tasksDTD;
     <!ENTITY % mailTasksDTD SYSTEM "chrome://messenger/locale/mailTasksOverlay.dtd">
     %mailTasksDTD;
-	<!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
-	%messengerDTD;
-	<!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
-	%browserDTD;
+  <!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
+  %messengerDTD;
+  <!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
+  %browserDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<prefpane id="paneSpecific" label="&brandShortName;">
-		<preferences>
-			<preference id="watchbrowser" name="extensions.mintrayr.browser.watchbrowser" type="bool"/>
-			<preference id="watchbookmarks" name="extensions.mintrayr.browser.watchbookmarks" type="bool"/>
-			<preference id="watchdownloads" name="extensions.mintrayr.mozapps.watchdownloads" type="bool"/>
-			<preference id="watchmessenger" name="extensions.mintrayr.messenger.watchmessenger" type="bool"/>
-			<preference id="watchreader" name="extensions.mintrayr.messenger.watchreader" type="bool"/>
-			<preference id="watchcomposer" name="extensions.mintrayr.messenger.watchcomposer" type="bool"/>
-		</preferences>
+  <prefpane id="paneSpecific" label="&brandShortName;">
+    <preferences>
+      <preference id="watchbrowser" name="extensions.mintrayr.browser.watchbrowser" type="bool"/>
+      <preference id="watchbookmarks" name="extensions.mintrayr.browser.watchbookmarks" type="bool"/>
+      <preference id="watchdownloads" name="extensions.mintrayr.mozapps.watchdownloads" type="bool"/>
+      <preference id="watchmessenger" name="extensions.mintrayr.messenger.watchmessenger" type="bool"/>
+      <preference id="watchreader" name="extensions.mintrayr.messenger.watchreader" type="bool"/>
+      <preference id="watchcomposer" name="extensions.mintrayr.messenger.watchcomposer" type="bool"/>
+    </preferences>
 
-		<groupbox>
-			<caption label="&navigatorCmd.label;"/>
-			<checkbox preference="watchbrowser" label="&mintrayr.prefs.browser.watchbrowser;"/>
-			<checkbox preference="watchbookmarks" label="&mintrayr.prefs.browser.watchbookmarks;"/>
-			<checkbox preference="watchdownloads" label="&mintrayr.prefs.mozapps.watchdownloads;"/>
-		</groupbox>
-		<groupbox>
-			<caption label="&messengerCmd.label;"/>
-			<checkbox preference="watchmessenger" label="&mintrayr.prefs.messenger.watchmessenger;"/>
-			<checkbox preference="watchreader" label="&mintrayr.prefs.messenger.watchreader;"/>
-			<checkbox preference="watchcomposer" label="&mintrayr.prefs.messenger.watchcomposer;"/>
-		</groupbox>
-	</prefpane>
+    <groupbox>
+      <caption label="&navigatorCmd.label;"/>
+      <checkbox preference="watchbrowser" label="&mintrayr.prefs.browser.watchbrowser;"/>
+      <checkbox preference="watchbookmarks" label="&mintrayr.prefs.browser.watchbookmarks;"/>
+      <checkbox preference="watchdownloads" label="&mintrayr.prefs.mozapps.watchdownloads;"/>
+    </groupbox>
+    <groupbox>
+      <caption label="&messengerCmd.label;"/>
+      <checkbox preference="watchmessenger" label="&mintrayr.prefs.messenger.watchmessenger;"/>
+      <checkbox preference="watchreader" label="&mintrayr.prefs.messenger.watchreader;"/>
+      <checkbox preference="watchcomposer" label="&mintrayr.prefs.messenger.watchcomposer;"/>
+    </groupbox>
+  </prefpane>
 </overlay>

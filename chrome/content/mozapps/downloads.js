@@ -37,8 +37,8 @@
 
 var gMinTrayR = {};
 addEventListener(
-	'load',
-	function() {
+  'load',
+  function() {
     removeEventListener("load", arguments.callee, true);
 
     Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
@@ -46,5 +46,5 @@ addEventListener(
       gMinTrayR.MinTrayR.call(this, document.getElementById('MinTrayR_context'), 'mozapps.watchdownloads');
     });
   },
-	true
+  true
 );

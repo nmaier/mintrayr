@@ -40,43 +40,43 @@
    - ***** END LICENSE BLOCK ***** -->
 
 <!DOCTYPE prefwindow [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">
-	%globalDTD;
-	<!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
-	%prefsDTD;
+  <!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">
+  %globalDTD;
+  <!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
+  %prefsDTD;
 ]>
 
 <prefwindow
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	id="MinTrayR"
-	windowtype="MinTrayR:Preferences"
-	title="&mintrayr.prefs.title;"
-	persist="lastSelected screenX screenY"
-	style="&mintrayr.prefs.winstyle;"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  id="MinTrayR"
+  windowtype="MinTrayR:Preferences"
+  title="&mintrayr.prefs.title;"
+  persist="lastSelected screenX screenY"
+  style="&mintrayr.prefs.winstyle;"
 >
-	<prefpane id="paneMain" label="&mintrayr.prefs.main;">
-		<preferences>
-			<preference id="minimizeon" name="extensions.mintrayr.minimizeon" type="int"/>
-			<preference id="dblclickrestore" name="extensions.mintrayr.dblclickrestore" type="bool"/>
-			<preference id="showcontext" name="extensions.mintrayr.showcontext" type="bool"/>
-		</preferences>
-		
-		<groupbox>
-			<caption label="&mintrayr.prefs.minimizeon;"/>
-			<radiogroup preference="minimizeon">
-				<radio value="0" label="&mintrayr.prefs.minimizeon.never;"/>
-				<radio value="1" label="&mintrayr.prefs.minimizeon.minimize;"/>
-				<radio value="2" label="&mintrayr.prefs.minimizeon.close;"/>
-				<radio value="3" label="&mintrayr.prefs.minimizeon.both;"/>
-			</radiogroup>
-		</groupbox>
-			
-		
+  <prefpane id="paneMain" label="&mintrayr.prefs.main;">
+    <preferences>
+      <preference id="minimizeon" name="extensions.mintrayr.minimizeon" type="int"/>
+      <preference id="dblclickrestore" name="extensions.mintrayr.dblclickrestore" type="bool"/>
+      <preference id="showcontext" name="extensions.mintrayr.showcontext" type="bool"/>
+    </preferences>
+
+    <groupbox>
+      <caption label="&mintrayr.prefs.minimizeon;"/>
+      <radiogroup preference="minimizeon">
+        <radio value="0" label="&mintrayr.prefs.minimizeon.never;"/>
+        <radio value="1" label="&mintrayr.prefs.minimizeon.minimize;"/>
+        <radio value="2" label="&mintrayr.prefs.minimizeon.close;"/>
+        <radio value="3" label="&mintrayr.prefs.minimizeon.both;"/>
+      </radiogroup>
+    </groupbox>
+
+
     <groupbox>
       <caption label="&mintrayr.prefs.clickbehavior;"/>
       <checkbox preference="dblclickrestore" label="&mintrayr.prefs.dblclickrestore;"/>
       <checkbox preference="showcontext" label="&mintrayr.prefs.showcontext;"/>
     </groupbox>
-	</prefpane>
-	<prefpane id="paneSpecific"/>	
+  </prefpane>
+  <prefpane id="paneSpecific"/>
 </prefwindow>

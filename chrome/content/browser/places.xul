@@ -39,14 +39,14 @@
    - ***** END LICENSE BLOCK ***** -->
 
 <!DOCTYPE overlay [
-	<!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
-	%browserDTD;
+  <!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
+  %browserDTD;
 ]>
 
 <overlay id="MinTrayR_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="text/javascript" src="chrome://mintrayr/content/browser/places.js"/>
+  <script type="text/javascript" src="chrome://mintrayr/content/browser/places.js"/>
 
-	<popupset>
-		<menupopup id="MinTrayR_context"/>
-	</popupset>
+  <popupset>
+    <menupopup id="MinTrayR_context"/>
+  </popupset>
 </overlay>

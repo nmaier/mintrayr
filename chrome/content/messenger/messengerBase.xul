@@ -39,23 +39,23 @@
    - ***** END LICENSE BLOCK ***** -->
 
 <!DOCTYPE overlay [
-	<!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
-	%messengerDTD;
+  <!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
+  %messengerDTD;
 ]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <keyset id="mailKeys">
     <keyset id="MinTrayR_keyset"/>
   </keyset>
-  
-	<menupopup id="menu_FilePopup">
-		<menuitem id="MinTrayR_minimize" insertbefore="menu_FileQuitItem"/>
-	</menupopup>
-	
-	<popupset>
-			<menupopup id="MinTrayR_context" mintrayr_newmessage="&mintrayr.newmessage;">
-				<menuseparator id="MinTrayR_sep-top"/>	
-			   <menuseparator id="MinTrayR_sep-bottom"/>
-			</menupopup> 
-		</popupset>
+
+  <menupopup id="menu_FilePopup">
+    <menuitem id="MinTrayR_minimize" insertbefore="menu_FileQuitItem"/>
+  </menupopup>
+
+  <popupset>
+      <menupopup id="MinTrayR_context" mintrayr_newmessage="&mintrayr.newmessage;">
+        <menuseparator id="MinTrayR_sep-top"/>
+         <menuseparator id="MinTrayR_sep-bottom"/>
+      </menupopup>
+    </popupset>
 </overlay>

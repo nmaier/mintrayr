@@ -38,25 +38,24 @@
    - ***** END LICENSE BLOCK ***** -->
 
 <!DOCTYPE overlay [
-	<!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
-	%brandingDTD;	
-	<!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
-	%mozappsDTD;	
-	<!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
-	%prefsDTD;
-	<!ENTITY % instantbirdDTD SYSTEM "chrome://mintrayr/locale/instantbird.dtd">
-	%instantbirdDTD;
+  <!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
+  %brandingDTD;
+  <!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
+  %mozappsDTD;
+  <!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
+  %prefsDTD;
+  <!ENTITY % instantbirdDTD SYSTEM "chrome://mintrayr/locale/instantbird.dtd">
+  %instantbirdDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<prefpane id="paneSpecific" label="&brandShortName;">
-		<preferences>
-			<preference id="watchblist" name="extensions.mintrayr.instantbird.watchblist" type="bool"/>
-		</preferences>
-		
-		<groupbox>
-			<caption label="&mintrayr.prefs.watchwindows;"/>
-			<checkbox preference="watchblist" label="&mintrayr.prefs.instantbird.watchblist;"/>
-		</groupbox>
-	</prefpane>
+  <prefpane id="paneSpecific" label="&brandShortName;">
+    <preferences>
+      <preference id="watchblist" name="extensions.mintrayr.instantbird.watchblist" type="bool"/>
+    </preferences>
+
+    <groupbox>
+      <caption label="&mintrayr.prefs.watchwindows;"/>
+      <checkbox preference="watchblist" label="&mintrayr.prefs.instantbird.watchblist;"/>
+    </groupbox>
+  </prefpane>
 </overlay>
-	

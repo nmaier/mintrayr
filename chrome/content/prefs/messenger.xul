@@ -37,29 +37,28 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 <!DOCTYPE overlay [
-	<!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
-	%brandingDTD;	
-	<!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
-	%mozappsDTD;
-	<!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
-	%prefsDTD;
-	<!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
-	%messengerDTD;	
+  <!ENTITY % brandingDTD SYSTEM "chrome://branding/locale/brand.dtd">
+  %brandingDTD;
+  <!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
+  %mozappsDTD;
+  <!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
+  %prefsDTD;
+  <!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
+  %messengerDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<prefpane id="paneSpecific" label="&brandShortName;">
-		<preferences>
-			<preference id="watchmessenger" name="extensions.mintrayr.messenger.watchmessenger" type="bool"/>
-			<preference id="watchreader" name="extensions.mintrayr.messenger.watchreader" type="bool"/>
-			<preference id="watchcomposer" name="extensions.mintrayr.messenger.watchcomposer" type="bool"/>
-		</preferences>
-		
-		<groupbox>
-			<caption label="&mintrayr.prefs.watchwindows;"/>
-			<checkbox preference="watchmessenger" label="&mintrayr.prefs.messenger.watchmessenger;"/>
-			<checkbox preference="watchreader" label="&mintrayr.prefs.messenger.watchreader;"/>	
-			<checkbox preference="watchcomposer" label="&mintrayr.prefs.messenger.watchcomposer;"/>
-		</groupbox>
-	</prefpane>
+  <prefpane id="paneSpecific" label="&brandShortName;">
+    <preferences>
+      <preference id="watchmessenger" name="extensions.mintrayr.messenger.watchmessenger" type="bool"/>
+      <preference id="watchreader" name="extensions.mintrayr.messenger.watchreader" type="bool"/>
+      <preference id="watchcomposer" name="extensions.mintrayr.messenger.watchcomposer" type="bool"/>
+    </preferences>
+
+    <groupbox>
+      <caption label="&mintrayr.prefs.watchwindows;"/>
+      <checkbox preference="watchmessenger" label="&mintrayr.prefs.messenger.watchmessenger;"/>
+      <checkbox preference="watchreader" label="&mintrayr.prefs.messenger.watchreader;"/>
+      <checkbox preference="watchcomposer" label="&mintrayr.prefs.messenger.watchcomposer;"/>
+    </groupbox>
+  </prefpane>
 </overlay>
-	

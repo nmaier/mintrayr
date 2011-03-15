@@ -41,8 +41,8 @@
 <!DOCTYPE overlay>
 
 <overlay id="MinTrayR_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="text/javascript" src="chrome://mintrayr/content/messenger/messenger.js"/>
-	<toolbarpalette id="MailToolbarPalette">	
-		<toolbarbutton id="MinTrayR_toolbaritem"/>
-	</toolbarpalette>		
+  <script type="text/javascript" src="chrome://mintrayr/content/messenger/messenger.js"/>
+  <toolbarpalette id="MailToolbarPalette">
+    <toolbarbutton id="MinTrayR_toolbaritem"/>
+  </toolbarpalette>
 </overlay>

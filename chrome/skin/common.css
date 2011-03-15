@@ -1,16 +1,16 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 #MinTrayR_toolbaritem {
-	list-style-image: url(chrome://mintrayr/skin/toolbuttons.png);
-	-moz-image-region: rect(0px, 24px, 24px, 0px);
+  list-style-image: url(chrome://mintrayr/skin/toolbuttons.png);
+  -moz-image-region: rect(0px, 24px, 24px, 0px);
 }
 #MinTrayR_toolbaritem:hover {
-	-moz-image-region: rect(0px, 48px, 24px, 24px);
+  -moz-image-region: rect(0px, 48px, 24px, 24px);
 }
 
 toolbar[iconsize="small"] #MinTrayR_toolbaritem {
-	-moz-image-region: rect(24px, 16px, 40px, 0px);
+  -moz-image-region: rect(24px, 16px, 40px, 0px);
 }
 toolbar[iconsize="small"] #MinTrayR_toolbaritem:hover {
-	-moz-image-region: rect(24px, 40px, 40px, 24px);	
+  -moz-image-region: rect(24px, 40px, 40px, 24px);
 }

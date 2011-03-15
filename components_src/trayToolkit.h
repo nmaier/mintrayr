@@ -63,8 +63,8 @@ namespace mintrayr {
  * Minimize on what actions
  */
 typedef enum _eMinimizeActions {
-	kTrayOnMinimize = (1 << 0),
-	kTrayOnClose = (1 << 1)
+  kTrayOnMinimize = (1 << 0),
+  kTrayOnClose = (1 << 1)
 } eMinimizeActions;
 
 /**
@@ -72,7 +72,7 @@ typedef enum _eMinimizeActions {
  * The implementation will be platform specific
  */
 namespace platform {
-	class Icon;
+  class Icon;
 }
 
 /**
@@ -96,57 +96,57 @@ class TrayServiceImpl;
  * The implementation for trayITrayIcon
  */
 class TrayIconImpl : public trayITrayIcon, nsIDOMEventListener {
-	friend class platform::Icon;
+  friend class platform::Icon;
 
 private:
-	PRBool mIsMinimized;
-	nsCOMPtr<nsIDOMWindow> mWindow;
+  PRBool mIsMinimized;
+  nsCOMPtr<nsIDOMWindow> mWindow;
 
-	PRBool mCloseOnRestore;
+  PRBool mCloseOnRestore;
 
-	bool mClosed;
-	TrayServiceImpl *mService;
-	nsAutoPtr<platform::Icon> mIcon;
+  bool mClosed;
+  TrayServiceImpl *mService;
+  nsAutoPtr<platform::Icon> mIcon;
 
 public:
-	NS_DECL_ISUPPORTS
-	NS_DECL_NSIDOMEVENTLISTENER
-	NS_DECL_TRAYITRAYICON
+  NS_DECL_ISUPPORTS
+  NS_DECL_NSIDOMEVENTLISTENER
+  NS_DECL_TRAYITRAYICON
 
-	TrayIconImpl(TrayServiceImpl *aService)
-		: mIsMinimized(PR_FALSE),
-		mCloseOnRestore(PR_FALSE),
-		mClosed(false),
-		mService(aService)
-		{}
+  TrayIconImpl(TrayServiceImpl *aService)
+    : mIsMinimized(PR_FALSE),
+    mCloseOnRestore(PR_FALSE),
+    mClosed(false),
+    mService(aService)
+    {}
 
-	NS_IMETHOD Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore);
-	NS_IMETHOD DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey);
+  NS_IMETHOD Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore);
+  NS_IMETHOD DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey);
 };
 
 /**
  * The implementation for trayITrayService
  */
 class TrayServiceImpl : public trayITrayService, nsIObserver {
-	friend class TrayIconImpl;
+  friend class TrayIconImpl;
 public:
-	NS_DECL_ISUPPORTS
-	NS_DECL_NSIOBSERVER
-	NS_DECL_TRAYITRAYSERVICE
+  NS_DECL_ISUPPORTS
+  NS_DECL_NSIOBSERVER
+  NS_DECL_TRAYITRAYSERVICE
 
-	TrayServiceImpl();
-
-private:
-	nsCOMArray<trayITrayIcon> mIcons;
-	nsCOMArray<nsIDOMWindow> mWatches;
+  TrayServiceImpl();
 
 private:
-	~TrayServiceImpl();
-	void Destroy();
+  nsCOMArray<trayITrayIcon> mIcons;
+  nsCOMArray<nsIDOMWindow> mWatches;
 
-	void UnwatchAll();
+private:
+  ~TrayServiceImpl();
+  void Destroy();
 
-	void CloseIcon(trayITrayIcon *aIcon);
+  void UnwatchAll();
+
+  void CloseIcon(trayITrayIcon *aIcon);
 };
 
 } // namespace

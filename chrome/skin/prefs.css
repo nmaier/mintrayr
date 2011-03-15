@@ -1,19 +1,19 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 prefwindow {
-	min-width: 30em;
-	min-height: 20em;
+  min-width: 30em;
+  min-height: 20em;
 }
 
 /* songbird hack */
 .paneButtonIcon {
-	width: 32px;
-	height: 32px;
+  width: 32px;
+  height: 32px;
 }
 
 radio[pane="paneMain"] {
-	list-style-image: url(chrome://mintrayr-icon/skin/icon.png);
+  list-style-image: url(chrome://mintrayr-icon/skin/icon.png);
 }
 radio[pane="paneSpecific"] {
-	list-style-image: url(chrome://mintrayr-icon/skin/appicon64.png);
+  list-style-image: url(chrome://mintrayr-icon/skin/appicon64.png);
 }

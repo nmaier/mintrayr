@@ -41,11 +41,11 @@
 <!DOCTYPE overlay>
 
 <overlay id="MinTrayR_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="text/javascript" src="chrome://mintrayr/content/mozapps/downloads.js"/>
+  <script type="text/javascript" src="chrome://mintrayr/content/mozapps/downloads.js"/>
   <keyset>
     <keyset id="MinTrayR_keyset"/>
   </keyset>
-	<popupset>
-		<menupopup id="MinTrayR_context"/>
-	</popupset>
+  <popupset>
+    <menupopup id="MinTrayR_context"/>
+  </popupset>
 </overlay>

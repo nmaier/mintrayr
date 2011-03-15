@@ -41,21 +41,21 @@
 <!DOCTYPE overlay>
 
 <overlay id="MinTrayR_overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="text/javascript" src="chrome://mintrayr/content/navigator/navigator.js"/>
+  <script type="text/javascript" src="chrome://mintrayr/content/navigator/navigator.js"/>
   <keyset id="mainKeyset">
     <keyset id="MinTrayR_keyset"/>
   </keyset>
-	<menupopup id="menu_FilePopup">
-		<menuitem id="MinTrayR_minimize" insertbefore="goOfflineMenuitem"/>
-	</menupopup>
-	<popupset id="mainPopupSet">
-		<menupopup id="MinTrayR_context">
-			<menuseparator id="MinTrayR_sep-top"/>
-			<menuseparator id="MinTrayR_sep-bottom"/>
-		</menupopup>
-	</popupset>
+  <menupopup id="menu_FilePopup">
+    <menuitem id="MinTrayR_minimize" insertbefore="goOfflineMenuitem"/>
+  </menupopup>
+  <popupset id="mainPopupSet">
+    <menupopup id="MinTrayR_context">
+      <menuseparator id="MinTrayR_sep-top"/>
+      <menuseparator id="MinTrayR_sep-bottom"/>
+    </menupopup>
+  </popupset>
 
-	<toolbarpalette id="BrowserToolbarPalette">
-		<toolbarbutton id="MinTrayR_toolbaritem"/>
-	</toolbarpalette>
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="MinTrayR_toolbaritem"/>
+  </toolbarpalette>
 </overlay>
