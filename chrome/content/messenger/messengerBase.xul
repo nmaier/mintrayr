@@ -49,13 +49,13 @@
   </keyset>
 
   <menupopup id="menu_FilePopup">
-    <menuitem id="MinTrayR_minimize" insertbefore="menu_FileQuitItem"/>
+    <menuitem id="MinTrayR_minimize" insertafter="menu_FileCloseSeparator"/>
   </menupopup>
 
   <popupset>
       <menupopup id="MinTrayR_context" mintrayr_newmessage="&mintrayr.newmessage;">
         <menuseparator id="MinTrayR_sep-top"/>
-         <menuseparator id="MinTrayR_sep-bottom"/>
+        <menuseparator id="MinTrayR_sep-bottom"/>
       </menupopup>
     </popupset>
 </overlay>

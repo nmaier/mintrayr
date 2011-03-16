@@ -53,7 +53,8 @@ addEventListener(
         'label',
         menu.getAttribute('mintrayr_newmessage')
       );
-      this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
+      document.getElementById('MinTrayR_sep-bottom').hidden = true;
+    })();
   },
   true
 );
