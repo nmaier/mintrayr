@@ -60,12 +60,12 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "FileDescription", "TrayToolkit XPCOM Components"
-            VALUE "FileVersion", "0, 8, 0, 0"
+            VALUE "FileVersion", "0, 9, 0, 0"
             VALUE "InternalName", "TrayToolkit"
-            VALUE "LegalCopyright", "Copyright (C) 2008-2010 Nils Maier. MPL-Tri licensed"
+            VALUE "LegalCopyright", "Copyright (C) 2008-2011 Nils Maier. MPL-Tri licensed"
             VALUE "OriginalFilename", "trayToolkit.dll"
             VALUE "ProductName", "MinTrayR Mozilla extension"
-            VALUE "ProductVersion", "0, 8, 0, 0"
+            VALUE "ProductVersion", "0, 9, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
