@@ -39,6 +39,7 @@ var gMinTrayR = {};
 addEventListener(
   'load',
   function() {
+    function $(id) document.getElementById(id);
     removeEventListener("load", arguments.callee, true);
 
     if (!window.toolbar.visible) {
@@ -49,27 +50,44 @@ addEventListener(
     gMinTrayR = new (function() {
       gMinTrayR.MinTrayR.call(
         this,
-        document.getElementById('MinTrayR_context'),
+        $('MinTrayR_context'),
         'browser.watchbrowser'
         );
       this.cloneToMenu('MinTrayR_sep-top', ['menu_newNavigator'], false);
       this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
 
-      // Override WindowIsClosing to correctly tray-on-close
-      // See GH-6
+      // Correctly tray-on-close, as Firefox 4 owner-draws the window controls in non-aero windows.
+      // This will remove the commands from the close button widgets and add an own window handler.
+      // Sucks, but there is not really another way.
+      // See GH-6, GH-9
       (function(self) {
-        if (!WindowIsClosing) {
-          return;
-        }
-        let _old = WindowIsClosing;
-        WindowIsClosing = function() {
+        function MinTrayRTryCloseToWindow(event){
           if (self.prefs.getExt('browser.watchbrowser', true)
             && (self.prefs.getExt('minimizeon', 1) & (1<<1))) {
             self.minimize();
+            event.preventDefault();
+            event.stopPropagation();
             return false;
           }
-          return _old.apply(window, arguments);
+          // must be in sync with the original command
+          return BrowserTryToCloseWindow();
         }
+        function hijackCloseButton(id) {
+          let closeButton = $(id);
+          if (!closeButton) {
+            // Only available in Firefox 4
+            return;
+          }
+
+          // Remove old command(s)
+          // titlebar-close sets both, command and oncommand :p
+          closeButton.removeAttribute('command');
+          closeButton.removeAttribute('oncommand');
+
+          // Add ourselves
+          closeButton.addEventListener('command', MinTrayRTryCloseToWindow, false);
+        }
+        ['titlebar-close', 'close-button'].forEach(hijackCloseButton);
       })(this);
 
     });
