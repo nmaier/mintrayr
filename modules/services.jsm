@@ -46,7 +46,7 @@ const trayService = Cc['@tn123.ath.cx/trayservice;1'].getService(Ci.trayITraySer
 const log = Components.utils.reportError;
 
 function minimizeWindow(window) {
-  trayService.minimize(window);
+  trayService.minimize(window, true);
 }
 
 function restoreWindow(window) {
