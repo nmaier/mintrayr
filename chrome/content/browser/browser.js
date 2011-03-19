@@ -41,6 +41,10 @@ addEventListener(
   function() {
     removeEventListener("load", arguments.callee, true);
 
+    if (!window.toolbar.visible) {
+      return;
+    }
+
     Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
     gMinTrayR = new (function() {
       gMinTrayR.MinTrayR.call(
