@@ -120,10 +120,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       if (wp->flags & SWP_SHOWWINDOW) {
         // Shown again, unexpectedly that is, so release
         Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-        if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
+        if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
           goto WndProcEnd;
         }
-        me->mIcon->Restore();
+        me->mOwnerIcon->Restore();
       }
       else if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
         WINDOWPLACEMENT pl;
@@ -162,7 +162,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     if (uMsg == WM_TASKBARCREATED) {
       // Try to get the platform icon
       Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
+      if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
         goto WndProcEnd;
       }
       // The taskbar was (re)created. Add ourselves again.
@@ -173,7 +173,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     else if (uMsg == WM_TRAYMESSAGE) {
       // Try to get the platform icon
       Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
+      if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
         // eat message, as it is our message
         return 0;
       }
@@ -221,7 +221,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
           // SFW/PM is a win32 hack, so that the context menu is hidden when loosing focus.
           ::SetForegroundWindow(hwnd);
-          me->mIcon->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
+          me->mOwnerIcon->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
           ::PostMessage(hwnd, WM_NULL, 0, 0L);
         }
       }
@@ -232,7 +232,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     else if (uMsg == WM_SETTEXT) {
       // Try to get the platform icons
       Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
+      if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
         goto WndProcEnd;
       }
 
@@ -337,7 +337,7 @@ NS_IMETHODIMP UnwatchWindow(nsIDOMWindow *aWindow)
 namespace win {
 
 Icon::Icon(TrayIconImpl *aIcon, nsIDOMWindow *aWindow, const nsString& aTitle)
-  : mIcon(aIcon)
+  : mOwnerIcon(aIcon)
 {
   Init(aWindow, aTitle);
 }
@@ -408,7 +408,7 @@ Icon::~Icon()
   // Remove the icon
   ::Shell_NotifyIconW(NIM_DELETE, &mIconData);
 
-  mIcon = 0;
+  mOwnerIcon = 0;
 }
 
 void Icon::Restore()

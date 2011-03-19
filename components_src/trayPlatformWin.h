@@ -68,7 +68,7 @@ private:
 public:
   HWND mWnd;
   NOTIFYICONDATAW mIconData;
-  TrayIconImpl *mIcon;
+  TrayIconImpl *mOwnerIcon;
 
   Icon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle);
   virtual ~Icon();
