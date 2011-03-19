@@ -29,13 +29,13 @@ static UINT WM_TRAYMESSAGE = 0;
 static void AdjustMessageFilters(UINT filter)
 {
   HMODULE user32 = LoadLibraryW(L"user32.dll");
-  if (user32 != NULL) {
+  if (user32 != 0) {
     pChangeWindowMessageFilter changeWindowMessageFilter =
       reinterpret_cast<pChangeWindowMessageFilter>(GetProcAddress(
         user32,
         "ChangeWindowMessageFilter"
       ));
-    if (changeWindowMessageFilter != NULL) {
+    if (changeWindowMessageFilter != 0) {
       changeWindowMessageFilter(WM_TASKBARCREATED, filter);
     }
     FreeLibrary(user32);
@@ -83,15 +83,18 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     // Watcher stuff
 
     switch (uMsg) {
-        case WM_WINDOWPOSCHANGING: {
+    case WM_WINDOWPOSCHANGING: {
       /* XXX Fix this bit to something more reasonable
          The following code kinda replicates the way mozilla gets the window state.
          We intensionally "hide" the SW_SHOWMINIMIZED here.
          This indeed might cause some side effects, but if it didn't we couldn't open
          menus due to bugzilla #435848,.
          This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
-      */
+         */
       WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(lParam);
+      if (wp == 0) {
+        goto WndProcEnd;
+      }
       if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
         WINDOWPLACEMENT pl;
         pl.length = sizeof(WINDOWPLACEMENT);
@@ -100,8 +103,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
           return 0;
         }
       }
-            break;
-        }
+      break;
+    }
     case WM_WINDOWPOSCHANGED: {
       /* XXX Fix this bit to something more reasonable
          The following code kinda replicates the way mozilla gets the window state.
@@ -111,15 +114,18 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
          This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
       */
       WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(lParam);
-      if (wp && wp->flags & SWP_SHOWWINDOW) {
+      if (wp == 0) {
+        goto WndProcEnd;
+      }
+      if (wp->flags & SWP_SHOWWINDOW) {
         // Shown again, unexpectedly that is, so release
         Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-        if (!me) {
+        if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
           goto WndProcEnd;
         }
         me->mIcon->Restore();
       }
-      else if (wp && wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
+      else if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
         WINDOWPLACEMENT pl;
         pl.length = sizeof(WINDOWPLACEMENT);
         ::GetWindowPlacement(hwnd, &pl);
@@ -156,7 +162,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     if (uMsg == WM_TASKBARCREATED) {
       // Try to get the platform icon
       Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (!me) {
+      if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
         goto WndProcEnd;
       }
       // The taskbar was (re)created. Add ourselves again.
@@ -167,8 +173,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     else if (uMsg == WM_TRAYMESSAGE) {
       // Try to get the platform icon
       Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (!me) {
-        goto WndProcEnd;
+      if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
+        // eat message, as it is our message
+        return 0;
       }
 
       nsString eventName;
@@ -223,9 +230,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
     // Window title changed
     else if (uMsg == WM_SETTEXT) {
-      // Try to get the platform icon
+      // Try to get the platform icons
       Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (!me) {
+      if (me == 0 || me->mIcon == 0 || me->mIcon->IsClosed()) {
         goto WndProcEnd;
       }
 
@@ -234,7 +241,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       // this is required because we cannot know the encoding of this message for sure ;)
       LRESULT rv;
       WNDPROC oldWindowProc = reinterpret_cast<WNDPROC>(::GetPropW(hwnd, kOldProc));
-      if (oldWindowProc != NULL) {
+      if (oldWindowProc != 0) {
         rv = CallWindowProcW(oldWindowProc, hwnd, uMsg, wParam, lParam);
       }
       else {
@@ -252,7 +259,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 WndProcEnd:
   // Call the old WNDPROC or at lest DefWindowProc
   WNDPROC oldProc = reinterpret_cast<WNDPROC>(::GetPropW(hwnd, kOldProc));
-  if (oldProc != NULL) {
+  if (oldProc != 0) {
     return ::CallWindowProcW(oldProc, hwnd, uMsg, wParam, lParam);
   }
   return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
@@ -260,7 +267,7 @@ WndProcEnd:
 
 static void SetupWnd(HWND hwnd, nsIDOMWindow *aWindow)
 {
-  if (!::GetPropW(hwnd, kOldProc)) {
+  if (::GetPropW(hwnd, kOldProc) == 0) {
     ::SetPropW(hwnd, kDOMWindow, reinterpret_cast<HANDLE>(aWindow));
     WNDPROC oldProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
     ::SetPropW(hwnd, kOldProc, reinterpret_cast<HANDLE>(oldProc));
@@ -360,18 +367,18 @@ NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
   mIconData.szTip[128] = '\0'; // Better be safe than sorry :p
 
   // Get the window icon
-  HICON icon = reinterpret_cast<HICON>(::SendMessageW(mWnd, WM_GETICON, ICON_SMALL, NULL));
-  if (icon == NULL) {
+  HICON icon = reinterpret_cast<HICON>(::SendMessageW(mWnd, WM_GETICON, ICON_SMALL, 0));
+  if (icon == 0) {
     // Alternative method. Get from the window class
     icon = reinterpret_cast<HICON>(::GetClassLongPtrW(mWnd, GCLP_HICONSM));
   }
   // Alternative method: get the first icon from the main module (executable image of the process)
-  if (icon == NULL) {
-    icon = ::LoadIcon(GetModuleHandleW(NULL), MAKEINTRESOURCE(0));
+  if (icon == 0) {
+    icon = ::LoadIcon(GetModuleHandleW(0), MAKEINTRESOURCE(0));
   }
   // Alternative method. Use OS default icon
-  if (icon == NULL) {
-    icon = ::LoadIcon(NULL, IDI_APPLICATION);
+  if (icon == 0) {
+    icon = ::LoadIcon(0, IDI_APPLICATION);
   }
   mIconData.hIcon = icon;
 
@@ -400,6 +407,8 @@ Icon::~Icon()
 
   // Remove the icon
   ::Shell_NotifyIconW(NIM_DELETE, &mIconData);
+
+  mIcon = 0;
 }
 
 void Icon::Restore()

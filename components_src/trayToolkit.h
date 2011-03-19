@@ -122,6 +122,7 @@ public:
 
   NS_IMETHOD Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore);
   NS_IMETHOD DispatchMouseEvent(const nsAString& aEventName, PRUint16 aButton, nsPoint& pt, PRBool aCtrlKey, PRBool aAltKey, PRBool aShiftKey);
+  inline bool IsClosed() const { return mClosed; }
 };
 
 /**
