@@ -192,7 +192,7 @@ NS_IMETHODIMP TrayIconImpl::Minimize()
     // Already minimized
     return NS_OK;
   }
-  mIcon->Minimize();
+  mPlatformIcon->Minimize();
   mIsMinimized = PR_TRUE;
   return NS_OK;
 }
@@ -209,7 +209,7 @@ NS_IMETHODIMP TrayIconImpl::Restore()
     Close();
   }
   else {
-    mIcon->Restore();
+    mPlatformIcon->Restore();
   }
   mIsMinimized = PR_FALSE;
 
@@ -222,7 +222,7 @@ NS_IMETHODIMP TrayIconImpl::Close()
   }
   mClosed = true;
 
-  delete mIcon.forget();
+  delete mPlatformIcon.forget();
   mService->CloseIcon(this);
   mIsMinimized = PR_FALSE;
 
@@ -265,7 +265,7 @@ NS_IMETHODIMP TrayIconImpl::Init(nsIDOMWindow *aWindow, PRBool aCloseOnRestore)
 
   nsString title;
   baseWindow->GetTitle(getter_Copies(title));
-  mIcon = platform::CreateIcon(this, aWindow, title);
+  mPlatformIcon = platform::CreateIcon(this, aWindow, title);
   mWindow = aWindow;
 
   return NS_OK;

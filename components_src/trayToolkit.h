@@ -106,7 +106,7 @@ private:
 
   bool mClosed;
   TrayServiceImpl *mService;
-  nsAutoPtr<platform::Icon> mIcon;
+  nsAutoPtr<platform::Icon> mPlatformIcon;
 
 public:
   NS_DECL_ISUPPORTS
