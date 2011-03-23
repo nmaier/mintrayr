@@ -171,13 +171,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
     // We got clicked. How exciting, isn't it.
     else if (uMsg == WM_TRAYMESSAGE) {
-      // Try to get the platform icon
-      Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
-        // eat message, as it is our message
-        return 0;
-      }
-
       nsString eventName;
       PRUint16 button = 0;
       switch (LOWORD(lParam)) {
@@ -221,7 +214,13 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
           // SFW/PM is a win32 hack, so that the context menu is hidden when loosing focus.
           ::SetForegroundWindow(hwnd);
-          me->mOwnerIcon->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
+
+          // Try to get the platform icon
+          Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
+          if (me != 0 && me->mOwnerIcon != 0 && !me->mOwnerIcon->IsClosed()) {
+            me->mOwnerIcon->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
+          }
+
           ::PostMessage(hwnd, WM_NULL, 0, 0L);
         }
       }
