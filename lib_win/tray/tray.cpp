@@ -1,15 +1,15 @@
-#include "trayToolkit.h"
-#include "trayPlatformWin.h"
-
-namespace mintrayr {
-namespace platform {
+#include <windows.h>
+#include "tray.h"
 
 static const wchar_t kTrayMessage[]  = L"_MINTRAYR_TrayMessageW";
-static const wchar_t kDOMWindow[]  = L"_MINTRAYR_DOM";
 static const wchar_t kOldProc[] = L"_MINTRAYR_WRAPPER_OLD_PROC";
+
 static const wchar_t kWatch[] = L"_MINTRAYR_WATCH";
+static const wchar_t kWatchMinimizeProc[] = L"_MINTRAYR_WATCH_MINIMIZEPROC";
+
 static const wchar_t kIcon[] = L"_MINTRAYR_ICON";
-static const wchar_t kPlatformIcon[] = L"_MINTRAYR_PICON";
+static const wchar_t kIconData[] = L"_MINTRAYR_ICON_DATA";
+static const wchar_t kIconMouseEventProc[] = L"_MINTRAYR_ICON_MOUSEEVENTPROC";
 
 typedef BOOL (WINAPI *pChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
 #ifndef MGSFLT_ADD
@@ -20,6 +20,15 @@ typedef BOOL (WINAPI *pChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
 
 static UINT WM_TASKBARCREATED = 0;
 static UINT WM_TRAYMESSAGE = 0;
+
+/**
+ * Minimize on what actions
+ */
+typedef enum _eMinimizeActions {
+  kTrayOnMinimize = (1 << 0),
+  kTrayOnClose = (1 << 1)
+} eMinimizeActions;
+
 
 /**
  * Helper function that will allow us to receive some broadcast messages on Vista
@@ -58,27 +67,10 @@ public:
 };
 
 /**
- * Helper: We need to get the DOMWindow from the hwnd
- */
-static bool DoMinimizeWindowWin(HWND hwnd, eMinimizeActions action)
-{
-  nsIDOMWindow *window = reinterpret_cast<nsIDOMWindow*>(::GetPropW(hwnd, kDOMWindow));
-  if (window == 0) {
-    return false;
-  }
-  if (::GetPropW(hwnd, kWatch) == (HANDLE)0x2) {
-    return true;
-  }
-  return DoMinimizeWindow(window, action);
-}
-
-/**
  * Helper: Subclassed Windows WNDPROC
  */
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  using win::Icon;
-
   if (::GetPropW(hwnd, kWatch) > (HANDLE)0x0) {
     // Watcher stuff
 
@@ -88,7 +80,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
          The following code kinda replicates the way mozilla gets the window state.
          We intensionally "hide" the SW_SHOWMINIMIZED here.
          This indeed might cause some side effects, but if it didn't we couldn't open
-         menus due to bugzilla #435848,.
+         menus due to bugzilla #435848.
          This might defeat said bugfix completely reverting to old behavior, but only when we're active, of course.
          */
       WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(lParam);
@@ -117,7 +109,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       if (wp == 0) {
         goto WndProcEnd;
       }
-      if (wp->flags & SWP_SHOWWINDOW) {
+      /*if (wp->flags & SWP_SHOWWINDOW) {
         // Shown again, unexpectedly that is, so release
         Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
         if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
@@ -125,12 +117,13 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         }
         me->mOwnerIcon->Restore();
       }
-      else if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
+      else*/ if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
         WINDOWPLACEMENT pl;
         pl.length = sizeof(WINDOWPLACEMENT);
         ::GetWindowPlacement(hwnd, &pl);
         if (pl.showCmd == SW_SHOWMINIMIZED) {
-          if (DoMinimizeWindowWin(hwnd, kTrayOnMinimize)) {
+          minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(GetPropW(hwnd, kWatchMinimizeProc));
+          if (callback && callback(hwnd, kTrayOnMinimize)) {
             // We're active, ignore
             return 0;
           }
@@ -141,15 +134,21 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
       // Frame button clicked
-      if (wParam == HTCLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
-        return TRUE;
+      if (wParam == HTCLOSE) {
+        minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(GetPropW(hwnd, kWatchMinimizeProc));
+        if (callback && callback(hwnd, kTrayOnMinimize)) {
+          return TRUE;
+        }
       }
       break;
 
     case WM_SYSCOMMAND:
       // Window menu
-      if (wParam == SC_CLOSE && DoMinimizeWindowWin(hwnd, kTrayOnClose)) {
-        return 0;
+      if (wParam == SC_CLOSE) {
+        minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(GetPropW(hwnd, kWatchMinimizeProc));
+        if (callback && callback(hwnd, kTrayOnMinimize)) {
+          return 0;
+        }
       }
       break;
     }
@@ -161,64 +160,72 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     // This is a badly documented custom broadcast message by explorer
     if (uMsg == WM_TASKBARCREATED) {
       // Try to get the platform icon
-      Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
+      NOTIFYICONDATAW *iconData = reinterpret_cast<NOTIFYICONDATAW*>(GetPropW(hwnd, kIconData));
+      if (iconData == 0) {
         goto WndProcEnd;
       }
       // The taskbar was (re)created. Add ourselves again.
-      Shell_NotifyIconW(NIM_ADD, &me->mIconData);
+      Shell_NotifyIconW(NIM_ADD, iconData);
     }
 
     // We got clicked. How exciting, isn't it.
     else if (uMsg == WM_TRAYMESSAGE) {
-      nsString eventName;
-      PRUint16 button = 0;
+      mouseevent_t event;
+      event.clickCount = 0;
       switch (LOWORD(lParam)) {
         case WM_LBUTTONUP:
         case WM_MBUTTONUP:
         case WM_RBUTTONUP:
         case WM_CONTEXTMENU:
         case NIN_KEYSELECT:
-          eventName = NS_LITERAL_STRING("TrayClick");
+          event.clickCount = 1;
           break;
         case WM_LBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
-          eventName = NS_LITERAL_STRING("TrayDblClick");
+          event.clickCount = 2;
           break;
       }
       switch (LOWORD(lParam)) {
         case WM_LBUTTONUP:
         case WM_LBUTTONDBLCLK:
-          button = 0;
+          event.button = 0;
           break;
         case WM_MBUTTONUP:
         case WM_MBUTTONDBLCLK:
-          button = 1;
+          event.button = 1;
           break;
         case WM_RBUTTONUP:
         case WM_RBUTTONDBLCLK:
         case WM_CONTEXTMENU:
         case NIN_KEYSELECT:
-          button = 2;
+          event.button = 2;
           break;
       }
-      if (eventName.IsEmpty() == PR_FALSE) {
+      if (event.clickCount) {
         POINT wpt;
         if (GetCursorPos(&wpt) == TRUE) {
-          nsPoint pt((nscoord)wpt.x, (nscoord)wpt.y);
+          event.x = wpt.x;
+          event.y = wpt.y;
 
-          PRBool ctrlKey = (::GetKeyState(VK_CONTROL) & 0x8000) != 0;
-          PRBool altKey = (::GetKeyState(VK_MENU) & 0x8000) != 0;
-          PRBool shiftKey = (::GetKeyState(VK_SHIFT) & 0x8000) != 0;
+          event.keys = 0;
+          if (::GetKeyState(VK_CONTROL) & 0x8000) {
+            event.keys += (1<<0);
+          }
+          if (::GetKeyState(VK_MENU) & 0x8000) {
+            event.keys += (1<<1);
+          }
+          if (::GetKeyState(VK_MENU) & 0x8000) {
+            event.keys += (1<<2);
+          }
 
           // SFW/PM is a win32 hack, so that the context menu is hidden when loosing focus.
           ::SetForegroundWindow(hwnd);
 
           // Try to get the platform icon
-          Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-          if (me != 0 && me->mOwnerIcon != 0 && !me->mOwnerIcon->IsClosed()) {
-            me->mOwnerIcon->DispatchMouseEvent(eventName, button, pt, ctrlKey, altKey, shiftKey);
+          mouseevent_callback_t callback = reinterpret_cast<mouseevent_callback_t>(GetPropW(hwnd, kIconMouseEventProc));
+          if (callback) {
+            callback(hwnd, &event);
           }
 
           ::PostMessage(hwnd, WM_NULL, 0, 0L);
@@ -229,9 +236,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
     // Window title changed
     else if (uMsg == WM_SETTEXT) {
-      // Try to get the platform icons
-      Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-      if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
+      NOTIFYICONDATAW *iconData = reinterpret_cast<NOTIFYICONDATAW*>(GetPropW(hwnd, kIconData));
+      if (iconData == 0) {
         goto WndProcEnd;
       }
 
@@ -247,9 +253,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         rv = DefWindowProcW(hwnd, uMsg, wParam, lParam);
       }
 
-      if (::GetWindowTextW(hwnd, me->mIconData.szTip, 128) != 0) {
-        me->mIconData.szTip[128] = '\0';
-        Shell_NotifyIconW(NIM_MODIFY, &me->mIconData);
+      if (::GetWindowTextW(hwnd, iconData->szTip, 127) != 0) {
+        iconData->szTip[128] = '\0';
+        Shell_NotifyIconW(NIM_MODIFY, iconData);
       }
       return rv;
     }
@@ -264,16 +270,7 @@ WndProcEnd:
   return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-static void SetupWnd(HWND hwnd, nsIDOMWindow *aWindow)
-{
-  if (::GetPropW(hwnd, kOldProc) == 0) {
-    ::SetPropW(hwnd, kDOMWindow, reinterpret_cast<HANDLE>(aWindow));
-    WNDPROC oldProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
-    ::SetPropW(hwnd, kOldProc, reinterpret_cast<HANDLE>(oldProc));
-  }
-}
-
-void Init()
+void WINAPI mintrayr_Init()
 {
   // Get TaskbarCreated
   WM_TASKBARCREATED = RegisterWindowMessageW(L"TaskbarCreated");
@@ -285,91 +282,111 @@ void Init()
     AdjustMessageFilters(MSGFLT_ADD);
   }
 }
-void Destroy() {
+
+void WINAPI mintrayr_Destroy()
+{
   // Vista (Administrator) needs some unlove, see c'tor
   if (OSVersionInfo().isVistaOrLater()) {
     AdjustMessageFilters(MSGFLT_REMOVE);
   }
 }
 
-Icon* CreateIcon(TrayIconImpl *aOwner, nsIDOMWindow* aWindow, const nsString& aTitle)
+static void SetupWnd(HWND hwnd)
 {
-  return new win::Icon(aOwner, aWindow, aTitle);
+  if (::GetPropW(hwnd, kOldProc) == 0) {
+    WNDPROC oldProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+    ::SetPropW(hwnd, kOldProc, reinterpret_cast<HANDLE>(oldProc));
+  }
 }
 
-NS_IMETHODIMP WatchWindow(nsIDOMWindow *aWindow)
+BOOL WINAPI mintrayr_WatchWindow(void *handle, minimize_callback_t callback)
 {
-  nsresult rv;
+  HWND hwnd = (HWND)handle;
+  if (!hwnd) {
+    return FALSE;
+  }
 
-  nsCOMPtr<nsIBaseWindow> baseWindow;
-  rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  nativeWindow native = 0;
-  rv = baseWindow->GetParentNativeWindow(&native);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  HWND hwnd = reinterpret_cast<HWND>(native);
-  SetupWnd(hwnd, aWindow);
+  SetupWnd(hwnd);
+  ::SetPropW(hwnd, kWatchMinimizeProc, reinterpret_cast<HANDLE>(callback));
   ::SetPropW(hwnd, kWatch, reinterpret_cast<HANDLE>(0x1));
 
-  return NS_OK;
+  return TRUE;
 }
-NS_IMETHODIMP UnwatchWindow(nsIDOMWindow *aWindow)
+BOOL WINAPI mintrayr_UnwatchWindow(void *handle)
 {
-  nsresult rv;
+  HWND hwnd = (HWND)handle;
+  if (!hwnd) {
+    return FALSE;
+  }
 
-  nsCOMPtr<nsIBaseWindow> baseWindow;
-  rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  nativeWindow native = 0;
-  rv = baseWindow->GetParentNativeWindow(&native);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  HWND hwnd = reinterpret_cast<HWND>(native);
   ::RemovePropW(hwnd, kWatch);
+  ::RemovePropW(hwnd, kWatchMinimizeProc);
 
-  return NS_OK;
+  return TRUE;
 }
 
-namespace win {
-
-Icon::Icon(TrayIconImpl *aIcon, nsIDOMWindow *aWindow, const nsString& aTitle)
-  : mOwnerIcon(aIcon)
+void WINAPI mintrayr_MinimizeWindow(void *handle)
 {
-  Init(aWindow, aTitle);
+  HWND hwnd = (HWND)handle;
+  if (!hwnd) {
+    return;
+  }
+
+  // We need to get a minimize through.
+  // Otherwise the SFW/PM hack won't work
+  // However we need to protect against the watcher watching this
+  HANDLE watch = ::GetPropW(hwnd, kWatch);
+  ::SetPropW(hwnd, kWatch, (HANDLE)(0x2));
+  ::ShowWindow(hwnd, SW_MINIMIZE);
+  ::SetPropW(hwnd, kWatch, watch);
+
+  ::ShowWindow(hwnd, SW_HIDE);
 }
-NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
+void WINAPI mintrayr_RestoreWindow(void *handle)
 {
-  nsresult rv;
-  nsCOMPtr<nsIBaseWindow> baseWindow;
-  rv = GetBaseWindow(aWindow, getter_AddRefs(baseWindow));
-  NS_ENSURE_SUCCESS(rv, rv);
+  HWND hwnd = (HWND)handle;
+  if (!hwnd) {
+    return;
+  }
 
-  nativeWindow native = 0;
-  rv = baseWindow->GetParentNativeWindow(&native);
-  NS_ENSURE_SUCCESS(rv, rv);
+  // Show the window again
+  ::ShowWindow(hwnd, SW_SHOW);
 
-  mWnd = reinterpret_cast<HWND>(native);
-  SetupWnd(mWnd, aWindow);
+  // If it was minimized then restore it as well
+  if (::IsIconic(hwnd)) {
+    ::ShowWindow(hwnd, SW_RESTORE);
+    // Try to grab focus
+    ::SetForegroundWindow(hwnd);
+  }
+}
 
-  // Hook window
-  ::SetPropW(mWnd, kIcon, reinterpret_cast<HANDLE>(0x1));
+BOOL WINAPI mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
+{
+  HWND hwnd = (HWND)handle;
+  if (!hwnd) {
+    return FALSE;
+  }
 
+  SetupWnd(hwnd);
+
+  NOTIFYICONDATAW *iconData = new NOTIFYICONDATAW;
   // Init the icon data according to MSDN
-  ZeroMemory(&mIconData, sizeof(mIconData));
-  mIconData.cbSize = sizeof(mIconData);
+  ZeroMemory(iconData, sizeof(NOTIFYICONDATAW));
+  iconData->cbSize = sizeof(NOTIFYICONDATAW);
 
   // Copy the title
-  lstrcpynW(mIconData.szTip, aTitle.get(), 127);
-  mIconData.szTip[128] = '\0'; // Better be safe than sorry :p
+  if (GetWindowText(hwnd, iconData->szTip, 127)) {
+    iconData->szTip[128] = '\0'; // Better be safe than sorry :p
+  }
+  else{
+    iconData->szTip[0] = '\0';
+  }
 
   // Get the window icon
-  HICON icon = reinterpret_cast<HICON>(::SendMessageW(mWnd, WM_GETICON, ICON_SMALL, 0));
+  HICON icon = reinterpret_cast<HICON>(::SendMessageW(hwnd, WM_GETICON, ICON_SMALL, 0));
   if (icon == 0) {
     // Alternative method. Get from the window class
-    icon = reinterpret_cast<HICON>(::GetClassLongPtrW(mWnd, GCLP_HICONSM));
+    icon = reinterpret_cast<HICON>(::GetClassLongPtrW(hwnd, GCLP_HICONSM));
   }
   // Alternative method: get the first icon from the main module (executable image of the process)
   if (icon == 0) {
@@ -379,63 +396,56 @@ NS_IMETHODIMP Icon::Init(nsIDOMWindow *aWindow, const nsString& aTitle)
   if (icon == 0) {
     icon = ::LoadIcon(0, IDI_APPLICATION);
   }
-  mIconData.hIcon = icon;
+  iconData->hIcon = icon;
 
   // Set the rest of the members
-  mIconData.hWnd = mWnd;
-  mIconData.uCallbackMessage = WM_TRAYMESSAGE;
-  mIconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-  mIconData.uVersion = 5;
+  iconData->hWnd = hwnd;
+  iconData->uCallbackMessage = WM_TRAYMESSAGE;
+  iconData->uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+  iconData->uVersion = 5;
 
   // Install the icon
-  ::Shell_NotifyIconW(NIM_ADD, &mIconData);
-  ::Shell_NotifyIconW(NIM_SETVERSION, &mIconData);
+  ::Shell_NotifyIconW(NIM_ADD, iconData);
+  ::Shell_NotifyIconW(NIM_SETVERSION, iconData);
 
-  ::SetPropW(mWnd, kIcon, reinterpret_cast<HANDLE>(0x1));
-  ::SetPropW(mWnd, kPlatformIcon, reinterpret_cast<HANDLE>(this));
+  SetupWnd(hwnd);
+  ::SetPropW(hwnd, kIconData, reinterpret_cast<HANDLE>(iconData));
+  ::SetPropW(hwnd, kIconMouseEventProc, reinterpret_cast<HANDLE>(callback));
+  ::SetPropW(hwnd, kIcon, reinterpret_cast<HANDLE>(0x1));
 
-  return NS_OK;
+  return TRUE;
 }
 
-Icon::~Icon()
+BOOL WINAPI mintrayr_DestroyIcon(void *handle)
 {
-  Restore();
-
-  // Disable message handling
-  ::RemovePropW(mWnd, kIcon);
-  ::RemovePropW(mWnd, kPlatformIcon);
-
-  // Remove the icon
-  ::Shell_NotifyIconW(NIM_DELETE, &mIconData);
-
-  mOwnerIcon = 0;
-}
-
-void Icon::Restore()
-{
-  // Show the window again
-  ::ShowWindow(mWnd, SW_SHOW);
-
-  // If it was minimized then restore it as well
-  if (::IsIconic(mWnd)) {
-    ::ShowWindow(mWnd, SW_RESTORE);
-    // Try to grab focus
-    ::SetForegroundWindow(mWnd);
+  HWND hwnd = (HWND)handle;
+  if (!hwnd) {
+    return FALSE;
   }
+
+  mintrayr_RestoreWindow(handle);
+
+  SetupWnd(hwnd);
+  ::RemovePropW(hwnd, kIcon);
+
+  NOTIFYICONDATAW *iconData = reinterpret_cast<NOTIFYICONDATAW *>(::GetPropW(hwnd, kIconData));
+  if (iconData) {
+    ::Shell_NotifyIconW(NIM_DELETE, iconData);
+    delete iconData;
+  }
+  ::RemovePropW(hwnd, kIconData);
+
+  ::RemovePropW(hwnd, kIconMouseEventProc);
+
+  return TRUE;
 }
 
-void Icon::Minimize() {
-  // We need to get a minimize through.
-  // Otherwise the SFW/PM hack won't work
-  // However we need to protect against the watcher watching this
-  HANDLE watch = ::GetPropW(mWnd, kWatch);
-  ::SetPropW(mWnd, kWatch, (HANDLE)(0x2));
-  ::ShowWindow(mWnd, SW_MINIMIZE);
-  ::SetPropW(mWnd, kWatch, watch);
-
-  ::ShowWindow(mWnd, SW_HIDE);
+void* WINAPI mintrayr_GetBaseWindow(wchar_t *title)
+{
+	void *rv = 0;
+	if (!title) {
+		return rv;
+	}
+	rv = ::FindWindow(0, title);
+	return rv;
 }
-
-} // namespace win
-
-}} // namespaces

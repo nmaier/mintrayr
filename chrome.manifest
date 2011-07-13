@@ -1,0 +1,14 @@
+content mintrayr chrome/content/
+skin mintrayr classic/1.0 chrome/skin/
+skin mintrayr-icon classic/1.0 ./
+locale mintrayr en-US chrome/locale/en-US/
+resource mintrayr modules/
+
+overlay	chrome://browser/content/browser.xul	chrome://mintrayr/content/browser/browser.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+overlay chrome://browser/content/places/places.xul	chrome://mintrayr/content/browser/places.xul
+overlay chrome://mintrayr/content/prefs/prefs.xul chrome://mintrayr/content/prefs/browser.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+overlay chrome://mozapps/content/downloads/downloads.xul	chrome://mintrayr/content/mozapps/downloads.xul
+
+override chrome://mintrayr-icon/skin/appicon64.png chrome://branding/content/icon64.png
+
+style chrome://global/content/customizeToolbar.xul	chrome://mintrayr/skin/common.css
