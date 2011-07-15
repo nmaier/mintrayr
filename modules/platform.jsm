@@ -1,3 +1,5 @@
+"use strict";
+
 const EXPORTED_SYMBOLS = ["init", "createIcon", "isWatched", "watchMinimize", "unwatchMinimize"];
 
 const Cc = Components.classes;
@@ -15,8 +17,13 @@ XPCOMUtils.defineLazyServiceGetter(
 		Services, "uuid", "@mozilla.org/uuid-generator;1",
 		"nsIUUIDGenerator");
 
-const _watchedWindows = [];
-const _icons = [];
+const _libraries = {
+	"x86-msvc": "tray_x86-msvc.dll",
+	"x86_64-msvc": "tray_x86_64-msvc.dll"
+};
+
+var _watchedWindows = [];
+var _icons = [];
 
 const Observer = {
 	register: function() {
@@ -69,12 +76,13 @@ const minimize_callback_t = ctypes.FunctionType(
 		ctypes.default_abi,
 		ctypes.void_t, // retval
 		[
-		handle_t
+		handle_t, // handle
+		ctypes.int // type
 		]
 ).ptr;
 
 
-_initialized = false;
+var _initialized = false;
 const _functions = {};
 
 function init(callback) {
@@ -83,12 +91,35 @@ function init(callback) {
 		return;
 	}
 	AddonManager.getAddonByID("mintrayr@tn123.ath.cx", function(addon) {
-		const resource = addon.getResourceURI("lib_win/tray.dll");
-		resource instanceof Ci.nsIFileURL;
+		function loadLibrary(lib) {
+			const resource = addon.getResourceURI("lib/" + lib);
+			resource instanceof Ci.nsIFileURL;
+			if (!resource.file.exists()) {
+				throw new Error("XPCOMABI Library: " + resource)
+			}
+			return ctypes.open(resource.file.path);
+		}
 
-		const abi_t = ctypes.winapi_abi;
+		var traylib;
+		try {
+			traylib = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
+		}
+		catch (ex) {
+			for (let [,l] in _libraries) {
+				try {
+					traylib = loadLibrary(l);
+				}
+				catch (ex) {
+					// no op
+				}
+			}
+			if (!traylib) {
+				throw new Error("No loadable library found!");
+			}
+		}
+
+		const abi_t = ctypes.default_abi;
 		const char_ptr_t = ctypes.jschar.ptr;
-		const traylib = ctypes.open(resource.file.path);
 
 		_functions.Init = traylib.declare(
 			"mintrayr_Init",
@@ -100,7 +131,7 @@ function init(callback) {
 			abi_t,
 			ctypes.void_t // retval
 			);
-		_functions.GetBaseWindow = traylib.declare(
+		_functions.GetBaseWindowHandle = traylib.declare(
 			"mintrayr_GetBaseWindow",
 			abi_t,
 			handle_t, // retval handle
@@ -159,7 +190,7 @@ function init(callback) {
 	});
 }
 
-function GetBaseWindow(window) {
+function GetBaseWindowHandle(window) {
 	let baseWindow = window
 		.QueryInterface(Ci.nsIInterfaceRequestor)
 		.getInterface(Ci.nsIWebNavigation)
@@ -172,7 +203,7 @@ function GetBaseWindow(window) {
 	let rv;
 	try {
 		// Search the window by the new title
-		rv = _functions.GetBaseWindow(baseWindow.title);
+		rv = _functions.GetBaseWindowHandle(baseWindow.title);
 		if (rv.isNull()) {
 			throw new Error("Window not found!");
 		}
@@ -220,19 +251,20 @@ const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(h
 				document
 				);
 			document.dispatchEvent(e);
-			break;
+			return;
 		}
+		throw new Error("Window for mouse event not found!" + _icons.toSource());
 	}
 	catch (ex) {
 		Cu.reportError(ex);
 	}
 });
 
-const minimize_callback = minimize_callback_t(function minimize_callback(handle) {
+const minimize_callback = minimize_callback_t(function minimize_callback(handle, type) {
 	try {
 		for (let [,w] in Iterator(_watchedWindows)) {
 			if (ptrcmp(w.handle, handle)) {
-				return w.callback(w.window);
+				return w.callback(w.window, type);
 			}
 		}
 	}
@@ -243,7 +275,7 @@ const minimize_callback = minimize_callback_t(function minimize_callback(handle)
 });
 
 function WatchedWindow(window, callback) {
-	this._handle = GetBaseWindow(window);
+	this._handle = GetBaseWindowHandle(window);
 	try {
 		this._window = window;
 		this._callback = callback;
@@ -270,11 +302,12 @@ WatchedWindow.prototype = {
 			delete this._window;
 			delete this._callback;
 		}
-	}
+	},
+	toString: function() "[WatchedWindow @" + this._handle + "]"
 };
 
 function Icon(window) {
-	this._handle = GetBaseWindow(window);
+	this._handle = GetBaseWindowHandle(window);
 	try {
 		this._window = window;
 		_functions.CreateIcon(this._handle, mouseevent_callback);
@@ -309,7 +342,8 @@ Icon.prototype = {
 			delete this._handle;
 			delete this._window;
 		}
-	}
+	},
+	toString: function() "[Icon @" + this._handle + "]"
 };
 
 function createIcon(window) {
@@ -326,8 +360,8 @@ function createIcon(window) {
 
 function isWatched(window) {
 	if (!_initialized) throw new Error("not initialized");
-	for (let [,w] in _watchedWindows) {
-		if (w.window == window) {
+	for (let [i,w] in Iterator(_watchedWindows)) {
+		if (w.window === window) {
 			return true;
 		}
 	}
@@ -336,14 +370,16 @@ function isWatched(window) {
 
 function watchMinimize(window, callback) {
 	if (!_initialized) throw new Error("not initialized");
+	if (isWatched(window)) {
+		return;
+	}
 	let ww = new WatchedWindow(window, callback);
 	_watchedWindows.push(ww);
 }
 function unwatchMinimize(window) {
 	if (!_initialized) throw new Error("not initialized");
-	let handle = GetBaseWindow(window);
-	for (let [i,w] in _watchedWindows) {
-		if (w.handle == handle) {
+	for (let [i,w] in Iterator(_watchedWindows)) {
+		if (w.window === window) {
 			try {
 				w.destroy();
 			}

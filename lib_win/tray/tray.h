@@ -13,23 +13,23 @@ typedef struct _mouseevent_t {
 } mouseevent_t;
 
 typedef void (*mouseevent_callback_t)(void *handle, mouseevent_t *event);
-typedef void (*minimize_callback_t)(void *handle);
+typedef void (*minimize_callback_t)(void *handle, int type);
 
 
-void WINAPI mintrayr_Init();
-void WINAPI mintrayr_Destroy();
+void mintrayr_Init();
+void mintrayr_Destroy();
 
-BOOL WINAPI mintrayr_WatchWindow(void *handle);
-BOOL WINAPI mintrayr_UnwatchWindow(void *handle);
+BOOL mintrayr_WatchWindow(void *handle);
+BOOL mintrayr_UnwatchWindow(void *handle);
 
-void WINAPI mintrayr_MinimizeWindow(void *handle);
-void WINAPI mintrayr_RestoreWindow(void *handle);
+void mintrayr_MinimizeWindow(void *handle);
+void mintrayr_RestoreWindow(void *handle);
 
-BOOL WINAPI mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback);
-BOOL WINAPI mintrayr_DestroyIcon(void *handle);
+BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback);
+BOOL mintrayr_DestroyIcon(void *handle);
 
-void* WINAPI mintrayr_GetBaseWindow(wchar_t *title);
-void WINAPI mintrayr_SetWatchMode(int mode);
+void* mintrayr_GetBaseWindow(wchar_t *title);
+void mintrayr_SetWatchMode(int mode);
 
 #ifdef __cplusplus
 } // extern "C"

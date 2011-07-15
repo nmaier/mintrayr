@@ -1,3 +1,4 @@
+"use strict";
 const EXPORTED_SYMBOLS = ["TrayService"];
 
 const Cc = Components.classes;
@@ -68,12 +69,16 @@ TrayIcon.prototype = {
 	}
 };
 
-function doMinimizeWindow(window) {
+function doMinimizeWindow(window, type) {
 	try {
-		TrayService.minimize(window, true);
+		if (!type) {
+			TrayService.minimize(window, true);
+		}
+		else {
+			TrayService.restore(window);
+		}
 	}
 	catch (ex) {
-		Cu.reportError(ex);
 	}
 	return 0;
 }
@@ -89,7 +94,7 @@ const TrayService = {
 	},
 	createIcon: function(window, aCloseOnRestore) {
 		for (let [,icon] in Iterator(_icons)) {
-			if (icon.window == window) {
+			if (icon.window === window) {
 				return icon;
 			}
 		}
@@ -116,7 +121,7 @@ const TrayService = {
 	minimize: function(window, aCloseOnRestore) this.createIcon(window, aCloseOnRestore).minimize(),
 	restore: function(window) {
 		for (let [,icon] in Iterator(_icons)) {
-			if (icon.window == window) {
+			if (icon.window === window) {
 				icon.restore();
 				return;
 			}

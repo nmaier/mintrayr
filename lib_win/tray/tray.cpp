@@ -1,8 +1,10 @@
 #include <windows.h>
+#include <new>
+
 #include "tray.h"
 
 static const wchar_t kTrayMessage[]  = L"_MINTRAYR_TrayMessageW";
-static const wchar_t kTrayMinimize[]  = L"_MINTRAYR_TrayMinimizeW";
+static const wchar_t kTrayCallback[]  = L"_MINTRAYR_TrayCallbackW";
 static const wchar_t kOldProc[] = L"_MINTRAYR_WRAPPER_OLD_PROC";
 
 static const wchar_t kWatch[] = L"_MINTRAYR_WATCH";
@@ -21,7 +23,7 @@ typedef BOOL (WINAPI *pChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
 
 static UINT WM_TASKBARCREATED = 0;
 static UINT WM_TRAYMESSAGE = 0;
-static UINT WM_TRAYMINIMIZE = 0;
+static UINT WM_TRAYCALLBACK = 0;
 
 /**
  * Minimize on what actions
@@ -113,20 +115,16 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       if (wp == 0) {
         goto WndProcEnd;
       }
-      /*if (wp->flags & SWP_SHOWWINDOW) {
+      if (wp->flags & SWP_SHOWWINDOW) {
         // Shown again, unexpectedly that is, so release
-        Icon *me = reinterpret_cast<Icon*>(GetPropW(hwnd, kPlatformIcon));
-        if (me == 0 || me->mOwnerIcon == 0 || me->mOwnerIcon->IsClosed()) {
-          goto WndProcEnd;
-        }
-        me->mOwnerIcon->Restore();
+        PostMessage(hwnd, WM_TRAYCALLBACK, 0, 1);
       }
-      else*/ if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
+      else if (wp->flags & SWP_FRAMECHANGED && ::IsWindowVisible(hwnd)) {
         WINDOWPLACEMENT pl;
         pl.length = sizeof(WINDOWPLACEMENT);
         ::GetWindowPlacement(hwnd, &pl);
         if (pl.showCmd == SW_SHOWMINIMIZED && (gWatchMode & kTrayOnMinimize)) {
-          PostMessage(hwnd, WM_TRAYMINIMIZE, 0, 0);
+          PostMessage(hwnd, WM_TRAYCALLBACK, 0, 0);
           // We're active, ignore
           return 0;
         }
@@ -137,7 +135,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     case WM_NCLBUTTONUP:
       // Frame button clicked
       if (wParam == HTCLOSE && (gWatchMode & kTrayOnClose)) {
-        PostMessage(hwnd, WM_TRAYMINIMIZE, 0, 0);
+        PostMessage(hwnd, WM_TRAYCALLBACK, 0, 0);
         return TRUE;
       }
       break;
@@ -145,17 +143,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     case WM_SYSCOMMAND:
       // Window menu
       if (wParam == SC_CLOSE && (gWatchMode & kTrayOnClose)) {
-        PostMessage(hwnd, WM_TRAYMINIMIZE, 0, 0);
+        PostMessage(hwnd, WM_TRAYCALLBACK, 0, 0);
         return 0;
       }
       break;
-    }
-    // Need to handle this in or own message or crash!
-    // See https://bugzilla.mozilla.org/show_bug.cgi?id=671266
-    if (uMsg == WM_TRAYMINIMIZE) {
-      minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(::GetPropW(hwnd, kWatchMinimizeProc));
-      if (callback) callback(hwnd);
-      return 0;
     }
   }
 
@@ -175,65 +166,61 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
     // We got clicked. How exciting, isn't it.
     else if (uMsg == WM_TRAYMESSAGE) {
-      mouseevent_t event;
-      event.clickCount = 0;
+      mouseevent_t *event = new(std::nothrow) mouseevent_t;
+      if (!event) {
+        goto WndProcEnd;
+      }
+      event->clickCount = 0;
       switch (LOWORD(lParam)) {
         case WM_LBUTTONUP:
         case WM_MBUTTONUP:
         case WM_RBUTTONUP:
         case WM_CONTEXTMENU:
         case NIN_KEYSELECT:
-          event.clickCount = 1;
+          event->clickCount = 1;
           break;
         case WM_LBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
-          event.clickCount = 2;
+          event->clickCount = 2;
           break;
       }
       switch (LOWORD(lParam)) {
         case WM_LBUTTONUP:
         case WM_LBUTTONDBLCLK:
-          event.button = 0;
+          event->button = 0;
           break;
         case WM_MBUTTONUP:
         case WM_MBUTTONDBLCLK:
-          event.button = 1;
+          event->button = 1;
           break;
         case WM_RBUTTONUP:
         case WM_RBUTTONDBLCLK:
         case WM_CONTEXTMENU:
         case NIN_KEYSELECT:
-          event.button = 2;
+          event->button = 2;
           break;
       }
-      if (event.clickCount) {
+      if (event->clickCount) {
         POINT wpt;
         if (GetCursorPos(&wpt) == TRUE) {
-          event.x = wpt.x;
-          event.y = wpt.y;
+          event->x = wpt.x;
+          event->y = wpt.y;
 
-          event.keys = 0;
+          event->keys = 0;
           if (::GetKeyState(VK_CONTROL) & 0x8000) {
-            event.keys += (1<<0);
+            event->keys += (1<<0);
           }
           if (::GetKeyState(VK_MENU) & 0x8000) {
-            event.keys += (1<<1);
+            event->keys += (1<<1);
           }
           if (::GetKeyState(VK_MENU) & 0x8000) {
-            event.keys += (1<<2);
+            event->keys += (1<<2);
           }
-
-          // SFW/PM is a win32 hack, so that the context menu is hidden when loosing focus.
-          ::SetForegroundWindow(hwnd);
-
-          // Try to get the platform icon
-          mouseevent_callback_t callback = reinterpret_cast<mouseevent_callback_t>(GetPropW(hwnd, kIconMouseEventProc));
-          if (callback) {
-            callback(hwnd, &event);
-          }
-
-          ::PostMessage(hwnd, WM_NULL, 0, 0L);
+          PostMessage(hwnd, WM_TRAYCALLBACK, 1, (LPARAM)event);
+        }
+        else {
+          delete event;
         }
       }
       return 0;
@@ -265,6 +252,29 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       return rv;
     }
   }
+  // Need to handle this in or own message or crash!
+  // See https://bugzilla.mozilla.org/show_bug.cgi?id=671266
+  if (uMsg == WM_TRAYCALLBACK) {
+    if (wParam == 0) {
+      minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(::GetPropW(hwnd, kWatchMinimizeProc));
+      if (callback) {
+        callback(hwnd, (int)lParam);
+      }
+    }
+    else if (wParam == 1) {
+      mouseevent_t *event = reinterpret_cast<mouseevent_t*>(lParam);
+      mouseevent_callback_t callback = reinterpret_cast<mouseevent_callback_t>(::GetPropW(hwnd, kIconMouseEventProc));
+      if (event && callback) {
+          // SFW/PM is a win32 hack, so that the context menu is hidden when loosing focus.
+          ::SetForegroundWindow(hwnd);
+          callback(hwnd, event);
+          ::PostMessage(hwnd, WM_NULL, 0, 0L);
+      }
+      delete event;
+    }
+
+    return 0;
+  }
 
 WndProcEnd:
   // Call the old WNDPROC or at lest DefWindowProc
@@ -275,13 +285,13 @@ WndProcEnd:
   return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-void WINAPI mintrayr_Init()
+void mintrayr_Init()
 {
   // Get TaskbarCreated
   WM_TASKBARCREATED = RegisterWindowMessageW(L"TaskbarCreated");
   // We register this as well, as we cannot know which WM_USER values are already taken
   WM_TRAYMESSAGE = RegisterWindowMessageW(kTrayMessage);
-  WM_TRAYMINIMIZE = RegisterWindowMessageW(kTrayMinimize);
+  WM_TRAYCALLBACK = RegisterWindowMessageW(kTrayCallback);
 
   // Vista (Administrator) needs some love, or else we won't receive anything due to UIPI
   if (OSVersionInfo().isVistaOrLater()) {
@@ -289,7 +299,7 @@ void WINAPI mintrayr_Init()
   }
 }
 
-void WINAPI mintrayr_Destroy()
+void mintrayr_Destroy()
 {
   // Vista (Administrator) needs some unlove, see c'tor
   if (OSVersionInfo().isVistaOrLater()) {
@@ -305,7 +315,7 @@ static void SetupWnd(HWND hwnd)
   }
 }
 
-BOOL WINAPI mintrayr_WatchWindow(void *handle, minimize_callback_t callback)
+BOOL mintrayr_WatchWindow(void *handle, minimize_callback_t callback)
 {
   HWND hwnd = (HWND)handle;
   if (!hwnd) {
@@ -318,7 +328,7 @@ BOOL WINAPI mintrayr_WatchWindow(void *handle, minimize_callback_t callback)
 
   return TRUE;
 }
-BOOL WINAPI mintrayr_UnwatchWindow(void *handle)
+BOOL mintrayr_UnwatchWindow(void *handle)
 {
   HWND hwnd = (HWND)handle;
   if (!hwnd) {
@@ -331,7 +341,7 @@ BOOL WINAPI mintrayr_UnwatchWindow(void *handle)
   return TRUE;
 }
 
-void WINAPI mintrayr_MinimizeWindow(void *handle)
+void mintrayr_MinimizeWindow(void *handle)
 {
   HWND hwnd = (HWND)handle;
   if (!hwnd) {
@@ -348,7 +358,7 @@ void WINAPI mintrayr_MinimizeWindow(void *handle)
 
   ::ShowWindow(hwnd, SW_HIDE);
 }
-void WINAPI mintrayr_RestoreWindow(void *handle)
+void mintrayr_RestoreWindow(void *handle)
 {
   HWND hwnd = (HWND)handle;
   if (!hwnd) {
@@ -366,7 +376,7 @@ void WINAPI mintrayr_RestoreWindow(void *handle)
   }
 }
 
-BOOL WINAPI mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
+BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
 {
   HWND hwnd = (HWND)handle;
   if (!hwnd) {
@@ -422,7 +432,7 @@ BOOL WINAPI mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
   return TRUE;
 }
 
-BOOL WINAPI mintrayr_DestroyIcon(void *handle)
+BOOL mintrayr_DestroyIcon(void *handle)
 {
   HWND hwnd = (HWND)handle;
   if (!hwnd) {
@@ -446,7 +456,7 @@ BOOL WINAPI mintrayr_DestroyIcon(void *handle)
   return TRUE;
 }
 
-void* WINAPI mintrayr_GetBaseWindow(wchar_t *title)
+void* mintrayr_GetBaseWindow(wchar_t *title)
 {
 	void *rv = 0;
 	if (!title) {
@@ -456,6 +466,6 @@ void* WINAPI mintrayr_GetBaseWindow(wchar_t *title)
 	return rv;
 }
 
-void WINAPI mintrayr_SetWatchMode(int mode) {
+void mintrayr_SetWatchMode(int mode) {
   gWatchMode = mode;
 }
