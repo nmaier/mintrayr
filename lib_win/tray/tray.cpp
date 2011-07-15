@@ -2,6 +2,7 @@
 #include "tray.h"
 
 static const wchar_t kTrayMessage[]  = L"_MINTRAYR_TrayMessageW";
+static const wchar_t kTrayMinimize[]  = L"_MINTRAYR_TrayMinimizeW";
 static const wchar_t kOldProc[] = L"_MINTRAYR_WRAPPER_OLD_PROC";
 
 static const wchar_t kWatch[] = L"_MINTRAYR_WATCH";
@@ -20,6 +21,7 @@ typedef BOOL (WINAPI *pChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
 
 static UINT WM_TASKBARCREATED = 0;
 static UINT WM_TRAYMESSAGE = 0;
+static UINT WM_TRAYMINIMIZE = 0;
 
 /**
  * Minimize on what actions
@@ -29,6 +31,8 @@ typedef enum _eMinimizeActions {
   kTrayOnClose = (1 << 1)
 } eMinimizeActions;
 
+
+static int gWatchMode = 0;
 
 /**
  * Helper function that will allow us to receive some broadcast messages on Vista
@@ -121,12 +125,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         WINDOWPLACEMENT pl;
         pl.length = sizeof(WINDOWPLACEMENT);
         ::GetWindowPlacement(hwnd, &pl);
-        if (pl.showCmd == SW_SHOWMINIMIZED) {
-          minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(GetPropW(hwnd, kWatchMinimizeProc));
-          if (callback && callback(hwnd, kTrayOnMinimize)) {
-            // We're active, ignore
-            return 0;
-          }
+        if (pl.showCmd == SW_SHOWMINIMIZED && (gWatchMode & kTrayOnMinimize)) {
+          PostMessage(hwnd, WM_TRAYMINIMIZE, 0, 0);
+          // We're active, ignore
+          return 0;
         }
       }
       break;
@@ -134,23 +136,26 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
       // Frame button clicked
-      if (wParam == HTCLOSE) {
-        minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(GetPropW(hwnd, kWatchMinimizeProc));
-        if (callback && callback(hwnd, kTrayOnMinimize)) {
-          return TRUE;
-        }
+      if (wParam == HTCLOSE && (gWatchMode & kTrayOnClose)) {
+        PostMessage(hwnd, WM_TRAYMINIMIZE, 0, 0);
+        return TRUE;
       }
       break;
 
     case WM_SYSCOMMAND:
       // Window menu
-      if (wParam == SC_CLOSE) {
-        minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(GetPropW(hwnd, kWatchMinimizeProc));
-        if (callback && callback(hwnd, kTrayOnMinimize)) {
-          return 0;
-        }
+      if (wParam == SC_CLOSE && (gWatchMode & kTrayOnClose)) {
+        PostMessage(hwnd, WM_TRAYMINIMIZE, 0, 0);
+        return 0;
       }
       break;
+    }
+    // Need to handle this in or own message or crash!
+    // See https://bugzilla.mozilla.org/show_bug.cgi?id=671266
+    if (uMsg == WM_TRAYMINIMIZE) {
+      minimize_callback_t callback = reinterpret_cast<minimize_callback_t>(::GetPropW(hwnd, kWatchMinimizeProc));
+      if (callback) callback(hwnd);
+      return 0;
     }
   }
 
@@ -276,6 +281,7 @@ void WINAPI mintrayr_Init()
   WM_TASKBARCREATED = RegisterWindowMessageW(L"TaskbarCreated");
   // We register this as well, as we cannot know which WM_USER values are already taken
   WM_TRAYMESSAGE = RegisterWindowMessageW(kTrayMessage);
+  WM_TRAYMINIMIZE = RegisterWindowMessageW(kTrayMinimize);
 
   // Vista (Administrator) needs some love, or else we won't receive anything due to UIPI
   if (OSVersionInfo().isVistaOrLater()) {
@@ -448,4 +454,8 @@ void* WINAPI mintrayr_GetBaseWindow(wchar_t *title)
 	}
 	rv = ::FindWindow(0, title);
 	return rv;
+}
+
+void WINAPI mintrayr_SetWatchMode(int mode) {
+  gWatchMode = mode;
 }

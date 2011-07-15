@@ -15,19 +15,35 @@ XPCOMUtils.defineLazyServiceGetter(
 		Services, "uuid", "@mozilla.org/uuid-generator;1",
 		"nsIUUIDGenerator");
 
-
 const _watchedWindows = [];
 const _icons = [];
 
+const Observer = {
+	register: function() {
+		Services.obs.addObserver(Observer, "quit-application", false);
+		Services.prefs.addObserver("extensions.mintrayr.minimizeon", Observer, false);
+		this.setWatchMode();
+	},
+	unregister: function() {
+		Services.obs.removeObserver(Observer, "quit-application");
+		Services.prefs.removeObserver("extensions.mintrayr.minimizeon", Observer);
+	},
+	setWatchMode: function() {
+		_functions.SetWatchMode(Services.prefs.getIntPref("extensions.mintrayr.minimizeon"));
+	},
+	observe: function(s, topic, data) {
+		if (topic == "quit-application") {
+			this.unregister();
+			unwatchAll();
+		}
+		else {
+			this.setWatchMode();
+		}
+	}
+};
+
+
 const handle_t = ctypes.voidptr_t;
-const minimize_callback_t = ctypes.FunctionType(
-	ctypes.default_abi,
-	ctypes.int, // retval
-	[
-	handle_t, //handle
-	ctypes.int // reason
-	]
-	).ptr;
 
 const mouseevent_t = ctypes.StructType(
 		"mouseevent_t",
@@ -48,6 +64,14 @@ const mouseevent_callback_t = ctypes.FunctionType(
 		mouseevent_t.ptr, // event
 		]
 		).ptr;
+
+const minimize_callback_t = ctypes.FunctionType(
+		ctypes.default_abi,
+		ctypes.void_t, // retval
+		[
+		handle_t
+		]
+).ptr;
 
 
 _initialized = false;
@@ -82,6 +106,12 @@ function init(callback) {
 			handle_t, // retval handle
 			char_ptr_t // title
 			);
+		_functions.SetWatchMode = traylib.declare(
+			"mintrayr_SetWatchMode",
+			abi_t,
+			ctypes.void_t, // retval handle
+			ctypes.int // mode
+		);
 		_functions.MinimizeWindow = traylib.declare(
 			"mintrayr_MinimizeWindow",
 			abi_t,
@@ -122,6 +152,7 @@ function init(callback) {
 			);
 
 		_functions.Init();
+		Observer.register();
 
 		_initialized = true;
 		callback();
@@ -155,11 +186,53 @@ function GetBaseWindow(window) {
 
 function ptrcmp(p1, p2) p1.toString() == p2.toString()
 
-const minimize_callback = minimize_callback_t(function minimize_callback(handle, reason) {
+const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(handle, event) {
+	try {
+		event = event.contents;
+		for (let [,w] in Iterator(_watchedWindows)) {
+			if (!ptrcmp(w.handle, handle)) {
+				continue;
+			}
+			let document = w.window.document;
+			let e = document.createEvent("MouseEvents");
+			let et = "TrayClick";
+			if (event.clickCount == 2) {
+				et = "TrayDblClick";
+			}
+			else if (event.clickCount > 2) {
+				et = "TrayTriClick";
+			}
+			e.initMouseEvent(
+				et,
+				true,
+				true,
+				w.window,
+				0,
+				event.x,
+				event.y,
+				0,
+				0,
+				(event.keys & (1<<0)) != 0,
+				(event.keys & (1<<1)) != 0,
+				(event.keys & (1<<2)) != 0,
+				(event.keys & (1<<3)) != 0,
+				event.button,
+				document
+				);
+			document.dispatchEvent(e);
+			break;
+		}
+	}
+	catch (ex) {
+		Cu.reportError(ex);
+	}
+});
+
+const minimize_callback = minimize_callback_t(function minimize_callback(handle) {
 	try {
 		for (let [,w] in Iterator(_watchedWindows)) {
 			if (ptrcmp(w.handle, handle)) {
-				return w.callback(w.window, reason);
+				return w.callback(w.window);
 			}
 		}
 	}
@@ -168,48 +241,6 @@ const minimize_callback = minimize_callback_t(function minimize_callback(handle,
 	}
 	return 0;
 });
-
-const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(handle, event) {
-	try {
-		event = event.contents;
-		for (let [,w] in Iterator(_watchedWindows)) {
-			if (ptrcmp(w.handle, handle)) {
-				let document = w.window.document;
-				let e = document.createEvent("MouseEvents");
-				let et = "TrayClick";
-				if (event.clickCount == 2) {
-					et = "TrayDblClick";
-				}
-				else if (event.clickCount > 2) {
-					et = "TrayTriClick";
-				}
-				e.initMouseEvent(
-					et,
-					true,
-					true,
-					w.window,
-					0,
-					event.x,
-					event.y,
-					0,
-					0,
-					(event.keys & (1<<0)) != 0,
-					(event.keys & (1<<1)) != 0,
-					(event.keys & (1<<2)) != 0,
-					(event.keys & (1<<3)) != 0,
-					event.button,
-					document
-					);
-				document.dispatchEvent(e);
-				break;
-			}
-		}
-	}
-	catch (ex) {
-		Cu.reportError(ex);
-	}
-});
-
 
 function WatchedWindow(window, callback) {
 	this._handle = GetBaseWindow(window);
@@ -321,5 +352,22 @@ function unwatchMinimize(window) {
 			}
 			return;
 		}
+	}
+}
+
+function unwatchAll(){
+	if (!_this.initialized) return;
+
+	const appstartup = Cc["@mozilla.org/toolkit/app-startup;1"].
+		getService(Ci.nsIAppStartup);
+	appstartup.enterLastWindowClosingSurvivalArea();
+	try {
+		for (let [,w] in _watchedWindows) {
+			w.destroy();
+		}
+		_watchedWindows.length = 0;
+	}
+	finally {
+		appstartup.exitLastWindowClosingSurvivalArea();
 	}
 }

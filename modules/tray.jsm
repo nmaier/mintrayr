@@ -68,12 +68,9 @@ TrayIcon.prototype = {
 	}
 };
 
-function doMinimizeWindow(window, reason) {
+function doMinimizeWindow(window) {
 	try {
-		if (_prefs.getIntPref("minimizeon") & reason) {
-			TrayService.minimize(window, true);
-			return 1;
-		}
+		TrayService.minimize(window, true);
 	}
 	catch (ex) {
 		Cu.reportError(ex);
