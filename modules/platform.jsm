@@ -18,8 +18,9 @@ XPCOMUtils.defineLazyServiceGetter(
 		"nsIUUIDGenerator");
 
 const _libraries = {
-	"x86-msvc": "tray_x86-msvc.dll",
-	"x86_64-msvc": "tray_x86_64-msvc.dll"
+	"x86-msvc": {m:"tray_x86-msvc.dll",c:ctypes.jschar.ptr},
+	"x86_64-msvc": {m:"tray_x86_64-msvc.dll",c:ctypes.jschar.ptr},
+	"x86_64-gcc3": {m:"tray_x86_64-gcc3.so",c:ctypes.char.ptr}
 };
 
 var _watchedWindows = [];
@@ -91,23 +92,24 @@ function init(callback) {
 		return;
 	}
 	AddonManager.getAddonByID("mintrayr@tn123.ath.cx", function(addon) {
-		function loadLibrary(lib) {
-			const resource = addon.getResourceURI("lib/" + lib);
+		function loadLibrary({m,c}) {
+			const resource = addon.getResourceURI("lib/" + m);
 			resource instanceof Ci.nsIFileURL;
 			if (!resource.file.exists()) {
 				throw new Error("XPCOMABI Library: " + resource)
 			}
-			return ctypes.open(resource.file.path);
+			return [ctypes.open(resource.file.path), c];
 		}
 
 		var traylib;
+		var char_ptr_t;
 		try {
-			traylib = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
+			[traylib, char_ptr_t] = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
 		}
 		catch (ex) {
-			for (let [,l] in _libraries) {
+			for (let [,l] in Iterator(_libraries)) {
 				try {
-					traylib = loadLibrary(l);
+					[traylib, char_ptr_t] = loadLibrary(l);
 				}
 				catch (ex) {
 					// no op
@@ -119,7 +121,6 @@ function init(callback) {
 		}
 
 		const abi_t = ctypes.default_abi;
-		const char_ptr_t = ctypes.jschar.ptr;
 
 		_functions.Init = traylib.declare(
 			"mintrayr_Init",

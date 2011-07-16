@@ -6,6 +6,7 @@
 		<em:unpack>true</em:unpack>
 		<em:targetPlatform>WINNT_x86-msvc</em:targetPlatform>
 		<em:targetPlatform>WINNT_x86_64-msvc</em:targetPlatform>
+		<em:targetPlatform>Linux_x86_64-gcc3</em:targetPlatform>
 
 		<em:name>MinimizeToTray revived (MinTrayR)</em:name>
 		<em:description>Minimizes windows into the system tray</em:description>

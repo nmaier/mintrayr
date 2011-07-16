@@ -1,0 +1,14 @@
+EXPORTED {
+  global:
+    mintrayr_Init;
+    mintrayr_Destroy;
+    mintrayr_WatchWindow;
+    mintrayr_UnwatchWindow;
+    mintrayr_MinimizeWindow;
+    mintrayr_RestoreWindow;
+    mintrayr_CreateIcon;
+    mintrayr_DestroyIcon;
+    mintrayr_GetBaseWindow;
+    mintrayr_SetWatchMode;
+  local: *;
+};
