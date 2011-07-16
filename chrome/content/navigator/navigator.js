@@ -37,18 +37,18 @@
 
 var gMinTrayR = {};
 addEventListener(
-	"load",
-	function() {
-		removeEventListener("load", arguments.callee, true);
+  "load",
+  function() {
+    removeEventListener("load", arguments.callee, true);
 
-		Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
-		gMinTrayR = new gMinTrayR.MinTrayR(
-			document.getElementById("MinTrayR_context"),
-			"browser.watchbrowser",
-			function() {
-				this.cloneToMenu('MinTrayR_sep-top', ['tasksMenuNavigator', 'tasksMenuMail'], false);
-				this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
-			});
-	},
-	true
+    Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
+    gMinTrayR = new gMinTrayR.MinTrayR(
+      document.getElementById("MinTrayR_context"),
+      "browser.watchbrowser",
+      function() {
+        this.cloneToMenu('MinTrayR_sep-top', ['tasksMenuNavigator', 'tasksMenuMail'], false);
+        this.cloneToMenu('MinTrayR_sep-bottom', ['menu_closeWindow', 'menu_FileQuitItem'], true);
+      });
+  },
+  true
 );
