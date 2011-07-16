@@ -19,7 +19,7 @@ typedef void (*minimize_callback_t)(void *handle, int type);
 void mintrayr_Init();
 void mintrayr_Destroy();
 
-BOOL mintrayr_WatchWindow(void *handle);
+BOOL mintrayr_WatchWindow(void *handle, minimize_callback_t *);
 BOOL mintrayr_UnwatchWindow(void *handle);
 
 void mintrayr_MinimizeWindow(void *handle);

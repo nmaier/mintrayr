@@ -214,7 +214,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
           if (::GetKeyState(VK_MENU) & 0x8000) {
             event->keys += (1<<1);
           }
-          if (::GetKeyState(VK_MENU) & 0x8000) {
+          if (::GetKeyState(VK_SHIFT) & 0x8000) {
             event->keys += (1<<2);
           }
           PostMessage(hwnd, WM_TRAYCALLBACK, 1, (LPARAM)event);
