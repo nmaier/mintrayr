@@ -20,6 +20,7 @@ XPCOMUtils.defineLazyServiceGetter(
 const _libraries = {
 	"x86-msvc": {m:"tray_x86-msvc.dll",c:ctypes.jschar.ptr},
 	"x86_64-msvc": {m:"tray_x86_64-msvc.dll",c:ctypes.jschar.ptr},
+	"x86-gcc3": {m:"tray_i686-gcc3.so",c:ctypes.char.ptr},
 	"x86_64-gcc3": {m:"tray_x86_64-gcc3.so",c:ctypes.char.ptr}
 };
 
