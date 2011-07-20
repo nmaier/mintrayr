@@ -1,6 +1,42 @@
-"use strict";
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is MiniTrayR extension
+ *
+ * The Initial Developer of the Original Code is
+ * Nils Maier.
+ * Portions created by the Initial Developer are Copyright (C) 2011
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Nils Maier <MaierMan@web.de>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 
-const EXPORTED_SYMBOLS = ["init", "createIcon", "isWatched", "watchMinimize", "unwatchMinimize"];
+"use strict";
+const EXPORTED_SYMBOLS = ["TrayService"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -32,7 +68,7 @@ XPCOMUtils.defineLazyServiceGetter(
   "nsIAppStartup"
   );
 
-const directory = (function() {
+const _directory = (function() {
   let u = Services.io.newURI(Components.stack.filename, null, null);
   u = Services.io.newURI(Services2.res.resolveURI(u), null, null);
   if (u instanceof Ci.nsIFileURL) {
@@ -47,9 +83,23 @@ const _libraries = {
   "x86-gcc3": {m:"tray_i686-gcc3.so",c:ctypes.char.ptr},
   "x86_64-gcc3": {m:"tray_x86_64-gcc3.so",c:ctypes.char.ptr}
 };
+function loadLibrary({m,c}) {
+  let resource = _directory.clone();
+  resource.append("lib");
+  resource.append(m);
+  if (!resource.exists()) {
+    throw new Error("XPCOMABI Library: " + resource.path)
+  }
+  return [ctypes.open(resource.path), c];
+}
 
-var _watchedWindows = [];
 var _icons = [];
+var _watchedWindows = [];
+
+const _prefs = Services.prefs.getBranch("extensions.mintrayr.");
+
+
+const abi_t = ctypes.default_abi;
 
 const handle_t = ctypes.voidptr_t;
 
@@ -82,17 +132,6 @@ const minimize_callback_t = ctypes.FunctionType(
     ]
 ).ptr;
 
-
-function loadLibrary({m,c}) {
-  let resource = directory.clone();
-  resource.append("lib");
-  resource.append(m);
-  if (!resource.exists()) {
-    throw new Error("XPCOMABI Library: " + resource.path)
-  }
-  return [ctypes.open(resource.path), c];
-}
-
 var traylib;
 var char_ptr_t;
 try {
@@ -111,8 +150,6 @@ catch (ex) {
     throw new Error("No loadable library found!");
   }
 }
-
-const abi_t = ctypes.default_abi;
 
 const _Init = traylib.declare(
   "mintrayr_Init",
@@ -205,7 +242,7 @@ function ptrcmp(p1, p2) p1.toString() == p2.toString()
 const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(handle, event) {
   try {
     event = event.contents;
-    for (let [,w] in Iterator(_watchedWindows)) {
+    for (let [,w] in Iterator(_icons)) {
       if (!ptrcmp(w.handle, handle)) {
         continue;
       }
@@ -249,34 +286,37 @@ const minimize_callback = minimize_callback_t(function minimize_callback(handle,
   try {
     for (let [,w] in Iterator(_watchedWindows)) {
       if (ptrcmp(w.handle, handle)) {
-        return w.callback(w.window, type);
+        if (!type) {
+          TrayService.minimize(w.window, true);
+        }
+        else {
+          TrayService.restore(w.window);
+        }
+        return 1;
       }
     }
   }
   catch (ex) {
-    Cu.reportError(ex);
+    // no op
   }
   return 0;
 });
 
-function WatchedWindow(window, callback) {
+function WatchedWindow(window) {
   this._handle = GetBaseWindowHandle(window);
   try {
     this._window = window;
-    this._callback = callback;
     _WatchWindow(this._handle, minimize_callback);
   }
   catch (ex) {
     delete this._handle;
     delete this._window;
-    delete this._callback;
     throw ex;
   }
 }
 WatchedWindow.prototype = {
   get window() this._window,
   get handle() this._handle,
-  get callback() this._callback,
   destroy: function() {
     try {
       _UnwatchWindow(this._handle);
@@ -285,105 +325,148 @@ WatchedWindow.prototype = {
       // drop the references;
       delete this._handle;
       delete this._window;
-      delete this._callback;
     }
   },
   toString: function() "[WatchedWindow @" + this._handle + "]"
 };
 
-function Icon(window) {
+function TrayIcon(window, aCloseOnRestore) {
   this._handle = GetBaseWindowHandle(window);
   try {
-    this._window = window;
     _CreateIcon(this._handle, mouseevent_callback);
   }
   catch (ex) {
     delete this._handle;
-    delete this._window;
     throw ex;
   }
+
+  this._window = window;
+  this.closeOnRestore = aCloseOnRestore;
+  this.window.addEventListener("unload", this, false);
 }
-Icon.prototype = {
-  get window() this._window,
+TrayIcon.prototype = {
+  _closed: false,
+  _minimized: false,
   get handle() this._handle,
+  get window() this._window,
+  get isMinimized() this._minimized,
   minimize: function() {
+    if (this._closed) {
+      throw new Error("Icon already closed");
+    }
+    if (this._minimized) {
+      return;
+    }
     _MinimizeWindow(this._handle);
+    this._minimized = true;
   },
-  restore: function(){
-    _RestoreWindow(this._handle);
+  restore: function() {
+    if (this._closed) {
+      throw new Error("Icon already closed");
+    }
+    if (!this._minimized) {
+      return;
+    }
+    if (this.closeOnRestore) {
+      this.close();
+    }
+    else {
+      _RestoreWindow(this._handle);
+    }
+    this._minimized = false;
   },
-  destroy: function() {
-    try {
-      _DestroyIcon(this._handle);
+  close: function() {
+    if (this._closed){
+      return;
     }
-    finally {
-      // drop the references;
-      for (let [i,icon] in Iterator(_icons)) {
-        if (icon.window == this.window) {
-          _icons.splice(i, 1);
-          break;
-        }
-      }
-      delete this._handle;
-      delete this._window;
-    }
+    this._closed = true;
+
+    _DestroyIcon(this._handle);
+    this._window.removeEventListener("unload", this, false);
+    TrayService._closeIcon(this);
+
+    delete this._handle;
+    delete this._window;
+  },
+  handleEvent: function(event) {
+    this.close();
   },
   toString: function() "[Icon @" + this._handle + "]"
 };
 
-function createIcon(window) {
-  for (let [,icon] in Iterator(_icons)) {
-    if (icon.window == window) {
-      return icon;
-    }
-  }
-  let icon = new Icon(window);
-  _icons.push(icon);
-  return icon;
-}
-
-function isWatched(window) {
-  for (let [i,w] in Iterator(_watchedWindows)) {
-    if (w.window === window) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function watchMinimize(window, callback) {
-  if (isWatched(window)) {
-    return;
-  }
-  let ww = new WatchedWindow(window, callback);
-  _watchedWindows.push(ww);
-}
-function unwatchMinimize(window) {
-  for (let [i,w] in Iterator(_watchedWindows)) {
-    if (w.window === window) {
-      try {
-        w.destroy();
+const TrayService = {
+  createIcon: function(window, aCloseOnRestore) {
+    for (let [,icon] in Iterator(_icons)) {
+      if (icon.window === window) {
+        return icon;
       }
-      finally {
-        _watchedWindows.splice(i, 1);
-      }
+    }
+    let icon = new TrayIcon(window, aCloseOnRestore);
+    _icons.push(icon);
+    return icon;
+  },
+  restoreAll: function() {
+    for (let [,icon] in Iterator(_icons)) {
+      icon.restore();
+    }
+    _icons.length = 0;
+  },
+  watchMinimize: function(window) {
+    if (this.isWatchedWindow(window)) {
       return;
     }
-  }
-}
+    let ww = new WatchedWindow(window);
+    _watchedWindows.push(ww);
+  },
+  unwatchMinimize: function(window) {
+    for (let [i,w] in Iterator(_watchedWindows)) {
+      if (w.window === window) {
+        try {
+          w.destroy();
+        }
+        finally {
+          _watchedWindows.splice(i, 1);
+        }
+        return;
+      }
+    }
+  },
+  isWatchedWindow: function(window) {
+    for (let [i,w] in Iterator(_watchedWindows)) {
+      if (w.window === window) {
+        return true;
+      }
+    }
+    return false;
+  },
+  minimize: function(window, aCloseOnRestore) this.createIcon(window, aCloseOnRestore).minimize(),
+  restore: function(window) {
+    for (let [,icon] in Iterator(_icons)) {
+      if (icon.window === window) {
+        icon.restore();
+        return;
+      }
+    }
+    throw new Error("Invalid window to be restored specified");
+  },
+  _closeIcon: function(icon) {
+    let idx = _icons.indexOf(icon);
+    if (idx >= 0) {
+      _icons.splice(idx, 1);
+    }
+  },
+  _shutdown: function() {
+    for (let [,icon] in Iterator(_icons)) {
+      icon.close();
+    }
+    _icons.length = 0;
 
-function unwatchAll(){
-  Services2.appstartup.enterLastWindowClosingSurvivalArea();
-  try {
-    for (let [,w] in _watchedWindows) {
+    for (let [,w] in Iterator(_watchedWindows)) {
       w.destroy();
     }
     _watchedWindows.length = 0;
   }
-  finally {
-    appstartup.exitLastWindowClosingSurvivalArea();
-  }
-}
+};
 
 const Observer = {
   register: function() {
@@ -401,7 +484,13 @@ const Observer = {
   observe: function(s, topic, data) {
     if (topic == "quit-application") {
       this.unregister();
-      unwatchAll();
+      Services2.appstartup.enterLastWindowClosingSurvivalArea();
+      try {
+        TrayService._shutdown();
+      }
+      finally {
+        Services2.appstartup.exitLastWindowClosingSurvivalArea();
+      }
     }
     else {
       this.setWatchMode();

@@ -42,7 +42,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 const module = Cu.import;
 
-module("resource://mintrayr/tray.jsm");
+module("resource://mintrayr/trayservice.jsm");
 
 function MinTrayR(menu, pref, func) {
   if (!menu) {
