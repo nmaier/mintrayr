@@ -1,4 +1,3 @@
-LIBRARY tray
 EXPORTS
   mintrayr_Init
   mintrayr_Destroy
