@@ -11,6 +11,7 @@ module("resource://gre/modules/Services.jsm");
 module("resource://gre/modules/XPCOMUtils.jsm");
 
 const Platform = {};
+module("resource://mintrayr/platform.jsm", Platform);
 
 const _icons = [];
 const _prefs = Services.prefs.getBranch("extensions.mintrayr.");
@@ -84,14 +85,6 @@ function doMinimizeWindow(window, type) {
 }
 
 const TrayService = {
-  _initialized: false,
-  init: function(callback) {
-    module("resource://mintrayr/platform.jsm", Platform);
-    Platform.init((function() {
-      this._initialized = true;
-      callback();
-    }).bind(this));
-  },
   createIcon: function(window, aCloseOnRestore) {
     for (let [,icon] in Iterator(_icons)) {
       if (icon.window === window) {

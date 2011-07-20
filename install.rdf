@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>mintrayr@tn123.ath.cx</em:id>
-    <em:version>1.0b2.ctypes</em:version>
+    <em:version>1.0b1.ctypes</em:version>
     <em:unpack>true</em:unpack>
     <em:targetPlatform>WINNT_x86-msvc</em:targetPlatform>
     <em:targetPlatform>WINNT_x86_64-msvc</em:targetPlatform>
@@ -22,6 +22,7 @@
     <em:icon64URL>chrome://mintrayr-icon/skin/icon64.png</em:icon64URL>
     <em:homepageURL>https://tn123.org/mintrayr/</em:homepageURL>
     <em:optionsURL>chrome://mintrayr/content/prefs/prefs.xul</em:optionsURL>
+    <em:updateURL>https://tn123.org/mintrayr/beta/update.rdf</em:updateURL>
 
     <!-- Firefox -->
     <em:targetApplication>

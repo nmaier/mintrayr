@@ -9,13 +9,37 @@ const Cr = Components.results;
 const module = Cu.import;
 
 module("resource://gre/modules/ctypes.jsm");
-module("resource://gre/modules/AddonManager.jsm");
 module("resource://gre/modules/Services.jsm");
 module("resource://gre/modules/XPCOMUtils.jsm");
 
+const Services2 = {};
 XPCOMUtils.defineLazyServiceGetter(
-    Services, "uuid", "@mozilla.org/uuid-generator;1",
-    "nsIUUIDGenerator");
+  Services2,
+  "uuid",
+  "@mozilla.org/uuid-generator;1",
+  "nsIUUIDGenerator"
+  );
+XPCOMUtils.defineLazyServiceGetter(
+  Services2,
+  "res",
+  "@mozilla.org/network/protocol;1?name=resource",
+  "nsIResProtocolHandler"
+  );
+XPCOMUtils.defineLazyServiceGetter(
+  Services2,
+  "appstartup",
+  "@mozilla.org/toolkit/app-startup;1",
+  "nsIAppStartup"
+  );
+
+const directory = (function() {
+  let u = Services.io.newURI(Components.stack.filename, null, null);
+  u = Services.io.newURI(Services2.res.resolveURI(u), null, null);
+  if (u instanceof Ci.nsIFileURL) {
+    return u.file.parent.parent;
+  }
+  throw new Error("not resolved");
+})();
 
 const _libraries = {
   "x86-msvc": {m:"tray_x86-msvc.dll",c:ctypes.jschar.ptr},
@@ -26,31 +50,6 @@ const _libraries = {
 
 var _watchedWindows = [];
 var _icons = [];
-
-const Observer = {
-  register: function() {
-    Services.obs.addObserver(Observer, "quit-application", false);
-    Services.prefs.addObserver("extensions.mintrayr.minimizeon", Observer, false);
-    this.setWatchMode();
-  },
-  unregister: function() {
-    Services.obs.removeObserver(Observer, "quit-application");
-    Services.prefs.removeObserver("extensions.mintrayr.minimizeon", Observer);
-  },
-  setWatchMode: function() {
-    _functions.SetWatchMode(Services.prefs.getIntPref("extensions.mintrayr.minimizeon"));
-  },
-  observe: function(s, topic, data) {
-    if (topic == "quit-application") {
-      this.unregister();
-      unwatchAll();
-    }
-    else {
-      this.setWatchMode();
-    }
-  }
-};
-
 
 const handle_t = ctypes.voidptr_t;
 
@@ -84,113 +83,97 @@ const minimize_callback_t = ctypes.FunctionType(
 ).ptr;
 
 
-var _initialized = false;
-const _functions = {};
-
-function init(callback) {
-  if (_initialized) {
-    callback();
-    return;
+function loadLibrary({m,c}) {
+  let resource = directory.clone();
+  resource.append("lib");
+  resource.append(m);
+  if (!resource.exists()) {
+    throw new Error("XPCOMABI Library: " + resource.path)
   }
-  AddonManager.getAddonByID("mintrayr@tn123.ath.cx", function(addon) {
-    function loadLibrary({m,c}) {
-      const resource = addon.getResourceURI("lib/" + m);
-      resource instanceof Ci.nsIFileURL;
-      if (!resource.file.exists()) {
-        throw new Error("XPCOMABI Library: " + resource)
-      }
-      return [ctypes.open(resource.file.path), c];
-    }
+  return [ctypes.open(resource.path), c];
+}
 
-    var traylib;
-    var char_ptr_t;
+var traylib;
+var char_ptr_t;
+try {
+  [traylib, char_ptr_t] = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
+}
+catch (ex) {
+  for (let [,l] in Iterator(_libraries)) {
     try {
-      [traylib, char_ptr_t] = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
+      [traylib, char_ptr_t] = loadLibrary(l);
     }
     catch (ex) {
-      for (let [,l] in Iterator(_libraries)) {
-        try {
-          [traylib, char_ptr_t] = loadLibrary(l);
-        }
-        catch (ex) {
-          // no op
-        }
-      }
-      if (!traylib) {
-        throw new Error("No loadable library found!");
-      }
+      // no op
     }
-
-    const abi_t = ctypes.default_abi;
-
-    _functions.Init = traylib.declare(
-      "mintrayr_Init",
-      abi_t,
-      ctypes.void_t // retval
-      );
-    _functions.Destroy = traylib.declare(
-      "mintrayr_Destroy",
-      abi_t,
-      ctypes.void_t // retval
-      );
-    _functions.GetBaseWindowHandle = traylib.declare(
-      "mintrayr_GetBaseWindow",
-      abi_t,
-      handle_t, // retval handle
-      char_ptr_t // title
-      );
-    _functions.SetWatchMode = traylib.declare(
-      "mintrayr_SetWatchMode",
-      abi_t,
-      ctypes.void_t, // retval handle
-      ctypes.int // mode
-    );
-    _functions.MinimizeWindow = traylib.declare(
-      "mintrayr_MinimizeWindow",
-      abi_t,
-      ctypes.void_t, // retval BOOL
-      handle_t // handle
-      );
-    _functions.RestoreWindow = traylib.declare(
-      "mintrayr_RestoreWindow",
-      abi_t,
-      ctypes.void_t, // retval BOOL
-      handle_t // handle
-      );
-    _functions.CreateIcon = traylib.declare(
-      "mintrayr_CreateIcon",
-      abi_t,
-      ctypes.int, // retval BOOL
-      handle_t, // handle
-      mouseevent_callback_t // callback
-      );
-    _functions.DestroyIcon = traylib.declare(
-      "mintrayr_DestroyIcon",
-      abi_t,
-      ctypes.int, // retval BOOL
-      handle_t // handle
-      );
-    _functions.WatchWindow = traylib.declare(
-      "mintrayr_WatchWindow",
-      abi_t,
-      ctypes.int, // retval BOOL
-      handle_t, // handle
-      minimize_callback_t // callback
-      );
-    _functions.UnwatchWindow = traylib.declare(
-      "mintrayr_UnwatchWindow",
-      abi_t,
-      ctypes.int, // retval BOOL
-      handle_t // handle
-      );
-
-    _functions.Init();
-    Observer.register();
-
-    _initialized = true;
-    callback();
-  });
+  }
+  if (!traylib) {
+    throw new Error("No loadable library found!");
+  }
 }
+
+const abi_t = ctypes.default_abi;
+
+const _Init = traylib.declare(
+  "mintrayr_Init",
+  abi_t,
+  ctypes.void_t // retval
+  );
+const _Destroy = traylib.declare(
+  "mintrayr_Destroy",
+  abi_t,
+  ctypes.void_t // retval
+  );
+const _GetBaseWindowHandle = traylib.declare(
+  "mintrayr_GetBaseWindow",
+  abi_t,
+  handle_t, // retval handle
+  char_ptr_t // title
+  );
+const _SetWatchMode = traylib.declare(
+  "mintrayr_SetWatchMode",
+  abi_t,
+  ctypes.void_t, // retval handle
+  ctypes.int // mode
+);
+const _MinimizeWindow = traylib.declare(
+  "mintrayr_MinimizeWindow",
+  abi_t,
+  ctypes.void_t, // retval BOOL
+  handle_t // handle
+  );
+const _RestoreWindow = traylib.declare(
+  "mintrayr_RestoreWindow",
+  abi_t,
+  ctypes.void_t, // retval BOOL
+  handle_t // handle
+  );
+const _CreateIcon = traylib.declare(
+  "mintrayr_CreateIcon",
+  abi_t,
+  ctypes.int, // retval BOOL
+  handle_t, // handle
+  mouseevent_callback_t // callback
+  );
+const _DestroyIcon = traylib.declare(
+  "mintrayr_DestroyIcon",
+  abi_t,
+  ctypes.int, // retval BOOL
+  handle_t // handle
+  );
+const _WatchWindow = traylib.declare(
+  "mintrayr_WatchWindow",
+  abi_t,
+  ctypes.int, // retval BOOL
+  handle_t, // handle
+  minimize_callback_t // callback
+  );
+const _UnwatchWindow = traylib.declare(
+  "mintrayr_UnwatchWindow",
+  abi_t,
+  ctypes.int, // retval BOOL
+  handle_t // handle
+  );
 
 function GetBaseWindowHandle(window) {
   let baseWindow = window
@@ -200,12 +183,12 @@ function GetBaseWindowHandle(window) {
 
   // Tag the base window
   let oldTitle = baseWindow.title;
-  baseWindow.title = Services.uuid.generateUUID().toString();
+  baseWindow.title = Services2.uuid.generateUUID().toString();
 
   let rv;
   try {
     // Search the window by the new title
-    rv = _functions.GetBaseWindowHandle(baseWindow.title);
+    rv = _GetBaseWindowHandle(baseWindow.title);
     if (rv.isNull()) {
       throw new Error("Window not found!");
     }
@@ -281,7 +264,7 @@ function WatchedWindow(window, callback) {
   try {
     this._window = window;
     this._callback = callback;
-    _functions.WatchWindow(this._handle, minimize_callback);
+    _WatchWindow(this._handle, minimize_callback);
   }
   catch (ex) {
     delete this._handle;
@@ -296,7 +279,7 @@ WatchedWindow.prototype = {
   get callback() this._callback,
   destroy: function() {
     try {
-      _functions.UnwatchWindow(this._handle);
+      _UnwatchWindow(this._handle);
     }
     finally {
       // drop the references;
@@ -312,7 +295,7 @@ function Icon(window) {
   this._handle = GetBaseWindowHandle(window);
   try {
     this._window = window;
-    _functions.CreateIcon(this._handle, mouseevent_callback);
+    _CreateIcon(this._handle, mouseevent_callback);
   }
   catch (ex) {
     delete this._handle;
@@ -324,14 +307,14 @@ Icon.prototype = {
   get window() this._window,
   get handle() this._handle,
   minimize: function() {
-    _functions.MinimizeWindow(this._handle);
+    _MinimizeWindow(this._handle);
   },
   restore: function(){
-    _functions.RestoreWindow(this._handle);
+    _RestoreWindow(this._handle);
   },
   destroy: function() {
     try {
-      _functions.DestroyIcon(this._handle);
+      _DestroyIcon(this._handle);
     }
     finally {
       // drop the references;
@@ -349,7 +332,6 @@ Icon.prototype = {
 };
 
 function createIcon(window) {
-  if (!_initialized) throw new Error("not initialized");
   for (let [,icon] in Iterator(_icons)) {
     if (icon.window == window) {
       return icon;
@@ -361,7 +343,6 @@ function createIcon(window) {
 }
 
 function isWatched(window) {
-  if (!_initialized) throw new Error("not initialized");
   for (let [i,w] in Iterator(_watchedWindows)) {
     if (w.window === window) {
       return true;
@@ -371,7 +352,6 @@ function isWatched(window) {
 }
 
 function watchMinimize(window, callback) {
-  if (!_initialized) throw new Error("not initialized");
   if (isWatched(window)) {
     return;
   }
@@ -379,7 +359,6 @@ function watchMinimize(window, callback) {
   _watchedWindows.push(ww);
 }
 function unwatchMinimize(window) {
-  if (!_initialized) throw new Error("not initialized");
   for (let [i,w] in Iterator(_watchedWindows)) {
     if (w.window === window) {
       try {
@@ -394,11 +373,7 @@ function unwatchMinimize(window) {
 }
 
 function unwatchAll(){
-  if (!_this.initialized) return;
-
-  const appstartup = Cc["@mozilla.org/toolkit/app-startup;1"].
-    getService(Ci.nsIAppStartup);
-  appstartup.enterLastWindowClosingSurvivalArea();
+  Services2.appstartup.enterLastWindowClosingSurvivalArea();
   try {
     for (let [,w] in _watchedWindows) {
       w.destroy();
@@ -409,3 +384,30 @@ function unwatchAll(){
     appstartup.exitLastWindowClosingSurvivalArea();
   }
 }
+
+const Observer = {
+  register: function() {
+    Services.obs.addObserver(Observer, "quit-application", false);
+    Services.prefs.addObserver("extensions.mintrayr.minimizeon", Observer, false);
+    this.setWatchMode();
+  },
+  unregister: function() {
+    Services.obs.removeObserver(Observer, "quit-application");
+    Services.prefs.removeObserver("extensions.mintrayr.minimizeon", Observer);
+  },
+  setWatchMode: function() {
+    _SetWatchMode(Services.prefs.getIntPref("extensions.mintrayr.minimizeon"));
+  },
+  observe: function(s, topic, data) {
+    if (topic == "quit-application") {
+      this.unregister();
+      unwatchAll();
+    }
+    else {
+      this.setWatchMode();
+    }
+  }
+};
+Observer.register();
+
+_Init();

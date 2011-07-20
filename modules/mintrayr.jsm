@@ -45,57 +45,54 @@ const module = Cu.import;
 module("resource://mintrayr/tray.jsm");
 
 function MinTrayR(menu, pref, func) {
-  TrayService.init((function() {
-    if (!menu) {
-      throw Error("no menu");
-    }
-    this.menu = menu;
+  if (!menu) {
+    throw Error("no menu");
+  }
+  this.menu = menu;
 
-    this.document = menu.ownerDocument;
-    this.window = this.document.defaultView;
+  this.document = menu.ownerDocument;
+  this.window = this.document.defaultView;
 
-    let tp = this;
-    this.window.addEventListener(
-      'TrayDblClick',
-      function(event) {
-        if (event.button == 0 && !!tp.prefs.getExt('dblclickrestore', true)) {
-          tp.restore();
-        }
-      },
-      true
-    );
-    this.window.addEventListener(
-      'TrayClick',
-      function(event) {
-        if (event.button == 0 && !tp.prefs.getExt('dblclickrestore', true)) {
-          tp.restore();
-        }
-      },
-      true
-    );
-    this.window.addEventListener(
-      'TrayClick',
-      function(event) {
-        if (event.button == 2 && tp.prefs.getExt('showcontext', true)) {
-          Cu.reportError("show context/" + event.screenX + "_" + event.screenY);
-          tp.showMenu(event.screenX, event.screenY);
-        }
-      },
-      true
-    );
+  let tp = this;
+  this.window.addEventListener(
+    'TrayDblClick',
+    function(event) {
+      if (event.button == 0 && !!tp.prefs.getExt('dblclickrestore', true)) {
+        tp.restore();
+      }
+    },
+    true
+  );
+  this.window.addEventListener(
+    'TrayClick',
+    function(event) {
+      if (event.button == 0 && !tp.prefs.getExt('dblclickrestore', true)) {
+        tp.restore();
+      }
+    },
+    true
+  );
+  this.window.addEventListener(
+    'TrayClick',
+    function(event) {
+      if (event.button == 2 && tp.prefs.getExt('showcontext', true)) {
+        Cu.reportError("show context/" + event.screenX + "_" + event.screenY);
+        tp.showMenu(event.screenX, event.screenY);
+      }
+    },
+    true
+  );
 
-    if (typeof pref == 'boolean' && pref) {
-      this.watch();
-    }
-    else if (pref) {
-      this._watchPref = pref;
-      this.prefs.addObserver('extensions.mintrayr.' + this._watchPref, this);
-      this.observe(null, null, pref);
-    }
+  if (typeof pref == 'boolean' && pref) {
+    this.watch();
+  }
+  else if (pref) {
+    this._watchPref = pref;
+    this.prefs.addObserver('extensions.mintrayr.' + this._watchPref, this);
+    this.observe(null, null, pref);
+  }
 
-    func.call(this);
-
-  }).bind(this));
+  func.call(this);
 }
 
 MinTrayR.prototype = {
