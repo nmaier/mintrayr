@@ -104,40 +104,42 @@ const abi_t = ctypes.default_abi;
 const handle_t = ctypes.voidptr_t;
 
 const mouseevent_t = ctypes.StructType(
-    "mouseevent_t",
-    [
-    {"button": ctypes.int},
-    {"clickCount": ctypes.int},
-    {"x": ctypes.long},
-    {"y": ctypes.long},
-    {"keys": ctypes.int},
-    ]
-    );
+  "mouseevent_t",
+  [
+  {"button": ctypes.int},
+  {"clickCount": ctypes.int},
+  {"x": ctypes.long},
+  {"y": ctypes.long},
+  {"keys": ctypes.int},
+  ]
+  );
 
 const mouseevent_callback_t = ctypes.FunctionType(
-    ctypes.default_abi,
-    ctypes.void_t, // retval
-    [
-    handle_t, // handle
-    mouseevent_t.ptr, // event
-    ]
-    ).ptr;
+  ctypes.default_abi,
+  ctypes.void_t, // retval
+  [
+  handle_t, // handle
+  mouseevent_t.ptr, // event
+  ]
+  ).ptr;
 
 const minimize_callback_t = ctypes.FunctionType(
-    ctypes.default_abi,
-    ctypes.void_t, // retval
-    [
-    handle_t, // handle
-    ctypes.int // type
-    ]
-).ptr;
+  ctypes.default_abi,
+  ctypes.void_t, // retval
+  [
+  handle_t, // handle
+  ctypes.int // type
+  ]
+  ).ptr;
 
 var traylib;
 var char_ptr_t;
 try {
+	// Try to load the library according to XPCOMABI
   [traylib, char_ptr_t] = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
 }
 catch (ex) {
+	// XPCOMABI yielded wrong results; try alternative libraries
   for (let [,l] in Iterator(_libraries)) {
     try {
       [traylib, char_ptr_t] = loadLibrary(l);
