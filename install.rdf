@@ -22,7 +22,6 @@
     <em:icon64URL>chrome://mintrayr-icon/skin/icon64.png</em:icon64URL>
     <em:homepageURL>https://tn123.org/mintrayr/</em:homepageURL>
     <em:optionsURL>chrome://mintrayr/content/prefs/prefs.xul</em:optionsURL>
-    <em:updateURL>https://tn123.org/mintrayr/beta/update.rdf</em:updateURL>
 
     <!-- Firefox -->
     <em:targetApplication>
