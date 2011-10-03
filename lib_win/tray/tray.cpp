@@ -328,6 +328,7 @@ BOOL mintrayr_WatchWindow(void *handle, minimize_callback_t callback)
 
   return TRUE;
 }
+
 BOOL mintrayr_UnwatchWindow(void *handle)
 {
   HWND hwnd = (HWND)handle;
@@ -358,6 +359,7 @@ void mintrayr_MinimizeWindow(void *handle)
 
   ::ShowWindow(hwnd, SW_HIDE);
 }
+
 void mintrayr_RestoreWindow(void *handle)
 {
   HWND hwnd = (HWND)handle;
@@ -387,7 +389,6 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
 
   NOTIFYICONDATAW *iconData = new NOTIFYICONDATAW;
   // Init the icon data according to MSDN
-  ZeroMemory(iconData, sizeof(NOTIFYICONDATAW));
   iconData->cbSize = sizeof(NOTIFYICONDATAW);
 
   // Copy the title
@@ -466,6 +467,30 @@ void* mintrayr_GetBaseWindow(wchar_t *title)
 	return rv;
 }
 
-void mintrayr_SetWatchMode(int mode) {
+void mintrayr_SetWatchMode(int mode)
+{
   gWatchMode = mode;
+}
+
+static void *operator new(size_t size)
+{
+  // XXX: Note: usually one would throw std::bad_alloc
+  // However, the code does not handle that exception anyway
+  // and will crash on OOM, so this is "safe"
+  return LocalAlloc(LPTR, size);
+}
+static void *operator new(size_t size, std::nothrow_t const &)
+{
+  return LocalAlloc(LPTR, size);
+}
+
+static void operator delete(void *ptr)
+{
+  if (ptr) {
+    LocalFree(ptr);
+  }
+}
+
+namespace std {
+  const nothrow_t nothrow;
 }

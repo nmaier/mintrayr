@@ -24,6 +24,6 @@ clean:
 cp:
 	cp $(libs) ../../lib/
 
-install: clean all cp
+install: clean all strip cp
 
 .PHONY: all clean strip cp install

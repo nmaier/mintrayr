@@ -190,6 +190,7 @@
 				EnableFiberSafeOptimizations="true"
 				StringPooling="true"
 				MinimalRebuild="false"
+				BufferSecurityCheck="false"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -205,10 +206,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(SolutionDir)\..\..\lib\$(ProjectName)_x86-msvc.dll"
+				IgnoreAllDefaultLibraries="true"
 				ModuleDefinitionFile="exports.def"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				EntryPointSymbol="DllMain"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -267,6 +270,7 @@
 				EnableFiberSafeOptimizations="true"
 				StringPooling="true"
 				MinimalRebuild="false"
+				BufferSecurityCheck="false"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -282,10 +286,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(SolutionDir)\..\..\lib\$(ProjectName)_x86_64-msvc.dll"
+				IgnoreAllDefaultLibraries="true"
 				ModuleDefinitionFile="exports.def"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				EntryPointSymbol="DllMain"
 				TargetMachine="17"
 			/>
 			<Tool
