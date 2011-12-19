@@ -3,6 +3,12 @@ import os, sys, re
 from io import BytesIO
 from zipfile import ZipFile, ZIP_STORED, ZIP_DEFLATED
 
+try:
+    from cmp_listed_locales import cmp_listed_locales
+except ImportError, ex:
+    def cmp_listed_locales(dirname):
+        print >>sys.stderr, "WARNING: did not compare locales (%s)" % ex
+
 from path import path
 
 jar_files = [
@@ -69,6 +75,7 @@ def chromejar_line(line):
 
 def main():
     basedir = path(__file__).dirname()
+    cmp_listed_locales(basedir)
 
     with BytesIO() as xpi:
         zip_files(xpi, xpi_files, basedir)
@@ -83,6 +90,7 @@ def main():
                 zp.writestr("chrome.manifest", manifest)
         with open("mintrayr.xpi", "wb") as op:
             op.write(xpi.read())
+    print "done!"
     return 0
 
 if __name__ == "__main__":
