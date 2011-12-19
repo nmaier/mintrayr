@@ -56,7 +56,7 @@ addEventListener(
         catch (ex) {
           // no-op
         }
-        this.cloneToMenu('MinTrayR_sep-top', ['newNewMsgCmd'], false);
+        this.cloneToMenu('MinTrayR_sep-top', ["newNewMsgCmd", "button-getAllNewMsg", "addressBook"], false);
         this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
         document
           .getElementById('MinTrayR_newNewMsgCmd')
