@@ -25,6 +25,7 @@ locale mintrayr sr chrome/locale/sr/
 locale mintrayr sv-SE chrome/locale/sv-SE/
 locale mintrayr tr chrome/locale/tr/
 locale mintrayr uk chrome/locale/uk/
+locale mintrayr zh-CN chrome/locale/zh-CN/
 
 resource mintrayr modules/
 
