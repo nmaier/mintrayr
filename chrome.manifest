@@ -23,7 +23,7 @@ locale mintrayr ru-RU chrome/locale/ru-RU/
 locale mintrayr sl-SI chrome/locale/sl-SI/
 locale mintrayr sr chrome/locale/sr/
 locale mintrayr sv-SE chrome/locale/sv-SE/
-locale mintrayr tr-TR chrome/locale/tr-TR/
+locale mintrayr tr chrome/locale/tr/
 locale mintrayr uk chrome/locale/uk/
 
 resource mintrayr modules/
