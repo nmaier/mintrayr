@@ -2,12 +2,12 @@
 <!ENTITY mintrayr.prefs.winstyle "ширина: 32 емова; висина 27 емова">
 <!ENTITY mintrayr.prefs.minimizeon "Умањи у системску траку послова">
 <!ENTITY mintrayr.prefs.minimizeon.never "никада (само помоћу менија/дугмета)">
-<!ENTITY mintrayr.prefs.minimizeon.minimize "Када умањујеш">
-<!ENTITY mintrayr.prefs.minimizeon.close "Уместо умањивања">
-<!ENTITY mintrayr.prefs.minimizeon.both "Уместо затварања и приликом умањивања">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "када умањујеш">
+<!ENTITY mintrayr.prefs.minimizeon.close "уместо умањивања">
+<!ENTITY mintrayr.prefs.minimizeon.both "уместо затварања и приликом умањивања">
 <!ENTITY mintrayr.prefs.main "Главно">
-<!ENTITY mintrayr.prefs.dblclickrestore "Дупли клик за враћање">
-<!ENTITY mintrayr.prefs.showcontext "Прикажи садржајни мени приликом десног клика">
+<!ENTITY mintrayr.prefs.dblclickrestore "дупли клик за враћање">
+<!ENTITY mintrayr.prefs.showcontext "прикажи приручни мени приликом десног клика">
 <!ENTITY mintrayr.prefs.watchwindows "Посматрај прозоре">
 <!ENTITY mintrayr.prefs.misc "Разно">
 <!ENTITY mintrayr.prefs.clickbehavior "Приликом клика">
