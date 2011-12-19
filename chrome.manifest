@@ -11,7 +11,7 @@ locale mintrayr es-ES chrome/locale/es-ES/
 locale mintrayr fr chrome/locale/fr/
 locale mintrayr hu-HU chrome/locale/hu-HU/
 locale mintrayr hy-AM chrome/locale/hy-AM/
-locale mintrayr it-IT chrome/locale/it-IT/
+locale mintrayr it chrome/locale/it/
 locale mintrayr ja-JP chrome/locale/ja-JP/
 locale mintrayr nl chrome/locale/nl/
 locale mintrayr pl chrome/locale/pl/
