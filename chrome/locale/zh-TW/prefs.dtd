@@ -1,0 +1,13 @@
+<!ENTITY mintrayr.prefs.title "MinTrayR 設定">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
+<!ENTITY mintrayr.prefs.minimizeon "最小化至系統列">
+<!ENTITY mintrayr.prefs.minimizeon.never "永不（除非使用選單或特定按鈕）">
+<!ENTITY mintrayr.prefs.minimizeon.minimize "最小化視窗時">
+<!ENTITY mintrayr.prefs.minimizeon.close "關閉視窗時">
+<!ENTITY mintrayr.prefs.minimizeon.both "關閉或最小化視窗時">
+<!ENTITY mintrayr.prefs.main "主要設定">
+<!ENTITY mintrayr.prefs.dblclickrestore "雙擊系統列圖示還原視窗">
+<!ENTITY mintrayr.prefs.showcontext "右鍵點擊系統列圖示顯示選單">
+<!ENTITY mintrayr.prefs.watchwindows "監視的視窗">
+<!ENTITY mintrayr.prefs.misc "雜項">
+<!ENTITY mintrayr.prefs.clickbehavior "滑鼠點擊行為">
