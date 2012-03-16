@@ -199,10 +199,11 @@ void  mintrayr_RestoreWindow(void *handle)
 
 BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
 {
-  GdkWindow *window = (GdkWindow*)handle;
-  GtkWidget *widget = NULL;
-  GtkWindow *gtkWindow;
-  GdkPixbuf *buf;
+  GdkWindow   *window = (GdkWindow*)handle;
+  GtkWidget   *widget = NULL;
+  GtkWindow   *gtkWindow;
+  GdkPixbuf   *buf;
+  const gchar *iconname;
 
   icon_data_t *data = NULL;
 
@@ -236,6 +237,11 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
   buf = gtk_window_get_icon(gtkWindow);
   if (buf) {
     gtk_status_icon_set_from_pixbuf(data->statusIcon, buf);
+  } else {
+    iconname = gtk_window_get_icon_name(gtkWindow));
+    if (iconname) {
+      gtk_status_icon_set_from_icon_name(data->statusIcon, iconname);
+    }
   }
   g_object_set_data(G_OBJECT(window), kIcon, data);
 
