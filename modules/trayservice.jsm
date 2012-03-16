@@ -48,21 +48,21 @@ module("resource://gre/modules/ctypes.jsm");
 module("resource://gre/modules/Services.jsm");
 module("resource://gre/modules/XPCOMUtils.jsm");
 
-const Services2 = {};
+Services = Object.create(Services);
 XPCOMUtils.defineLazyServiceGetter(
-  Services2,
+  Services,
   "uuid",
   "@mozilla.org/uuid-generator;1",
   "nsIUUIDGenerator"
   );
 XPCOMUtils.defineLazyServiceGetter(
-  Services2,
+  Services,
   "res",
   "@mozilla.org/network/protocol;1?name=resource",
   "nsIResProtocolHandler"
   );
 XPCOMUtils.defineLazyServiceGetter(
-  Services2,
+  Services,
   "appstartup",
   "@mozilla.org/toolkit/app-startup;1",
   "nsIAppStartup"
@@ -70,7 +70,7 @@ XPCOMUtils.defineLazyServiceGetter(
 
 const _directory = (function() {
   let u = Services.io.newURI(Components.stack.filename, null, null);
-  u = Services.io.newURI(Services2.res.resolveURI(u), null, null);
+  u = Services.io.newURI(Services.res.resolveURI(u), null, null);
   if (u instanceof Ci.nsIFileURL) {
     return u.file.parent.parent;
   }
@@ -222,7 +222,7 @@ function GetBaseWindowHandle(window) {
 
   // Tag the base window
   let oldTitle = baseWindow.title;
-  baseWindow.title = Services2.uuid.generateUUID().toString();
+  baseWindow.title = Services.uuid.generateUUID().toString();
 
   let rv;
   try {
@@ -486,12 +486,12 @@ const Observer = {
   observe: function(s, topic, data) {
     if (topic == "quit-application") {
       this.unregister();
-      Services2.appstartup.enterLastWindowClosingSurvivalArea();
+      Services.appstartup.enterLastWindowClosingSurvivalArea();
       try {
         TrayService._shutdown();
       }
       finally {
-        Services2.appstartup.exitLastWindowClosingSurvivalArea();
+        Services.appstartup.exitLastWindowClosingSurvivalArea();
       }
     }
     else {
