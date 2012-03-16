@@ -238,11 +238,11 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
   if (buf) {
     gtk_status_icon_set_from_pixbuf(data->statusIcon, buf);
   }
+  else if ((iconname = gtk_window_get_icon_name(gtkWindow)) != NULL) {
+    gtk_status_icon_set_from_icon_name(data->statusIcon, iconname);
+  }
   else {
-    iconname = gtk_window_get_icon_name(gtkWindow);
-    if (iconname) {
-      gtk_status_icon_set_from_icon_name(data->statusIcon, iconname);
-    }
+    goto error_cleanup;
   }
   g_object_set_data(G_OBJECT(window), kIcon, data);
 
