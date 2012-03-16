@@ -61,9 +61,10 @@ def zip_files(out, file_list, basedir):
             for fe in basedir.glob(f):
                 if fe.isdir():
                     continue
-                oe = fe[len(basedir)+1:]
+                oe = fe[len(basedir):]
                 with open(fe, "rb") as fp:
                     zp.writestr(oe, fp.read())
+                    print oe
 
 def chromejar_line(line):
     pieces = re.split(r"\s+", line, 3)
@@ -81,7 +82,7 @@ def main():
         zip_files(xpi, xpi_files, basedir)
         with ZipOutFile(xpi) as zp:
             with BytesIO() as jar:
-                zip_files(jar, jar_files, basedir / "chrome")
+                zip_files(jar, jar_files, basedir / "chrome/")
                 zp.writestr("chrome.jar", jar.read())
             with open("chrome.manifest") as mf:
                 manifest = "\n".join((chromejar_line(l.strip())
