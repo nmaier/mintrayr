@@ -1,5 +1,5 @@
 <!ENTITY mintrayr.prefs.title "MinTrayR Nastavení">
-<!ENTITY mintrayr.prefs.winstyle "šířka: 32em; výška: 27em;">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
 <!ENTITY mintrayr.prefs.minimizeon "Minimize to tray">
 <!ENTITY mintrayr.prefs.minimizeon.never "Nikdy (pouze menu / tlačítko)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "Když minimalizováno">

@@ -1,5 +1,5 @@
 <!ENTITY mintrayr.prefs.title "Inställningar för MinTrayR">
-<!ENTITY mintrayr.prefs.winstyle "bredd: 32em; höjd: 27em;">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
 <!ENTITY mintrayr.prefs.minimizeon "Minimera till meddelandefältet">
 <!ENTITY mintrayr.prefs.minimizeon.never "Aldrig (bara via meny/knapp)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "När fönstret minimeras">

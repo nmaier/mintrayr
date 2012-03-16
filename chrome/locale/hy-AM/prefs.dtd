@@ -1,5 +1,5 @@
 <!ENTITY mintrayr.prefs.title "MinTrayR-ի կարգավորումները">
-<!ENTITY mintrayr.prefs.winstyle "լայն-ը. 32em; բարձր. 27em;">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
 <!ENTITY mintrayr.prefs.minimizeon "Թաքցնել ներքևում">
 <!ENTITY mintrayr.prefs.minimizeon.never "Երբեք (միայն ընտրացանկից/կոճակով)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "Իջեցնելիս">

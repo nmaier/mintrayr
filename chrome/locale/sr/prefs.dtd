@@ -1,5 +1,5 @@
 <!ENTITY mintrayr.prefs.title "MinTrayR подешавања">
-<!ENTITY mintrayr.prefs.winstyle "ширина: 32 емова; висина 27 емова">
+<!ENTITY mintrayr.prefs.winstyle "width: 32em; height: 27em;">
 <!ENTITY mintrayr.prefs.minimizeon "Умањи у системску траку послова">
 <!ENTITY mintrayr.prefs.minimizeon.never "никада (само помоћу менија/дугмета)">
 <!ENTITY mintrayr.prefs.minimizeon.minimize "када умањујеш">
