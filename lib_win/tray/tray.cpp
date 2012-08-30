@@ -127,8 +127,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         WINDOWPLACEMENT pl;
         pl.length = sizeof(WINDOWPLACEMENT);
         ::GetWindowPlacement(hwnd, &pl);
-        if (pl.showCmd == SW_SHOWMINIMIZED && (gWatchMode & kTrayOnMinimize)) {
-          PostMessage(hwnd, WM_TRAYCALLBACK, 0, 0);
+        if (pl.showCmd == SW_SHOWMINIMIZED) {
+          if (::GetPropW(hwnd, kWatch) == (HANDLE)0x1 && (gWatchMode & kTrayOnMinimize)) {
+            PostMessage(hwnd, WM_TRAYCALLBACK, 0, 0);
+          }
           // We're active, ignore
           return 0;
         }
