@@ -130,9 +130,13 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         if (pl.showCmd == SW_SHOWMINIMIZED) {
           if (::GetPropW(hwnd, kWatch) == (HANDLE)0x1 && (gWatchMode & kTrayOnMinimize)) {
             PostMessage(hwnd, WM_TRAYCALLBACK, 0, 0);
+            // We're active, ignore
+            return 0;
           }
-          // We're active, ignore
-          return 0;
+          if (::GetPropW(hwnd, kWatch) == (HANDLE)0x2) {
+            // We're minimizing to tray right now
+            return 0;
+          }
         }
       }
       break;
