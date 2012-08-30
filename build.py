@@ -61,10 +61,10 @@ def zip_files(out, file_list, basedir):
             for fe in basedir.glob(f):
                 if fe.isdir():
                     continue
-                oe = fe[len(basedir):]
+                oe = path(fe.replace("\\", "/"))[len(basedir):]
                 with open(fe, "rb") as fp:
                     zp.writestr(oe, fp.read())
-                    print oe
+                    print fe
 
 def chromejar_line(line):
     pieces = re.split(r"\s+", line, 3)
@@ -75,7 +75,7 @@ def chromejar_line(line):
     return " ".join(pieces)
 
 def main():
-    basedir = path(__file__).dirname()
+    basedir = path("./")
     cmp_listed_locales(basedir)
 
     with BytesIO() as xpi:
