@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/ */
+
 #include <stdlib.h>
 
 #include <X11/Xlib.h>
@@ -60,10 +64,10 @@ GdkFilterReturn filter_windows(XEvent *xev, GdkEvent* event, minimize_callback_d
       if (xev->xclient.data.l
           && (Atom)(xev->xclient.data.l[0]) == WM_DELETE_WINDOW
           && (gWatchMode & (1<<1))
-      ) { 
+      ) {
         data->callback(data->handle, 0);
         return GDK_FILTER_REMOVE;
-      }   
+      }
       break;
 
     default:
@@ -149,10 +153,10 @@ BOOL mintrayr_WatchWindow(void *handle, minimize_callback_t callback)
   }
   data->handle = handle;
   data->callback = callback;
-  
+
   gdk_window_add_filter(
     window,
-    (GdkFilterFunc)filter_windows, 
+    (GdkFilterFunc)filter_windows,
     data
     );
 
@@ -174,7 +178,7 @@ BOOL mintrayr_UnwatchWindow(void *handle)
   g_object_set_data(G_OBJECT(window), kWatch, NULL);
   gdk_window_remove_filter(
     window,
-    (GdkFilterFunc)filter_windows, 
+    (GdkFilterFunc)filter_windows,
     data
     );
   free(data);
@@ -252,7 +256,7 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
   gtk_status_icon_set_visible(data->statusIcon, 1);
 
   return 1;
- 
+
 error_cleanup:
   free(data);
   return 0;
