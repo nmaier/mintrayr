@@ -1,7 +1,8 @@
+CC = gcc
 deps = gdk-2.0 gdk-pixbuf-2.0 atk
 platform = $(shell uname -p)
 
-CFLAGS += -O3 -fPIC -g -mtune=generic $(shell pkg-config --cflags $(deps))
+CFLAGS += -Os -fPIC -g -mtune=generic $(shell pkg-config --cflags $(deps))
 LDFLAGS += -shared -rdynamic -Wl,--version-script -Wl,export-versionscript
 LIBS += $(shell pkg-config --libs $(deps))
 
@@ -10,10 +11,10 @@ libs = tray_$(platform)-gcc3.so
 all: $(libs)
 
 tray_$(platform)-gcc3.so: tray.o
-	gcc $(CFLAGS) $(LDFLAGS) $< $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $< $(LIBS) -o $@
 
 %.o: %.c
-	gcc $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 strip: $(libs)
 	strip $<
