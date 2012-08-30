@@ -15,6 +15,7 @@ static const wchar_t kWatch[] = L"_MINTRAYR_WATCH";
 static const wchar_t kWatchMinimizeProc[] = L"_MINTRAYR_WATCH_MINIMIZEPROC";
 
 static const wchar_t kIcon[] = L"_MINTRAYR_ICON";
+static const wchar_t kIconClick[] = L"_MINTRAYR_ICON_CLICK";
 static const wchar_t kIconData[] = L"_MINTRAYR_ICON_DATA";
 static const wchar_t kIconMouseEventProc[] = L"_MINTRAYR_ICON_MOUSEEVENTPROC";
 
@@ -180,22 +181,58 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       if (!event) {
         goto WndProcEnd;
       }
-      event->clickCount = 0;
-      switch (LOWORD(lParam)) {
-        case WM_LBUTTONUP:
-        case WM_MBUTTONUP:
-        case WM_RBUTTONUP:
-        case WM_CONTEXTMENU:
-        case NIN_KEYSELECT:
-          event->clickCount = 1;
-          break;
+      WORD button = LOWORD(lParam);
+      switch (button) {
         case WM_LBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
-          event->clickCount = 2;
+          // According to http://msdn.microsoft.com/en-us/library/windows/desktop/ms645606%28v=vs.85%29.aspx
+          // this will be followed by an UP message
+          // So store the DBL click event and have it replayed later by the UP message
+          // See GH-17
+          ::SetPropW(hwnd, kIconClick, (HANDLE)button);
+          goto WndProcEnd;
+      }
+      event->clickCount = 0;
+      switch (button) {
+        case WM_LBUTTONUP:
+          if (::GetPropW(hwnd, kIconClick) == (HANDLE)WM_LBUTTONDBLCLK) {
+            event->clickCount = 2;
+            button = WM_LBUTTONDBLCLK;
+          }
+          else {
+            event->clickCount = 1;
+          }
+          ::SetPropW(hwnd, kIconClick, (HANDLE)0);
+          break;
+        case WM_MBUTTONUP:
+          if (::GetPropW(hwnd, kIconClick) == (HANDLE)WM_MBUTTONDBLCLK) {
+            event->clickCount = 2;
+            button = WM_MBUTTONDBLCLK;
+          }
+          else {
+            event->clickCount = 1;
+          }
+          ::SetPropW(hwnd, kIconClick, (HANDLE)0);
+          break;
+        case WM_RBUTTONUP:
+          if (::GetPropW(hwnd, kIconClick) == (HANDLE)WM_RBUTTONDBLCLK) {
+            event->clickCount = 2;
+            button = WM_RBUTTONDBLCLK;
+          }
+          else {
+            event->clickCount = 1;
+          }
+          ::SetPropW(hwnd, kIconClick, (HANDLE)0);
+          break;
+        case WM_CONTEXTMENU:
+        case NIN_KEYSELECT:
+          event->clickCount = 1;
+          ::SetPropW(hwnd, kIconClick, (HANDLE)0);
           break;
       }
-      switch (LOWORD(lParam)) {
+
+      switch (button) {
         case WM_LBUTTONUP:
         case WM_LBUTTONDBLCLK:
           event->button = 0;

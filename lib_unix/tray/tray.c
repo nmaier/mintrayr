@@ -25,6 +25,7 @@ typedef struct _minimize_callback_data_t {
 
 typedef struct _icon_data_t {
   void *handle;
+  int clickCount;
   mouseevent_callback_t callback;
   GtkStatusIcon *statusIcon;
 } icon_data_t;
@@ -80,18 +81,19 @@ static void button_event(GtkStatusIcon* icon, GdkEventButton *event, icon_data_t
 {
   mouseevent_t mevent;
 
-  mevent.button = event->button -1;
+  mevent.button = event->button - 1;
 
   switch (event->type) {
     case GDK_BUTTON_RELEASE: // use release, so that we don't duplicate events
-      mevent.clickCount = 1;
+      mevent.clickCount = data->clickCount;
+      data->clickCount = 1;
       break;
     case GDK_2BUTTON_PRESS:
-      mevent.clickCount = 2;
-      break;
+      data->clickCount = 2;
+      return;
     case GDK_3BUTTON_PRESS:
-      mevent.clickCount = 3;
-      break;
+      data->clickCount = 3;
+      return;
     default:
       return;
   }
@@ -229,6 +231,7 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
   if (!data) {
     return 0;
   }
+  data->clickCount = 1;
   data->handle = handle;
   data->callback = callback;
 
