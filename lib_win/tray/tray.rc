@@ -43,7 +43,7 @@
 //
 
 1 VERSIONINFO
- FILEVERSION 1,1,0,0
+ FILEVERSION 1,1,1,0
  PRODUCTVERSION 1,1,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -60,9 +60,9 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "FileDescription", "TrayToolkit js-ctypes binary library"
-            VALUE "FileVersion", "1, 1, 0, 0"
+            VALUE "FileVersion", "1, 1, 1, 0"
             VALUE "InternalName", "TrayToolkit"
-            VALUE "LegalCopyright", "Copyright (C) 2008-2011 Nils Maier. MPL-Tri licensed"
+            VALUE "LegalCopyright", "Copyright (C) 2008-2012 Nils Maier. MPL-Tri licensed"
             VALUE "OriginalFilename", "tray.dll"
             VALUE "ProductName", "MinTrayR Mozilla extension"
             VALUE "ProductVersion", "1, 1, 0, 0"
