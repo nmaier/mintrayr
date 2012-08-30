@@ -64,6 +64,22 @@ addEventListener(
         ['titlebar-close', 'close-button'].forEach(hijackButton.bind(null, MinTrayRTryCloseWindow));
         ['titlebar-min', 'minimize-button'].forEach(hijackButton.bind(null, MinTrayRTryMinimizeWindow));
       })(this);
+
+      // Need to hook BrowserTryToCloseWindow in order for session restore
+      // to not get wrong window coords.
+      // See GH-84, GH-89
+      (function hookSessionStore(self) {
+
+        const o = BrowserTryToCloseWindow;
+        BrowserTryToCloseWindow = function mintrayr_BrowserTryToCloseWindow() {
+          try {
+            self.restore();
+          }
+          catch (ex) {}
+
+          return o.apply(null, arguments)
+        };
+      })(this);
     });
   },
   true

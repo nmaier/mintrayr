@@ -424,6 +424,15 @@ const TrayService = {
       _icons.splice(idx, 1);
     }
   },
+  _replaySessionStoreByAbusingCuImport: function you_didnt_see_this__im_serious__do_not_attempt_at_home() {
+    try {
+      const {SessionStoreInternal: ssi} = module("resource:///modules/sessionstore/SessionStore.jsm", {});
+      // Force re-collect all windows, so that the coords of previously minimized windows aren't all messed up
+      // See GH-84, GH-89
+      ssi.onQuitApplicationRequested();
+    }
+    catch (ex) {}
+  },
   _shutdown: function() {
     for (let [,icon] in Iterator(_icons)) {
       icon.close();
@@ -434,16 +443,19 @@ const TrayService = {
       w.destroy();
     }
     _watchedWindows.length = 0;
+    this._replaySessionStoreByAbusingCuImport();
   }
 };
 
 const Observer = {
   register: function() {
     Services.obs.addObserver(Observer, "quit-application", false);
+    Services.obs.addObserver(Observer, "quit-application-granted", false);
     Services.prefs.addObserver("extensions.mintrayr.minimizeon", Observer, false);
     this.setWatchMode();
   },
   unregister: function() {
+    Services.obs.removeObserver(Observer, "quit-application-granted");
     Services.obs.removeObserver(Observer, "quit-application");
     Services.prefs.removeObserver("extensions.mintrayr.minimizeon", Observer);
   },
@@ -451,7 +463,7 @@ const Observer = {
     _SetWatchMode(Services.prefs.getIntPref("extensions.mintrayr.minimizeon"));
   },
   observe: function(s, topic, data) {
-    if (topic == "quit-application") {
+    if (topic == "quit-application-granted" || topic == "quit-application") {
       this.unregister();
       Services.appstartup.enterLastWindowClosingSurvivalArea();
       try {
