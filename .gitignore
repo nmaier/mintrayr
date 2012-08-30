@@ -1,0 +1,9 @@
+*.lib
+*.exp
+*.aps
+*.pdb
+*.xpi
+*.pyc
+.project
+.pydevproject
+.settings/
