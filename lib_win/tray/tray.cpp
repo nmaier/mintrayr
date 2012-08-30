@@ -465,12 +465,12 @@ BOOL mintrayr_DestroyIcon(void *handle)
 
 void* mintrayr_GetBaseWindow(wchar_t *title)
 {
-	void *rv = 0;
-	if (!title) {
-		return rv;
-	}
-	rv = ::FindWindow(0, title);
-	return rv;
+  void *rv = 0;
+  if (!title) {
+    return rv;
+  }
+  rv = ::FindWindow(0, title);
+  return rv;
 }
 
 void mintrayr_SetWatchMode(int mode)
