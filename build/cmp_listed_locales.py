@@ -1,10 +1,7 @@
-import os, re, sys
+import re
 import logging
-import codecs
 
-from glob import glob
 from path import path
-from os.path import basename, dirname
 from Mozilla.CompareLocales import compareDirs
 
 logging.basicConfig()
@@ -117,6 +114,7 @@ def cmp_listed_locales(dirname):
         raise ValueError("Not valid")
 
 if __name__ == "__main__":
+    import sys
     try:
         cmp_listed_locales(path("."))
     except Exception,ex:

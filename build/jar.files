@@ -1,0 +1,6 @@
+content/*
+content/*/*
+locale/*/*.dtd
+locale/*/*.properties
+skin/*.css
+skin/*.png
