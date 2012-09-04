@@ -175,6 +175,12 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       Shell_NotifyIconW(NIM_ADD, iconData);
     }
 
+    else if (uMsg == WM_ENDSESSION) {
+      // Need to show again
+      SendMessage(hwnd, WM_TRAYCALLBACK, 0, 1);
+      goto WndProcEnd;
+    }
+
     // We got clicked. How exciting, isn't it.
     else if (uMsg == WM_TRAYMESSAGE) {
       mouseevent_t *event = new(std::nothrow) mouseevent_t;
