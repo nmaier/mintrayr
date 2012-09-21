@@ -440,7 +440,10 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
 
   SetupWnd(hwnd);
 
-  NOTIFYICONDATAW *iconData = new NOTIFYICONDATAW;
+  NOTIFYICONDATAW *iconData = new(std::nothrow) NOTIFYICONDATAW;
+  if (!iconData) {
+    return FALSE;
+  }
   // Init the icon data according to MSDN
   iconData->cbSize = sizeof(NOTIFYICONDATAW);
 
@@ -525,13 +528,6 @@ void mintrayr_SetWatchMode(int mode)
   gWatchMode = mode;
 }
 
-static void *operator new(size_t size)
-{
-  // XXX: Note: usually one would throw std::bad_alloc
-  // However, the code does not handle that exception anyway
-  // and will crash on OOM, so this is "safe"
-  return LocalAlloc(LPTR, size);
-}
 static void *operator new(size_t size, std::nothrow_t const &)
 {
   return LocalAlloc(LPTR, size);
