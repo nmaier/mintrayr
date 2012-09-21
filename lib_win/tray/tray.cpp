@@ -299,7 +299,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       }
 
       if (::GetWindowTextW(hwnd, iconData->szTip, 127) != 0) {
-        iconData->szTip[128] = '\0';
+        iconData->szTip[127] = '\0';
         Shell_NotifyIconW(NIM_MODIFY, iconData);
       }
       return rv;
@@ -446,7 +446,7 @@ BOOL mintrayr_CreateIcon(void *handle, mouseevent_callback_t callback)
 
   // Copy the title
   if (GetWindowText(hwnd, iconData->szTip, 127)) {
-    iconData->szTip[128] = '\0'; // Better be safe than sorry :p
+    iconData->szTip[127] = '\0'; // Better be safe than sorry :p
   }
   else{
     iconData->szTip[0] = '\0';
