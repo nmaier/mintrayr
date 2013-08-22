@@ -374,7 +374,6 @@ const TrayService = {
     for (let [,icon] in Iterator(_icons)) {
       icon.restore();
     }
-    _icons.length = 0;
   },
   watchMinimize: function(window) {
     if (this.isWatchedWindow(window)) {
