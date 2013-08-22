@@ -5,15 +5,11 @@
 "use strict";
 const EXPORTED_SYMBOLS = ["TrayService"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
-const Cr = Components.results;
-const module = Cu.import;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-module("resource://gre/modules/ctypes.jsm");
-module("resource://gre/modules/Services.jsm");
-module("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/ctypes.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 Services = Object.create(Services);
 XPCOMUtils.defineLazyServiceGetter(

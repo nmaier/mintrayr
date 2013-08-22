@@ -4,12 +4,9 @@
 
 const EXPORTED_SYMBOLS = ['MinTrayR'];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
-const module = Cu.import;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-module("resource://mintrayr/trayservice.jsm");
+Cu.import("resource://mintrayr/trayservice.jsm");
 
 function MinTrayR(menu, pref, func) {
   if (!menu) {
@@ -191,4 +188,4 @@ MinTrayR.prototype = {
     TrayService.unwatchMinimize(window);
   }
 };
-module('resource://mintrayr/preferences.jsm', MinTrayR.prototype.prefs);
+Cu.import('resource://mintrayr/preferences.jsm', MinTrayR.prototype.prefs);
