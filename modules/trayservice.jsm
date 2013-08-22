@@ -315,6 +315,7 @@ TrayIcon.prototype = {
   get handle() this._handle,
   get window() this._window,
   get isMinimized() this._minimized,
+  get isClosed() this._closed,
   minimize: function() {
     if (this._closed) {
       throw new Error("Icon already closed");
