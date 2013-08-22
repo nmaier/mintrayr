@@ -371,7 +371,7 @@ const TrayService = {
     return icon;
   },
   restoreAll: function() {
-    for (let [,icon] in Iterator(_icons)) {
+    for (let [,icon] in Iterator(_icons.slice(0))) {
       icon.restore();
     }
   },
