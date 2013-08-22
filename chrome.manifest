@@ -1,4 +1,5 @@
 content mintrayr chrome/content/
+content mintrayr-locale chrome/locale/en-US/
 
 skin mintrayr classic/1.0 chrome/skin/
 skin mintrayr-icon classic/1.0 ./

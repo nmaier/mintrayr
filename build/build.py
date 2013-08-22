@@ -19,19 +19,19 @@ from context import ZipFileMinorCompression
 class ZipOutFile(ZipFile):
     def __init__(self, zfile, method=None):
         self.zfile = zfile
-        zfile.seek(0,0)
+        zfile.seek(0, 0)
         ZipFile.__init__(self, zfile, "a", method or ZIP_STORED)
     def __enter__(self):
         return self
     def __exit__(self, type, value, traceback):
         self.close()
-        self.zfile.seek(0,0)
+        self.zfile.seek(0, 0)
         del self.zfile
 
 class ZipOutInfo(ZipInfo):
     def __init__(self, name):
         super(ZipOutInfo, self).__init__(name,
-                                         (1980,1,1,0,0,0)
+                                         (1980, 1, 1, 0, 0, 0)
                                          )
 
 
@@ -60,7 +60,10 @@ def build(basedir, outfile):
     xpi_files = (path(__file__).dirname() / "xpi.files").lines(retain=False)
 
     print "verifying locales"
-    cmp_listed_locales(basedir)
+    try:
+        cmp_listed_locales(basedir)
+    except:
+        print >> sys.stderr, "WARN: locales did not verify"
 
     with ZipFileMinorCompression(), BytesIO() as xpi:
         with ZipOutFile(xpi, method=ZIP_DEFLATED) as zp:

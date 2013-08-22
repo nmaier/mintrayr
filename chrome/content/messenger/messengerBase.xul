@@ -6,6 +6,8 @@
 <!DOCTYPE overlay [
   <!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
   %messengerDTD;
+  <!ENTITY % defmessengerDTD SYSTEM "chrome://mintrayr-locale/content/messenger.dtd">
+  %defmessengerDTD;
 ]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">

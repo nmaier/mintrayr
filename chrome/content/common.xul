@@ -6,8 +6,12 @@
 <!DOCTYPE overlay [
   <!ENTITY % commonDTD SYSTEM "chrome://mintrayr/locale/common.dtd">
   %commonDTD;
+  <!ENTITY % dedcommonDTD SYSTEM "chrome://mintrayr-locale/content/common.dtd">
+  %commonDTD;
   <!ENTITY % keysDTD SYSTEM "chrome://mintrayr/locale/keys.dtd">
   %keysDTD;
+  <!ENTITY % defkeysDTD SYSTEM "chrome://mintrayr-locale/content/keys.dtd">
+  %defkeysDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 

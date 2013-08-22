@@ -7,16 +7,24 @@
   %brandingDTD;
   <!ENTITY % mozappsDTD SYSTEM "chrome://mintrayr/locale/mozapps.dtd">
   %mozappsDTD;
+  <!ENTITY % defmozappsDTD SYSTEM "chrome://mintrayr-locale/content/mozapps.dtd">
+  %defmozappsDTD;
   <!ENTITY % prefsDTD SYSTEM "chrome://mintrayr/locale/prefs.dtd">
   %prefsDTD;
-    <!ENTITY % tasksDTD SYSTEM "chrome://communicator/locale/tasksOverlay.dtd">
-    %tasksDTD;
-    <!ENTITY % mailTasksDTD SYSTEM "chrome://messenger/locale/mailTasksOverlay.dtd">
-    %mailTasksDTD;
+  <!ENTITY % defprefsDTD SYSTEM "chrome://mintrayr-locale/content/prefs.dtd">
+  %defprefsDTD;
+  <!ENTITY % tasksDTD SYSTEM "chrome://communicator/locale/tasksOverlay.dtd">
+  %tasksDTD;
+  <!ENTITY % mailTasksDTD SYSTEM "chrome://messenger/locale/mailTasksOverlay.dtd">
+  %mailTasksDTD;
   <!ENTITY % messengerDTD SYSTEM "chrome://mintrayr/locale/messenger.dtd">
   %messengerDTD;
+  <!ENTITY % defmessengerDTD SYSTEM "chrome://mintrayr-locale/content/messenger.dtd">
+  %defmessengerDTD;
   <!ENTITY % browserDTD SYSTEM "chrome://mintrayr/locale/browser.dtd">
   %browserDTD;
+  <!ENTITY % defbrowserDTD SYSTEM "chrome://mintrayr-locale/content/browser.dtd">
+  %defbrowserDTD;
 ]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <prefpane id="paneSpecific" label="&brandShortName;">
