@@ -55,13 +55,15 @@ function MinTrayR(menu, pref, func) {
     this.prefs.addObserver('extensions.mintrayr.' + this._watchPref, this);
     this.observe(null, null, pref);
   }
-
+  this.prefs.addObserver('extensions.mintrayr.always', this);
+  this._applyAlways();
   func.call(this);
 }
 
 MinTrayR.prototype = {
   _watchPref: null,
   _watched: false,
+  _icon: null,
   prefs: {},
 
   showMenu: function MinTrayR_showMenu(x, y) {
@@ -74,11 +76,31 @@ MinTrayR.prototype = {
       "bottomleft"
     );
   },
+  _ensureIcon: function() {
+    if (this._icon && !this._icon.isClosed) {
+      return;
+    }
+    delete this._icon;
+    this._icon = TrayService.createIcon(this.window, !this.prefs.getExt("always", false));
+  },
+  _applyAlways: function() {
+    if (this.prefs.getExt("always", false)) {
+      this.icon.closeOnRestore = false;
+      return;
+    }
+    if (this._icon && !this._icon.isClosed && !this._icon.isMinimized) {
+      this._icon.close();
+    }
+  },
+  get icon() {
+    this._ensureIcon();
+    return this._icon;
+  },
   minimize: function MinTrayR_minimize() {
-    this.minimizeWindow(this.window);
+    this.icon.minimize();
   },
   restore: function MinTrayR_restore() {
-    this.restoreWindow(this.window);
+    this.icon.restore();
   },
   get isWatched() this._watched,
   watch: function MinTrayR_watch() {
@@ -170,13 +192,10 @@ MinTrayR.prototype = {
       catch (ex) {
         Cu.reportError(ex);
       }
+      return;
     }
-  },
-  minimizeWindow: function(window) {
-    TrayService.minimize(window, true);
-  },
-  restoreWindow: function(window) {
-    TrayService.restore(window);
+
+    this._applyAlways();
   },
   restoreAll: function() {
     TrayService.restoreAll();

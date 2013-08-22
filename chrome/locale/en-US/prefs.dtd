@@ -13,3 +13,5 @@
 <!ENTITY mintrayr.prefs.watchwindows "Watch windows">
 <!ENTITY mintrayr.prefs.misc "Miscellanious">
 <!ENTITY mintrayr.prefs.clickbehavior "Click behavior">
+<!ENTITY mintrayr.prefs.icon "Tray-Icon">
+<!ENTITY mintrayr.prefs.showalways "Show always">

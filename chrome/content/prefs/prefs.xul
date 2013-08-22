@@ -26,6 +26,7 @@
       <preference id="minimizeon" name="extensions.mintrayr.minimizeon" type="int"/>
       <preference id="dblclickrestore" name="extensions.mintrayr.dblclickrestore" type="bool"/>
       <preference id="showcontext" name="extensions.mintrayr.showcontext" type="bool"/>
+      <preference id="always" name="extensions.mintrayr.always" type="bool"/>
     </preferences>
 
     <groupbox>
@@ -43,6 +44,11 @@
       <caption label="&mintrayr.prefs.clickbehavior;"/>
       <checkbox preference="dblclickrestore" label="&mintrayr.prefs.dblclickrestore;"/>
       <checkbox preference="showcontext" label="&mintrayr.prefs.showcontext;"/>
+    </groupbox>
+
+    <groupbox>
+      <caption label="&mintrayr.prefs.icon;"/>
+      <checkbox preference="always" label="&mintrayr.prefs.showalways;"/>
     </groupbox>
   </prefpane>
   <prefpane id="paneSpecific"/>

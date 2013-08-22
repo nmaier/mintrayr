@@ -1,6 +1,7 @@
 pref('extensions.mintrayr.dblclickrestore', true);
 pref('extensions.mintrayr.showcontext', true);
 pref('extensions.mintrayr.minimizeon', 1);
+pref("extensions.mintrayr.always", false);
 
 pref('extensions.mintrayr.browser.watchbrowser', true);
 pref('extensions.mintrayr.browser.watchbookmarks', false);
