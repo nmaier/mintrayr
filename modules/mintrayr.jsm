@@ -6,7 +6,52 @@ const EXPORTED_SYMBOLS = ['MinTrayR'];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
+Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://mintrayr/trayservice.jsm");
+
+function showPopup(menu, x, y) {
+  var hDocument = Services.appShell.hiddenDOMWindow.document;
+  var frame = hDocument.createElement("iframe");
+  frame.addEventListener("load", function frameload() {
+    function redispatch(evt) {
+      let node = evt.originalTarget;
+      node = menu.ownerDocument.getElementById(node.id);
+      if (evt.type == "click") {
+        node.click();
+      }
+      else if (evt.type == "command") {
+        node.doCommand();
+      }
+      else {
+        let cevt = menu.ownerDocument.createEvent("UIEvents");
+        cevt.initUIEvent(evt.type, evt.bubbles, evt.cancelable, evt.view || null, evt.detail || 0);
+        node.dispatchEvent(cevt);
+      }
+    }
+    frame.removeEventListener("load", frameload, true);
+    var window = frame.contentWindow;
+    var document = window.document;
+    var clonedMenu = menu.cloneNode(true);
+    document.importNode(clonedMenu);
+    document.documentElement.appendChild(clonedMenu);
+    clonedMenu.addEventListener("popuphidden", function hidden() {
+      frame.parentNode.removeChild(frame);
+      clonedMenu.removeEventListener("popuphidden", hidden, false);
+    }, false);
+    clonedMenu.addEventListener("command", redispatch, true);
+    clonedMenu.addEventListener("click", redispatch, true);
+    clonedMenu.showPopup(
+      document.documentElement,
+      x,
+      y,
+      "context",
+      "",
+      "bottomleft"
+    );
+  }, true);
+  frame.setAttribute("src", "chrome://mintrayr/content/hidden.xul");
+  hDocument.documentElement.appendChild(frame);
+}
 
 function MinTrayR(menu, pref, func) {
   if (!menu) {
@@ -40,7 +85,6 @@ function MinTrayR(menu, pref, func) {
     'TrayClick',
     function(event) {
       if (event.button == 2 && tp.prefs.getExt('showcontext', true)) {
-        Cu.reportError("show context/" + event.screenX + "_" + event.screenY);
         tp.showMenu(event.screenX, event.screenY);
       }
     },
@@ -64,17 +108,19 @@ MinTrayR.prototype = {
   _watchPref: null,
   _watched: false,
   _icon: null,
+  _genid: 0,
   prefs: {},
 
+  get icon() {
+    this._ensureIcon();
+    return this._icon;
+  },
+  get isHidden() {
+    return this._icon && !this._icon.isClosed && this.icon.isMinimized;
+  },
+  get isWatched() this._watched,
   showMenu: function MinTrayR_showMenu(x, y) {
-    this.menu.showPopup(
-      this.document.documentElement,
-      x,
-      y,
-      "context",
-      "",
-      "bottomleft"
-    );
+    showPopup(this.menu, x, y);
   },
   _ensureIcon: function() {
     if (this._icon && !this._icon.isClosed) {
@@ -92,17 +138,14 @@ MinTrayR.prototype = {
       this._icon.close();
     }
   },
-  get icon() {
-    this._ensureIcon();
-    return this._icon;
-  },
   minimize: function MinTrayR_minimize() {
     this.icon.minimize();
   },
   restore: function MinTrayR_restore() {
-    this.icon.restore();
+    if (this._icon) {
+      this._icon.restore();
+    }
   },
-  get isWatched() this._watched,
   watch: function MinTrayR_watch() {
     if (!this._watched) {
       this.watchWindow(this.window);
@@ -123,16 +166,20 @@ MinTrayR.prototype = {
     let rv = []
     for each (let id in items) {
       try {
-        let node;
+        let node, onode;
         if (typeof id == 'string') {
-          node = this.document.getElementById(id).cloneNode(true);
+          onode = this.document.getElementById(id);
         }
         else {
-          node = id;
+          onode = id;
         }
-
-        node.setAttribute('mintrayr_origid', node.id);
-        node.setAttribute('id', 'MinTrayR_' + node.id);
+        node = onode.cloneNode(true);
+        id = onode.id;
+        if (!id) {
+          id = (this._genid++).toString();
+        }
+        node.setAttribute('mintrayr_origid', id);
+        node.setAttribute('id', 'MinTrayR_' + id);
         if (node.hasAttribute('hidden')) {
           node.removeAttribute('hidden');
         }
