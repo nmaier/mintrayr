@@ -7,7 +7,6 @@ from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED, ZIP_STORED
 try:
     from cmp_listed_locales import cmp_listed_locales
 except ImportError, ex:
-    raise ex
     from warnings import warn
     warn("cannot compare locales ({})".format(ex))
     def cmp_listed_locales(dirname):
