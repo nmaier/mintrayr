@@ -202,7 +202,9 @@ function GetBaseWindowHandle(window) {
   return rv;
 }
 
-function ptrcmp(p1, p2) p1.toString() == p2.toString()
+function ptrcmp(p1, p2) {
+  return p1.toString() == p2.toString();
+}
 
 const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(handle, event) {
   try {
@@ -280,8 +282,12 @@ function WatchedWindow(window) {
   }
 }
 WatchedWindow.prototype = {
-  get window() this._window,
-  get handle() this._handle,
+  get window() {
+    return this._window;
+  },
+  get handle() {
+    return this._handle
+  },
   destroy: function() {
     try {
       _UnwatchWindow(this._handle);
@@ -292,7 +298,9 @@ WatchedWindow.prototype = {
       delete this._window;
     }
   },
-  toString: function() "[WatchedWindow @" + this._handle + "]"
+  toString: function() {
+    return "[WatchedWindow @" + this._handle + "]";
+  }
 };
 
 function TrayIcon(window, aCloseOnRestore) {
@@ -312,10 +320,18 @@ function TrayIcon(window, aCloseOnRestore) {
 TrayIcon.prototype = {
   _closed: false,
   _minimized: false,
-  get handle() this._handle,
-  get window() this._window,
-  get isMinimized() this._minimized,
-  get isClosed() this._closed,
+  get handle() {
+    return this._handle;
+  },
+  get window() {
+    return this._window;
+  },
+  get isMinimized() {
+    return this._minimized;
+  },
+  get isClosed() {
+    return this._closed;
+  },
   minimize: function() {
     if (this._closed) {
       return;
@@ -357,7 +373,9 @@ TrayIcon.prototype = {
   handleEvent: function(event) {
     this.close();
   },
-  toString: function() "[Icon @" + this._handle + "]"
+  toString: function() {
+    return "[Icon @" + this._handle + "]";
+  }
 };
 
 var TrayService = {
@@ -404,7 +422,9 @@ var TrayService = {
     }
     return false;
   },
-  minimize: function(window, aCloseOnRestore) this.createIcon(window, aCloseOnRestore).minimize(),
+  minimize: function(window, aCloseOnRestore) {
+    return this.createIcon(window, aCloseOnRestore).minimize();
+  },
   restore: function(window) {
     for (let [,icon] in Iterator(_icons)) {
       if (icon.window === window) {

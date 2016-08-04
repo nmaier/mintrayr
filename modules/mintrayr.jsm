@@ -118,7 +118,9 @@ MinTrayR.prototype = {
   get isHidden() {
     return this._icon && !this._icon.isClosed && this.icon.isMinimized;
   },
-  get isWatched() this._watched,
+  get isWatched() {
+    return this._watched;
+  },
   showMenu: function MinTrayR_showMenu(x, y) {
     showPopup(this.menu, x, y);
   },

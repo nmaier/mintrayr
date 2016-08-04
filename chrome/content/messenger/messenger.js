@@ -6,7 +6,9 @@ var gMinTrayR = {};
 addEventListener(
   "load",
   function() {
-    function $(id) document.getElementById(id);
+    function $(id) {
+      return document.getElementById(id);
+    }
     removeEventListener("load", arguments.callee, true);
 
     Components.utils.import("resource://mintrayr/mintrayr.jsm", gMinTrayR);
