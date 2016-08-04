@@ -14,12 +14,14 @@ addEventListener(
       document.getElementById('MinTrayR_context'),
       "messenger.watchmessenger",
       function() {
+        var menu_NewPopup_id = "";
         try {
           // Seamonkey hack
           let n = document.querySelector('#menu_NewPopup menuitem');
           if (n && !n.id)  {
             n.id = 'newNewMsgCmd';
           }
+          menu_NewPopup_id = n.id;
         }
         catch (ex) {
           // no-op
@@ -70,10 +72,10 @@ addEventListener(
           ['titlebar-min'].forEach(hijackButton.bind(null, MinTrayRTryMinimizeWindow));
         })(this);
 
-        this.cloneToMenu('MinTrayR_sep-top', ["newNewMsgCmd", "button-getAllNewMsg", "addressBook"], false);
+        this.cloneToMenu('MinTrayR_sep-top', [menu_NewPopup_id, "button-getAllNewMsg", "addressBook"], false);
         this.cloneToMenu('MinTrayR_sep-bottom', ['menu_FileQuitItem'], true);
         document
-          .getElementById('MinTrayR_newNewMsgCmd')
+          .getElementById('MinTrayR_' + menu_NewPopup_id)
           .setAttribute(
             'label',
             this.menu.getAttribute('mintrayr_newmessage')
