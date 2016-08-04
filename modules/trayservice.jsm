@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/ */
 
 "use strict";
-const EXPORTED_SYMBOLS = ["TrayService"];
+var EXPORTED_SYMBOLS = ["TrayService"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
@@ -318,7 +318,7 @@ TrayIcon.prototype = {
   get isClosed() this._closed,
   minimize: function() {
     if (this._closed) {
-      throw new Error("Icon already closed");
+      return;
     }
     if (this._minimized) {
       return;
@@ -328,7 +328,7 @@ TrayIcon.prototype = {
   },
   restore: function() {
     if (this._closed) {
-      throw new Error("Icon already closed");
+      return;
     }
     if (!this._minimized) {
       return;
@@ -360,7 +360,7 @@ TrayIcon.prototype = {
   toString: function() "[Icon @" + this._handle + "]"
 };
 
-const TrayService = {
+var TrayService = {
   createIcon: function(window, aCloseOnRestore) {
     for (let [,icon] in Iterator(_icons)) {
       if (icon.window === window) {
