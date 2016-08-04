@@ -54,5 +54,5 @@ overlay chrome://mozapps/content/downloads/downloads.xul	chrome://mintrayr/conte
 override chrome://mintrayr-icon/skin/appicon64.png chrome://branding/content/icon64.png
 
 # toolbar button
-style chrome://global/content/customizeToolbar.xul	chrome://mintrayr/skin/common.css
-override chrome://mintrayr/skin/common.css chrome://mintrayr/skin/common-fx4.css application={ec8030f7-c20a-464f-9b0e-13a3a9e97384} appversion>=4.0b7 os=winnt
+style chrome://global/content/customizeToolbar.xul	chrome://mintrayr/skin/toolbar.css
+override chrome://mintrayr/skin/toolbar.css chrome://mintrayr/skin/toolbar-sm.css application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}

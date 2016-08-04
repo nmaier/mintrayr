@@ -5,7 +5,6 @@ prefwindow {
   min-height: 20em;
 }
 
-/* songbird hack */
 .paneButtonIcon {
   width: 32px;
   height: 32px;
@@ -16,4 +15,10 @@ radio[pane="paneMain"] {
 }
 radio[pane="paneSpecific"] {
   list-style-image: url(chrome://mintrayr-icon/skin/appicon64.png);
+}
+
+@media (min-resolution: 2dppx) {
+  radio[pane="paneMain"] {
+    list-style-image: url(chrome://mintrayr-icon/skin/icon64.png);
+  }
 }

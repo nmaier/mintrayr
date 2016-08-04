@@ -1,0 +1,44 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+/* generated */
+#MinTrayR_toolbaritem {
+  --mintrayr-icon-mono16: rect(48px, 168px, 64px, 152px);
+  --mintrayr-icon16: rect(80px, 168px, 96px, 152px);
+  --mintrayr-icon24: rect(8px, 176px, 32px, 152px);
+  --mintrayr-icon32: rect(88px, 136px, 120px, 104px);
+}
+@media (min-resolution: 2dppx) {
+#MinTrayR_toolbaritem {
+  --mintrayr-icon-mono16: rect(48px, 168px, 64px, 152px);
+  --mintrayr-icon16: rect(80px, 168px, 96px, 152px);
+  --mintrayr-icon24: rect(8px, 176px, 32px, 152px);
+  --mintrayr-icon32: rect(88px, 136px, 120px, 104px);
+}
+}
+
+#MinTrayR_toolbaritem {
+  list-style-image: url(toolbar.png);
+  -moz-image-region: var(--mintrayr-icon16);
+}
+
+toolbar[iconsize="large"] #MinTrayR_toolbaritem {
+  -moz-image-region: var(--mintrayr-icon24);
+}
+
+#MinTrayR_toolbaritem[cui-areatype="menu-panel"],
+#customization-container #MinTrayR_toolbaritem {
+  -moz-image-region: var(--mintrayr-icon32);
+}
+
+@media (min-resolution: 2dppx) {
+  #MinTrayR_toolbaritem .toolbarbutton-icon {
+    width: 16px;
+  }
+  toolbar[iconsize="large"] #MinTrayR_toolbaritem .toolbarbutton-icon {
+    width: 24px;
+  }
+  #MinTrayR_toolbaritem[cui-areatype="menu-panel"] .toolbarbutton-icon,
+  #customization-container #MinTrayR_toolbaritem .toolbarbutton-icon {
+    width: 32px;
+  }
+}
