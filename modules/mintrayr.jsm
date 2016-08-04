@@ -163,8 +163,8 @@ MinTrayR.prototype = {
     if (bottom) {
       ref = ref.nextSibling;
     }
-    let rv = []
-    for each (let id in items) {
+    let rv = [];
+    for (let id of Array.from(items)) {
       try {
         let node, onode;
         if (typeof id == 'string') {

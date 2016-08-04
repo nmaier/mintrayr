@@ -141,7 +141,7 @@ function resetBranch(branch) {
   catch (ex) {
     // BEWARE: not yet implemented in XPCOM 1.8/trunk.
     let children = prefs.getChildList(branch, {});
-    for each (let key in children) {
+    for (let key of Array.from(children)) {
       reset(key);
     }
   }
