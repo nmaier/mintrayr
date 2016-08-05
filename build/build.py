@@ -5,6 +5,12 @@ from io import BytesIO
 from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED, ZIP_STORED
 
 try:
+    from path import path
+except ImportError:
+    print "Install path.py (via pip)"
+    sys.exit(1)
+
+try:
     from cmp_listed_locales import cmp_listed_locales
 except ImportError, ex:
     from warnings import warn
@@ -12,7 +18,6 @@ except ImportError, ex:
     def cmp_listed_locales(dirname):
         pass
 
-from path import path
 from context import ZipFileMinorCompression
 
 class ZipOutFile(ZipFile):
