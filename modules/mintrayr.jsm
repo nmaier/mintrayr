@@ -144,8 +144,9 @@ MinTrayR.prototype = {
     this.icon.minimize();
   },
   restore: function MinTrayR_restore() {
-    if (this._icon) {
-      this._icon.restore();
+    let icon = TrayService.getIcon(this.window);
+    if (icon && !icon.isClosed) {
+      icon.restore();
     }
   },
   watch: function MinTrayR_watch() {

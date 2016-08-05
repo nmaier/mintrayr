@@ -379,13 +379,20 @@ TrayIcon.prototype = {
 };
 
 var TrayService = {
-  createIcon: function(window, aCloseOnRestore) {
+  getIcon: function(window) {
     for (let [,icon] in Iterator(_icons)) {
       if (icon.window === window) {
         return icon;
       }
     }
-    let icon = new TrayIcon(window, aCloseOnRestore);
+    return null;
+  },
+  createIcon: function(window, aCloseOnRestore) {
+    let icon = this.getIcon(window);
+    if (icon) {
+      return icon;
+    }
+    icon = new TrayIcon(window, aCloseOnRestore);
     _icons.push(icon);
     return icon;
   },
