@@ -27,6 +27,9 @@ function showPopup(menu, x, y) {
         cevt.initUIEvent(evt.type, evt.bubbles, evt.cancelable, evt.view || null, evt.detail || 0);
         node.dispatchEvent(cevt);
       }
+      evt.preventDefault();
+      evt.stopPropagation();
+      return;
     }
     frame.removeEventListener("load", frameload, true);
     var window = frame.contentWindow;
