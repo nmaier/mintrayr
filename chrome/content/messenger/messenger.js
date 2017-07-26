@@ -41,6 +41,9 @@ addEventListener(
               event.stopPropagation();
               return false;
             }
+            if (event.type == "close") {
+              return true;
+            }
             // must be in sync with the original command
             return goQuitApplication();
           }
@@ -72,6 +75,7 @@ addEventListener(
           }
           ['titlebar-close'].forEach(hijackButton.bind(null, MinTrayRTryCloseWindow));
           ['titlebar-min'].forEach(hijackButton.bind(null, MinTrayRTryMinimizeWindow));
+          window.addEventListener("close", MinTrayRTryCloseWindow);
         })(this);
 
         this.cloneToMenu('MinTrayR_sep-top', [menu_NewPopup_id, "button-getAllNewMsg", "addressBook"], false);
